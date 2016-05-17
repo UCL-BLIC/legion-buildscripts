@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+###############################################
+# Installing OMA standalone
+#
+# by Javier Herrero, 2016 
+#
+# Will need modules: compilers/gnu/4.9.2 and hdf/5-1.8.15/gnu-4.9.2 
+
+APPNAME=${APPNAME:-kallisto}
+VERSION=${VERSION:-0.42.5}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/$VERSION}
+MD5=${MD5:-11947b7411fca3a25b14d38827b8f93b}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-https://github.com/pachterlab/kallisto/archive/v${VERSION}.tar.gz}
+
+# Use Intel defate library
+NATIVE_LIB=${NATIVE_LIB:-NO}
+
+set -e
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+mkdir -p $INSTALL_PREFIX
+
+cd $INSTALL_PREFIX
+
+wget $SRC_ARCHIVE 
+
+CHECKSUM=`md5sum v${VERSION}.tar.gz | awk '{print $1}'`
+
+if [ "$MD5" == "$CHECKSUM" ]
+then
+  tar xvzf v${VERSION}.tar.gz
+  cd ${APPNAME}-${VERSION}
+  mkdir build
+  cd build
+  cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX
+  make
+  make install
+else
+  echo "Hash mismatch."
+  echo "Expected: $MD5"
+  echo "Got: $CHECKSUM"
+fi
