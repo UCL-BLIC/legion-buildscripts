@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+###############################################
+# Installing OMA standalone
+#
+# by Javier Herrero, 2016 
+#
+
+APPNAME=${APPNAME:-oma-standalone}
+VERSION=${VERSION:-1.0.6}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/$VERSION}
+MD5=${MD5:-6f7a24817d94902d2de7ecb451ed55af}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-http://omabrowser.org/standalone/OMA.${VERSION}.tgz}
+
+# Use Intel defate library
+NATIVE_LIB=${NATIVE_LIB:-NO}
+
+set -e
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+mkdir -p $INSTALL_PREFIX
+
+cd $INSTALL_PREFIX
+
+wget $SRC_ARCHIVE
+
+CHECKSUM=`md5sum OMA.${VERSION}.tgz | awk '{print $1}'`
+
+if [ "$MD5" == "$CHECKSUM" ]
+then
+  tar xvzf OMA.${VERSION}.tgz
+  cd OMA.${VERSION}
+  ./install.sh $INSTALL_PREFIX
+else
+  echo "Hash mismatch."
+  echo "Expected: $MD5"
+  echo "Got: $CHECKSUM"
+fi
