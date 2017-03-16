@@ -1,0 +1,53 @@
+#! /usr/bin/env perl
+use strict;
+use warnings;
+
+no warnings qw/uninitialized/;
+
+use File::Basename;
+use Env qw(SGE_ROOT);
+use lib "$SGE_ROOT/util/resources/jsv";
+use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
+
+my $usage = "USAGE: qsub cytof_pipeline.qsub <INPUTDIR> <OUTPUTDIR> [markersFile]\n";
+
+jsv_on_start(sub {
+    jsv_send_env();
+});
+
+
+jsv_on_verify(sub {
+    my %params = jsv_get_param_hash();
+    my $do_correct = 0;
+    my $do_wait = 0;
+
+    if ($params{CMDARGS} < 2) {
+        jsv_log_info($usage);
+        jsv_reject("You must specify inputdir and outputdir, and optionally a file with markers (E.g. \"qsub cytof_pipeline.qsub Tcell_fcs results_Tcell [markers.txt]\")");
+        return;
+    }
+
+    my $inputdir = $params{CMDARG0};
+    if (!-e "$inputdir") {
+        jsv_log_info($usage);
+        jsv_reject("Can't find directory with fcs files <$inputdir>");
+        return;
+    }
+
+    if($params{CMDARG2} ne ''){
+	    my $markers = $params{CMDARG2};
+	    if (!-e "$markers") {
+	        jsv_log_info($usage);
+	        jsv_reject("Can't find file with markers <$markers>");
+	        return;
+	    }
+    }
+
+    jsv_set_param('N', "cytof-${inputdir}");
+
+    jsv_accept('Job is accepted');
+
+});
+
+jsv_main();
+

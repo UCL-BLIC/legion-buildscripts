@@ -1,0 +1,119 @@
+#!/bin/bash -l
+
+# ========================================================================
+#  NAME: cytof_pipeline
+# ========================================================================
+#
+# ========================================================================
+# USAGE: qsub cytof_pipeline INPUTDIR OUTPUTDIR MARKERSFILE
+# ========================================================================
+
+
+
+#$ -S /bin/bash
+#$ -l h_rt=2:00:00
+#$ -l mem=10G
+#$ -l tmpfs=100G
+#$ -cwd
+#$ -v CYTOF_PIPE_HOME
+#$ -N cytof
+#$ -jsv $CYTOF_PIPE_HOME/cytof.jsv
+
+
+set -o pipefail
+
+module unload compilers
+module unload mpi
+module load r/recommended
+
+markersfile="NONE"
+
+inputfiles=$1
+outputfiles=$2
+if [ -n "$3" ]
+  then
+	markersfile=$3
+fi
+
+## Sets the name of the output file for the times command
+if [[ ! $SGE_TASK_ID ]]; then \
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID
+else
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID.$SGE_TASK_ID
+fi
+ 
+## Required by function die
+trap "exit 1" TERM
+export TOP_PID=$$
+ 
+function die {
+  echo "******************************************************"
+  echo "["`date`"] ERROR while running $1"
+  echo "******************************************************"
+  cat $TIMES_FILE
+  rm $TIMES_FILE
+  kill -s TERM $TOP_PID
+}
+ 
+function run {
+  echo ""
+  echo "======================================================"
+  echo "["`date`"] Starting $1"
+  echo " $*"
+  echo "======================================================"
+
+  cmd=""
+  out=""
+  mode="cmd"
+  for arg in $*; do
+    if [ $arg == ">" ]; then mode="out"; else
+      if [ $mode == "cmd" ]; then cmd="$cmd $arg"; else out=$arg; fi
+    fi
+  done
+
+  if [ $mode == "out" ]
+  then
+    if ! /usr/bin/time -va -o $TIMES_FILE \
+      $cmd > $out
+    then
+      die $*
+    fi
+  else
+    if ! /usr/bin/time  -va -o $TIMES_FILE \
+      $*
+    then
+      die $*
+    fi
+  fi
+}
+
+
+echo "======================================================"
+echo " HOST: "`hostname`
+echo " TIME: "`date`
+echo " ARGS: $*"
+echo "======================================================"
+
+
+DATA_DIR=$PWD/$outputfiles
+run "mkdir -p ${DATA_DIR}"
+
+MARKERS=${markersfile} INPUT=${inputfiles} OUTPUT=${outputfiles} R CMD BATCH --no-save $CYTOF_PIPE_HOME/cytofkit.R ${outputfiles}/log_R.txt
+
+run "rm Rplots.pdf"
+run "rm ${outputfiles}/analysed_FCS/Rplots.pdf"
+ 
+
+echo
+echo "======================================================"
+echo "["`date`"] times:"
+echo "======================================================"
+cat $TIMES_FILE
+rm $TIMES_FILE
+echo "------------------------------------------------------"
+echo
+echo "======================================================"
+echo "["`date`"] Done."
+echo "======================================================"
+
+
