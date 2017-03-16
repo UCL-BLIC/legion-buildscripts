@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
 # ========================================================================
-#  NAME: cytof_pipeline
+#  NAME: cytofpipe.qsub
 # ========================================================================
 #
 # ========================================================================
-# USAGE: qsub cytof_pipeline INPUTDIR OUTPUTDIR MARKERSFILE
+# USAGE: qsub cytofpipe.qsub INPUTDIR OUTPUTDIR [MARKERSFILE]
 # ========================================================================
 
 
@@ -15,9 +15,9 @@
 #$ -l mem=10G
 #$ -l tmpfs=100G
 #$ -cwd
-#$ -v CYTOF_PIPE_HOME
+#$ -v CYTOFPIPE_HOME
 #$ -N cytof
-#$ -jsv $CYTOF_PIPE_HOME/cytof.jsv
+#$ -jsv $CYTOFPIPE_HOME/cytofpipe.jsv
 
 
 set -o pipefail
@@ -98,7 +98,7 @@ echo "======================================================"
 DATA_DIR=$PWD/$outputfiles
 run "mkdir -p ${DATA_DIR}"
 
-MARKERS=${markersfile} INPUT=${inputfiles} OUTPUT=${outputfiles} R CMD BATCH --no-save $CYTOF_PIPE_HOME/cytofkit.R ${outputfiles}/log_R.txt
+MARKERS=${markersfile} INPUT=${inputfiles} OUTPUT=${outputfiles} R CMD BATCH --no-save $CYTOF_PIPE_HOME/cytofpipe.R ${outputfiles}/citofpipe.Rout
 
 run "rm Rplots.pdf"
 run "rm ${outputfiles}/analysed_FCS/Rplots.pdf"

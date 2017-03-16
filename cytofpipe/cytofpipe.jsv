@@ -9,7 +9,7 @@ use Env qw(SGE_ROOT);
 use lib "$SGE_ROOT/util/resources/jsv";
 use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
 
-my $usage = "USAGE: qsub cytof_pipeline.qsub <INPUTDIR> <OUTPUTDIR> [markersFile]\n";
+my $usage = "USAGE: qsub cytofpipe.qsub <INPUTDIR> <OUTPUTDIR> [<MARKERSFILE>]\n";
 
 jsv_on_start(sub {
     jsv_send_env();
@@ -23,7 +23,7 @@ jsv_on_verify(sub {
 
     if ($params{CMDARGS} < 2) {
         jsv_log_info($usage);
-        jsv_reject("You must specify inputdir and outputdir, and optionally a file with markers (E.g. \"qsub cytof_pipeline.qsub Tcell_fcs results_Tcell [markers.txt]\")");
+        jsv_reject("You must specify inputdir and outputdir, and optionally a file with markers (E.g. \"qsub cytofpipe.qsub Tcell_fcs results_Tcell [markers.txt]\")");
         return;
     }
 
@@ -43,7 +43,7 @@ jsv_on_verify(sub {
 	    }
     }
 
-    jsv_set_param('N', "cytof-${inputdir}");
+    jsv_set_param('N', "ctofp-${inputdir}");
 
     jsv_accept('Job is accepted');
 
