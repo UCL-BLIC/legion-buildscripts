@@ -1,82 +1,120 @@
 inputfiles<- as.character(Sys.getenv("INPUT"))
-outputfiles<- as.character(Sys.getenv("OUTPUT"))
+outputdir<- as.character(Sys.getenv("OUTPUT"))
 markersFile<- as.character(Sys.getenv("MARKERS"))
+configFile<- as.character(Sys.getenv("CONFIG"))
 
 library("cytofkit") 
 library(flowCore)
+library(ini)
+library(hash)
 
 
 #-----------------
 #- Get input data
 #-----------------
 files <- list.files(inputfiles,pattern='.fcs$', full=TRUE)
-parameters <- as.character(read.table("parameters.txt", header = FALSE)[,1])
+config<-read.ini(configFile)
+parameters <- as.character(read.table(markersFile, header = FALSE)[,1])
 
+fcs1<-read.FCS(files[1])
+markernames<-pData(parameters(fcs1))$name
+markerdesc<-pData(parameters(fcs1))$desc
+h<-hash()
+for(i in 1:length(markerdesc)){
+	h[[ strsplit(markerdesc, "[_]")[[i]][2] ]] <- markernames[i]
+}
+parameters2<-values(h[parameters])
 
 #------------------------------------------------------------------
-#- Extract (and combine) the expression matrix with transformation
+#- Parse config file
 #------------------------------------------------------------------
-if(markersFile == "NONE"){
-	data_transformed <- cytof_exprsMerge(fcsFiles = files, 
-					comp=FALSE, 
-					transformMethod = "cytofAsinh", 
-					mergeMethod ="fixed", 
-					fixedNum=10000)
-}else{
-	data_transformed <- cytof_exprsMerge(fcsFiles = files, 
-					comp=FALSE, 
-					markers=parameters,
-					transformMethod = "cytofAsinh", 
-					mergeMethod ="fixed", 
-					fixedNum=10000)
+
+projectName = "cytofpipe"
+transform = "cytofAsinh"
+merge ="fixed"
+num="10000"
+flowsom_num = "15"
+cluster<-"phenograph"
+visualization<-"tsne"
+
+if(configFile != "/home/regmond/Scratch/my_pipelines/modules/default_config.txt"){
+	cluster<-vector()
+	visualization<-vector()
+
+	data<-read.ini(configFile)
+
+	transform = data$cytofpipe$TRANSFORM
+	num=data$cytofpipe$DOWNSAMPLE
+	
+	if(length(data$cytofpipe$PHENOGRAPH)==1){tolower(data$cytofpipe$PHENOGRAPH);if(data$cytofpipe$PHENOGRAPH == "yes"){cluster<-c(cluster,"Rphenograph")}}
+	if(length(data$cytofpipe$CLUSTERX)==1){tolower(data$cytofpipe$CLUSTERX);if(data$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
+	if(length(data$cytofpipe$DENSVM)==1){tolower(data$cytofpipe$DENSVM);if(data$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
+	if(length(data$cytofpipe$FLOWSOM)==1){tolower(data$cytofpipe$FLOWSOM);if(data$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=data$cytofpipe$FLOWSOM_K}}
+	if(length(cluster) == 0){reduction<-c(cluster,"NULL")}
+	
+	if(length(data$cytofpipe$TSNE)==1){tolower(data$cytofpipe$TSNE);if(data$cytofpipe$TSNE == "yes"){visualization<-c(visualization,"tsne")}}
+	if(length(data$cytofpipe$PCA)==1){tolower(data$cytofpipe$PCA);if(data$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
+	if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
+
 }
 
-#-----------
-#- Run tSNE
-#-----------
-data_transformed_tsne <- cytof_dimReduction(data=data_transformed, method = "tsne")
+#------------------------------------------------------------------
+#- Run cytofkit wraper
+#------------------------------------------------------------------
 
-#-----------------
-#- Run Phenograph
-#-----------------
-cluster_PhenoGraph <- cytof_cluster(xdata = data_transformed, method = "Rphenograph")
+analysis_results <- cytofkit(fcsFiles = files, 
+                markers = parameters2, 
+                projectName = projectName,
+                transformMethod = transform, 
+                mergeMethod = "fixed",
+		fixedNum = as.numeric(num),
+                dimReductionMethod = "tsne",
+                clusterMethods = cluster,
+                visualizationMethods = visualization,
+                FlowSOM_k = as.numeric(flowsom_num),
+		progressionMethod = "NULL",
+                resultDir = outputdir,
+                saveResults = TRUE, 
+                saveObject = FALSE)
 
-#------------------------------------------------
-#- Combine transformed data, tSNE and Phenograph
-#------------------------------------------------
-data_all <- cbind(data_transformed, data_transformed_tsne, 
-                     PhenoGraph = cluster_PhenoGraph)
-data_all <- as.data.frame(data_all)
 
-#-----------------------------------
-#- Phenograph clusters plot on tSNE
-#-----------------------------------
-png(paste0(outputfiles,"/phenograph_tsne1_tsne2.png"))
-cytof_clusterPlot(data=data_all, xlab="tsne_1", ylab="tsne_2", 
-                  cluster="PhenoGraph", sampleLabel = FALSE)
-dev.off()
+#------------------------------------------------------------------
+#- Get scaled and norm01 heatmaps for mean and percentage
+#------------------------------------------------------------------
 
-#-----------------------------
-#- PhenoGraph cluster heatmap
-#-----------------------------
-PhenoGraph_cluster_mean <- aggregate(. ~ PhenoGraph, data = data_all, mean)
-write.table(PhenoGraph_cluster_mean, file=paste0(outputfiles,"/PhenoGraph_cluster_mean.txt"), sep="\t",quote=F, row.names=F);
+exprs <- as.data.frame(analysis_results$expressionData)
+clusterData <- analysis_results$clusterRes
+ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
 
 range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
-PhenoGraph_cluster_mean_norm01 <- as.data.frame(lapply(PhenoGraph_cluster_mean, range01))
-write.table(PhenoGraph_cluster_mean_norm01, file=paste0(outputfiles,"/PhenoGraph_cluster_mean_norm01.txt"), sep="\t",quote=F, row.names=F);
 
-png(paste0(outputfiles,"/heatmap_norm.png"))
-cytof_heatmap(PhenoGraph_cluster_mean_norm01, baseName = "PhenoGraph NormMean")
-dev.off()
+if(!is.null(clusterData) && length(clusterData) > 0){
+	for(j in 1:length(clusterData)){
+		methodj <- names(clusterData)[j]
+		dataj <- clusterData[[j]]
+		if(!is.null(dataj)){
+                    
+			exprs_cluster_sample <- data.frame(exprs, cluster = dataj, check.names = FALSE)
+		
+			## cluster mean 
+			cluster_mean <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "mean")
+			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_mean_heatmap_scaled.pdf"))
+			cytof_heatmap(cluster_mean, scaleMethod="column", paste(projectName, methodj, "\ncluster mean (scaled)", sep = " "))
+			dev.off()
 
+			cluster_mean_norm01<-as.data.frame( apply(cluster_mean, 2, range01))
+			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_mean_heatmap_norm01.pdf"))
+			cytof_heatmap(cluster_mean_norm01, paste(projectName, methodj, "\ncluster mean (norm01)", sep = " "))
+			dev.off()
 
-#------------------------------------
-#- save analysis results to FCS file
-#------------------------------------
-cytof_addToFCS(data_all, rawFCSdir=inputfiles, analyzedFCSdir=paste0(outputfiles,"/analysed_FCS"), 
-               transformed_cols = c("tsne_1", "tsne_2"), 
-               cluster_cols = c("PhenoGraph"))
-
-
+			## cluster percentage
+			if (ifMultiFCS) {
+				cluster_percentage <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "percentage")
+				pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_percentage_heatmap_scaled.pdf"))
+				cytof_heatmap(cluster_percentage,scaleMethod="column", paste(projectName, methodj, "cluster\ncell percentage (scaled)", sep = " "))
+				dev.off()
+			}
+		}
+	}
+}
 

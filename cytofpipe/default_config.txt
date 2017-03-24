@@ -1,0 +1,14 @@
+[ cytofpipe ]
+
+TRANSFORM = cytofAsinh
+DOWNSAMPLE = 10000
+
+TSNE = yes
+PCA = no
+
+PHENOGRAPH = yes
+CLUSTERX = no
+DENSVM = no
+FLOWSOM = no
+FLOWSOM_K - 15
+

@@ -1,11 +1,11 @@
 #!/bin/bash -l
 
 # ========================================================================
-#  NAME: cytofpipe.qsub
+#  NAME: cytof_pipeline
 # ========================================================================
 #
 # ========================================================================
-# USAGE: qsub cytofpipe.qsub INPUTDIR OUTPUTDIR [MARKERSFILE]
+# USAGE: qsub cytof_pipeline INPUTDIR OUTPUTDIR MARKERSFILE <CONFIGFILE>
 # ========================================================================
 
 
@@ -15,10 +15,8 @@
 #$ -l mem=10G
 #$ -l tmpfs=100G
 #$ -cwd
-#$ -v CYTOFPIPE_HOME
-#$ -N cytof
-#$ -jsv $CYTOFPIPE_HOME/cytofpipe.jsv
-
+#$ -N cytof_pipeline
+#$ -jsv /home/regmond/Scratch/qsub.scripts/cytof.jsv
 
 set -o pipefail
 
@@ -26,13 +24,14 @@ module unload compilers
 module unload mpi
 module load r/recommended
 
-markersfile="NONE"
+configfile="/home/regmond/Scratch/my_pipelines/modules/default_config.txt"
 
 inputfiles=$1
 outputfiles=$2
-if [ -n "$3" ]
+markersfile=$3
+if [ -n "$4" ]
   then
-	markersfile=$3
+	configfile=$4
 fi
 
 ## Sets the name of the output file for the times command
@@ -95,13 +94,58 @@ echo " ARGS: $*"
 echo "======================================================"
 
 
-DATA_DIR=$PWD/$outputfiles
-run "mkdir -p ${DATA_DIR}"
+run "mkdir -p $PWD/$outputfiles"
 
-MARKERS=${markersfile} INPUT=${inputfiles} OUTPUT=${outputfiles} R CMD BATCH --no-save $CYTOF_PIPE_HOME/cytofpipe.R ${outputfiles}/citofpipe.Rout
+CONFIG=${PWD}/${configfile} MARKERS=${PWD}/${markersfile} INPUT=${PWD}/${inputfiles} OUTPUT=${PWD}/${outputfiles} R CMD BATCH --no-save /home/regmond/Scratch/my_pipelines/modules/cytofkit.R ${PWD}/${outputfiles}/log_R.txt
 
-run "rm Rplots.pdf"
-run "rm ${outputfiles}/analysed_FCS/Rplots.pdf"
+run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf ${PWD}/${outputfiles}/*cluster_median_data.csv"
+
+for i in $PWD/$outputfiles/*Rphenograph*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/Rphenograph";
+		run "mv $PWD/$outputfiles/*Rphenograph*pdf $PWD/$outputfiles/Rphenograph/.";
+		run "mv $PWD/$outputfiles/*Rphenograph*csv $PWD/$outputfiles/Rphenograph/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*FlowSOM*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/FlowSOM";
+		run "mv $PWD/$outputfiles/*FlowSOM*pdf $PWD/$outputfiles/FlowSOM/.";
+		run "mv $PWD/$outputfiles/*FlowSOM*csv $PWD/$outputfiles/FlowSOM/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*DensVM*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/DensVM";
+		run "mv $PWD/$outputfiles/*DensVM*pdf $PWD/$outputfiles/DensVM/.";
+		run "mv $PWD/$outputfiles/*DensVM*csv $PWD/$outputfiles/DensVM/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*ClusterX*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/ClusterX";
+		run "mv $PWD/$outputfiles/*ClusterX*pdf $PWD/$outputfiles/ClusterX/.";
+		run "mv $PWD/$outputfiles/*ClusterX*csv $PWD/$outputfiles/ClusterX/.";
+		break;
+ fi
+done
+
+if [ -e "$PWD/Rplots.pdf" ]
+  then
+      run "rm Rplots.pdf"
+fi
+
+
  
 
 echo
