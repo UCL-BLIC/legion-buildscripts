@@ -37,7 +37,7 @@ flowsom_num = "15"
 cluster<-"phenograph"
 visualization<-"tsne"
 
-if(configFile != "/home/regmond/Scratch/my_pipelines/modules/default_config.txt"){
+if(configFile != "${CYTOFPIPE_HOME}/default_config.txt"){
 	cluster<-vector()
 	visualization<-vector()
 
