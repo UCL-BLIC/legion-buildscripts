@@ -16,7 +16,7 @@
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytof_pipeline
-#$ -jsv /home/regmond/Scratch/qsub.scripts/cytof.jsv
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/dev/cytofpipe.jsv
 
 set -o pipefail
 
@@ -24,7 +24,7 @@ module unload compilers
 module unload mpi
 module load r/recommended
 
-configfile="/home/regmond/Scratch/my_pipelines/modules/default_config.txt"
+configfile="/shared/ucl/depts/cancer/apps/cytofpipe/dev/default_config.txt"
 
 inputfiles=$1
 outputfiles=$2
