@@ -7,13 +7,54 @@ library("cytofkit")
 library(flowCore)
 library(ini)
 library(hash)
+library(openCyto)
+library(mvtnorm)
+
+
+#---------------------------------------------------------------------------------------------
+#- Functions
+#---------------------------------------------------------------------------------------------
+
+
+#- A custom gating function for a DNA/DNA gate on CyTOF data.
+#- Finds the intersection between a quantile of a multivariate normal fit
+#- of a population and a boundary along y = -x+b 
+#- author: jfreling@fhcrc.org
+boundry <-  function(xs) {
+    # find the boundry events that are above a quantile and below a line 
+
+    cxs <- scale(xs) # scale data so that it can be compaired to the results from qnorm
+    f <- qnorm(0.95) # set a boundry level
+    pd <- dmvnorm(c(f, f))[1] # and find the p(x) for that level
+
+    pxs <- dmvnorm(x=cxs)  
+    idxs <- (pxs > pd) # find those points who are above the boundy level
+
+    idxs2 <- ((-1*cxs[,1]) + 1.96) > cxs[,2] # find points that are below the line with y=-1*x+b 
+    pos_xs <- xs[idxs&idxs2,] # intersection of points below line and above threshold level
+
+    hpts <- chull(pos_xs) # find the boundry points of the intersection of cells
+    return(pos_xs[hpts,])
+}
+
+.dnaGate <- function(fr, pp_res, channels = NA, filterId="", ...){
+   xs <- exprs(fr[,channels])
+  pnts <- boundry(xs)
+  return(polygonGate(.gate=pnts, filterId=filterId))
+}
+
+registerPlugins(fun=.dnaGate,methodName='dnaGate', dep='mvtnorm','gating')
+
+#- A function to normalize expression values to a 0-1 range
+range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 
 
 #-----------------
 #- Get input data
 #-----------------
 files <- list.files(inputfiles,pattern='.fcs$', full=TRUE)
-config<-read.ini(configFile)
+files_short <- list.files(inputfiles,pattern='.fcs$', full=F)
+
 parameters <- as.character(read.table(markersFile, header = FALSE)[,1])
 
 fcs1<-read.FCS(files[1])
@@ -25,38 +66,80 @@ for(i in 1:length(markerdesc)){
 }
 parameters2<-values(h[parameters])
 
+
 #------------------------------------------------------------------
 #- Parse config file
 #------------------------------------------------------------------
 
 projectName = "cytofpipe"
-transform = "cytofAsinh"
 merge ="fixed"
-num="10000"
-flowsom_num = "15"
-cluster<-"phenograph"
-visualization<-"tsne"
 
-if(configFile != "${CYTOFPIPE_HOME}/default_config.txt"){
-	cluster<-vector()
-	visualization<-vector()
+cluster<-vector()
+visualization<-vector()
 
-	data<-read.ini(configFile)
+config<-read.ini(configFile)
 
-	transform = data$cytofpipe$TRANSFORM
-	num=data$cytofpipe$DOWNSAMPLE
+autogating=config$cytofpipe$GATING
+transform = config$cytofpipe$TRANSFORM
+num=config$cytofpipe$DOWNSAMPLE
 	
-	if(length(data$cytofpipe$PHENOGRAPH)==1){tolower(data$cytofpipe$PHENOGRAPH);if(data$cytofpipe$PHENOGRAPH == "yes"){cluster<-c(cluster,"Rphenograph")}}
-	if(length(data$cytofpipe$CLUSTERX)==1){tolower(data$cytofpipe$CLUSTERX);if(data$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
-	if(length(data$cytofpipe$DENSVM)==1){tolower(data$cytofpipe$DENSVM);if(data$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
-	if(length(data$cytofpipe$FLOWSOM)==1){tolower(data$cytofpipe$FLOWSOM);if(data$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=data$cytofpipe$FLOWSOM_K}}
-	if(length(cluster) == 0){reduction<-c(cluster,"NULL")}
+if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);if(config$cytofpipe$PHENOGRAPH == "yes"){cluster<-c(cluster,"Rphenograph")}}
+if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
+if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
+if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
+if(length(cluster) == 0){reduction<-c(cluster,"NULL")}
 	
-	if(length(data$cytofpipe$TSNE)==1){tolower(data$cytofpipe$TSNE);if(data$cytofpipe$TSNE == "yes"){visualization<-c(visualization,"tsne")}}
-	if(length(data$cytofpipe$PCA)==1){tolower(data$cytofpipe$PCA);if(data$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
-	if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
+if(length(config$cytofpipe$TSNE)==1){tolower(config$cytofpipe$TSNE);if(config$cytofpipe$TSNE == "yes"){visualization<-c(visualization,"tsne")}}
+if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
+if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
+
+
+#------------------------------------------------------------------
+#- Do automatic gating
+#------------------------------------------------------------------
+
+if(autogating == 'yes'){
+
+	gt<-gatingTemplate("${CYTOFPIPE_HOME}/gating_template_transform.csv")
+
+	#------------------------------------------------------------------------------------------------
+	#- gates are based on arcSinh transformed data, so raw files need to be transformed before gating
+	#------------------------------------------------------------------------------------------------
+	
+	arcsinh <- arcsinhTransform("arcsinh transformation")	
+	dataTransform <- transform(read.flowSet(files), 
+			"arcsinh_Ce142Di"= arcsinh(Ce142Di),
+			"arcsinh_Ce140Di"= arcsinh(Ce140Di),
+			"arcsinh_Ir191Di"= arcsinh(Ir191Di),
+			"arcsinh_Ir193Di"= arcsinh(Ir193Di),
+			"arcsinh_Y89Di"= arcsinh(Y89Di),
+			"arcsinh_Pt195Di"= arcsinh(Pt195Di)
+	)
+
+	gs <- GatingSet(dataTransform)
+	gating(x = gt, y = gs)
+	fs_live <- getData(gs,"Live")
+
+	pdf(paste0(outputdir,"/gating_scheme.pdf"))
+	plot(gs)
+	dev.off()
+
+	write.flowSet(fs_live, paste0(outputdir, "/gating_fs_live"))
+
+	rm(files)
+	rm(files_short)
+
+	files<-list.files(paste0(outputdir, "/gating_fs_live"), patter=".fcs", full=T)
+	files_short<-list.files(paste0(outputdir, "/gating_fs_live"), patter=".fcs", full=F)
+
+	for(i in 1:length(files_short)){
+		pdf(paste0(outputdir,"/gating_",files_short[i],".pdf"))
+		plotGate(gs[[i]])
+		dev.off()
+	}
 
 }
+
 
 #------------------------------------------------------------------
 #- Run cytofkit wraper
@@ -85,8 +168,6 @@ analysis_results <- cytofkit(fcsFiles = files,
 exprs <- as.data.frame(analysis_results$expressionData)
 clusterData <- analysis_results$clusterRes
 ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
-
-range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 
 if(!is.null(clusterData) && length(clusterData) > 0){
 	for(j in 1:length(clusterData)){

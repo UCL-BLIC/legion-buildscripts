@@ -12,32 +12,34 @@ use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
 sub print_usage {
 	my $usage0="";
 	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "USAGE: qsub cytof_pipeline.qsub <INPUTDIR> <OUTPUTDIR> <MARKERSFILE> [<CONFIGFILE>]\n";
+	my $usage2 = "USAGE: cytofpipe <INPUTDIR> <OUTPUTDIR> <MARKERSFILE> [<CONFIGFILE>]\n";
 	my $usage3="------------------------------------------------------------------------------------";
 	my $usage4="Where CONFIGFILE has the following format:";
 	my $usage5="";
 	my $usage6="\t[ cytofpipe ]  #-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
-	my $usage7="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
-	my $usage8="\tDOWNSAMPLE = number between 500 and 100000  #-- MANDATORY FIELD:\n";
-	my $usage9="";
-	my $usage10="\t#- Clustering methods:";
-	my $usage11="\tPHENOGRAPH = yes|no\n";
-	my $usage12="\tCLUSTERX = yes|no\n";
-	my $usage13="\tDENSVM = yes|no\n";
-	my $usage14="\tFLOWSOM = yes|no\n";
-	my $usage15="\tFLOWSOM_K = number between 2 and 50  #-- MANDATORY FIELD if FLOWSOM = YES:\n";
-	my $usage16="";
-	my $usage17="\t#- Visualization methods:";
-	my $usage18="\tTSNE = yes|no\n";
-	my $usage19="\tPCA = yes|no\n";
-	my $usage20="";
+	my $usage7="\tGATING = yes|no  #-- MANDATORY FIELD:\n";
+	my $usage8="";
+	my $usage9="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
+	my $usage10="\tDOWNSAMPLE = number between 500 and 100000  #-- MANDATORY FIELD:\n";
+	my $usage11="";
+	my $usage12="\t#- Clustering methods:";
+	my $usage13="\tPHENOGRAPH = yes|no\n";
+	my $usage14="\tCLUSTERX = yes|no\n";
+	my $usage15="\tDENSVM = yes|no\n";
+	my $usage16="\tFLOWSOM = yes|no\n";
+	my $usage17="\tFLOWSOM_K = number between 2 and 50  #-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage18="";
+	my $usage19="\t#- Visualization methods:";
+	my $usage20="\tTSNE = yes|no\n";
+	my $usage21="\tPCA = yes|no\n";
+	my $usage22="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
 	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);
+	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);
 }
 
 
@@ -53,8 +55,7 @@ jsv_on_verify(sub {
 
     if ($params{CMDARGS} < 3) {
 	print_usage();
-	jsv_reject("You must specify inputdir, outputdir, markers file, and optionally a config file (E.g. \"qsub cytof_pipeline.qsub Tcell_fcs results_Tcell 
-markers.txt <config.txt>\")");
+	jsv_reject("You must specify inputdir, outputdir, markers file, and optionally a config file (E.g. \"cytofpipe Tcell_fcs results_Tcell markers.txt <config.txt>\")");
         return;
     }
 
@@ -102,17 +103,24 @@ jsv_main();
 sub check_config_file {
 	my $config = shift(@_);
 
-	my $transform;my $downsample;my $flowsom;my $flowsom_k;
+	my $gating;$transform;my $downsample;my $flowsom;my $flowsom_k;
 	open(INF, "$config");
 	while(<INF>){
 		chomp $_;
+		if($_=~/^GATING\s*\=\s*(.*)\s*$/){
+			$gating=$1;
+			if($gating !~/^yes$/i && $gating !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$gating\" is not a valid GATING option in <$config>. Please correct the config file and choose if you want to include atomatic gating on your analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
 		if($_=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
 			$transform=$1;
 			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle"
 				&& $transform ne "arcsinh" && $transform ne "none"){
 				print_usage();
-				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods 
-	(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
+				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods (\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
 				return;
 			}
 		}
@@ -120,8 +128,7 @@ sub check_config_file {
 			$downsample=$1;
 			if($downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
 				print_usage();
-				jsv_reject("Can't recognize \"$downsample\" as a valid number of samples in <$config>. Please correct the config file and choose a downsample size between 500 and 
-	100000");
+				jsv_reject("Can't recognize \"$downsample\" as a valid number of samples in <$config>. Please correct the config file and choose a downsample size between 500 and 100000");
 				return;
 			}
 		}
@@ -145,8 +152,7 @@ sub check_config_file {
 			my $phenograph=$1;
 			if($phenograph !~/^yes$/i && $phenograph !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$phenograph\" is not a valid PHENOGRAPH option in <$config>. Please correct the config file and choose if you want to include PHENOGRAPH as clustering 
-	method in the analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$phenograph\" is not a valid PHENOGRAPH option in <$config>. Please correct the config file and choose if you want to include PHENOGRAPH as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
@@ -154,8 +160,7 @@ sub check_config_file {
 			my $clusterx=$1;
 			if($clusterx !~/^yes$/i && $clusterx !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$clusterx\" is not a valid CLUSTERX option in <$config>. Please correct the config file and choose if you want to include CLUSTERX as clustering method in 
-	the analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$clusterx\" is not a valid CLUSTERX option in <$config>. Please correct the config file and choose if you want to include CLUSTERX as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
@@ -163,8 +168,7 @@ sub check_config_file {
 			my $densvm=$1;
 			if($densvm !~/^yes$/i && $densvm !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$densvm\" is not a valid DENSVM option in <$config>. Please correct the config file and choose if you want to include DENSVM as clustering method in the 
-	analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$densvm\" is not a valid DENSVM option in <$config>. Please correct the config file and choose if you want to include DENSVM as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
@@ -172,8 +176,7 @@ sub check_config_file {
 			$flowsom=$1;
 			if($flowsom !~/^yes$/i && $flowsom !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$flowsom\" is not a valid FLOWSOM option in <$config>. Please correct the config file and choose if you want to include FLOWSOM as clustering method in the 
-	analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$flowsom\" is not a valid FLOWSOM option in <$config>. Please correct the config file and choose if you want to include FLOWSOM as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
@@ -183,10 +186,14 @@ sub check_config_file {
 
 	}
 	close(INF);
+	if(!$gating || $gating eq ''){
+		print_usage();
+		jsv_reject("Gating parameter not found in <$config>. Please correct the config file and enter a valid Gating option \(\"YES\" or \"NO\"\) or omit the config file to run with default parameters \(GATING = NO\)");
+		return;
+	}
 	if(!$transform || $transform eq ''){
 		print_usage();
-		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", 
-	\"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
+		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters \(TRANSFORMATION = arcsinh\)");
 		return;
 	}
 	if(!$downsample || $downsample eq ''){
