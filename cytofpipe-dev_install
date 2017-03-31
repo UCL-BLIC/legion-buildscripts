@@ -29,11 +29,18 @@ cp cytofpipe/* $INSTALL_PREFIX/${VERSION}
 
 mkdir -p ${INSTALL_PREFIX}/${VERSION}/Rlibs
 
+export R_LIBS=${INSTALL_PREFIX}/${VERSION}/Rlibs:${R_LIBS}
+
 ## If this fails, check that Bioconductor is not out of date. Uncomment the
 ## biocUpgrade line below if that is the case.
 R --vanilla <<EOF
 source("https://bioconductor.org/biocLite.R")
-# biocLite("biocUpgrade", lib="/home/regmher/tmp/test/$APPNAME/$VERSION/Rlibs")
-biocLite("flowCore", lib="/home/regmher/tmp/test/$APPNAME/$VERSION/Rlibs")
-biocLite("cytofkit", lib="/home/regmher/tmp/test/$APPNAME/$VERSION/Rlibs")
+# biocLite("biocUpgrade", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("flowCore", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("cytofkit", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("openCyto", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+	##install.packages("devtools", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+	##devtools::install_github("JinmiaoChenLab/cytofkit", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+install.packages("ini", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("hash", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
 EOF
