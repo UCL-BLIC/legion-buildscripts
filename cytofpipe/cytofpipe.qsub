@@ -16,7 +16,7 @@
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
-#$ -jsv ${CYTOFPIPE_HOME}/cytofpipe.jsv
+#$ -jsv /share/ucl/depts/cancer/apps/cytofpipe/dev/cytofpipe.jsv
 
 set -o pipefail
 
