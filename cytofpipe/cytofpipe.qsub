@@ -20,6 +20,9 @@
 
 set -o pipefail
 
+module r/recommended
+
+
 id=$PWD/$JOB_ID
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"
