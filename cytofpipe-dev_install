@@ -41,4 +41,5 @@ source("https://bioconductor.org/biocLite.R")
 #biocLite("openCyto", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
 #install.packages("ini", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
 #install.packages("hash", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+#install.packages("rmarkdown", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
 EOF

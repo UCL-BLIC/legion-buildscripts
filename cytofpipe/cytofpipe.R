@@ -159,7 +159,7 @@ analysis_results <- cytofkit(fcsFiles = files,
 		progressionMethod = "NULL",
                 resultDir = outputdir,
                 saveResults = TRUE, 
-                saveObject = FALSE)
+                saveObject = TRUE)
 
 
 #------------------------------------------------------------------
