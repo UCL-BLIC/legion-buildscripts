@@ -2,7 +2,7 @@
 
 GATING = no
 
-TRANSFORM = cytofAsinh
+TRANSFORM = arcsinh
 DOWNSAMPLE = 10000
 
 TSNE = yes
