@@ -1,6 +1,6 @@
 [ cytofpipe ]
 
-GATING = yes
+GATING = no
 
 TRANSFORM = cytofAsinh
 DOWNSAMPLE = 10000
@@ -12,5 +12,5 @@ PHENOGRAPH = yes
 CLUSTERX = no
 DENSVM = no
 FLOWSOM = no
-FLOWSOM_K - 15
+FLOWSOM_K = 15
 
