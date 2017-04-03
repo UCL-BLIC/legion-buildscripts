@@ -98,7 +98,7 @@ echo "======================================================"
 
 run "mkdir -p $PWD/$outputfiles"
 
-CONFIG=${PWD}/${configfile} MARKERS=${PWD}/${markersfile} INPUT=${PWD}/${inputfiles} OUTPUT=${PWD}/${outputfiles} R CMD BATCH --no-save ${CYTOFPIPE_HOME}//cytofpipe.R ${PWD}/${outputfiles}/log_R.txt
+CONFIG=${configfile} MARKERS=${PWD}/${markersfile} INPUT=${PWD}/${inputfiles} OUTPUT=${PWD}/${outputfiles} R CMD BATCH --no-save ${CYTOFPIPE_HOME}//cytofpipe.R ${PWD}/${outputfiles}/log_R.txt
 
 run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf ${PWD}/${outputfiles}/*cluster_median_data.csv"
 

@@ -103,10 +103,16 @@ jsv_main();
 sub check_config_file {
 	my $config = shift(@_);
 
-	my $gating;$transform;my $downsample;my $flowsom;my $flowsom_k;
+	my $gating;my $transform;my $downsample;my $flowsom;my $flowsom_k;
 	open(INF, "$config");
+	my $line=1;
 	while(<INF>){
 		chomp $_;
+		if($line == 1 && $_ !~ /^\s*\[\s*cytofpipe\s*\]\s*$/i){
+			print_usage();
+			jsv_reject("Invalid config file. Please make sure that the first line of the config file is \"[ cytofpipe ]\"");
+			return;
+		}
 		if($_=~/^GATING\s*\=\s*(.*)\s*$/){
 			$gating=$1;
 			if($gating !~/^yes$/i && $gating !~/^no$/i){
@@ -117,8 +123,7 @@ sub check_config_file {
 		}
 		if($_=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
 			$transform=$1;
-			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle"
-				&& $transform ne "arcsinh" && $transform ne "none"){
+			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle" && $transform ne "arcsinh" && $transform ne "none"){
 				print_usage();
 				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods (\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
 				return;
@@ -183,7 +188,7 @@ sub check_config_file {
 		if($_=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
 			$flowsom_k=$1;
 		}
-
+		$line++;
 	}
 	close(INF);
 	if(!$gating || $gating eq ''){
