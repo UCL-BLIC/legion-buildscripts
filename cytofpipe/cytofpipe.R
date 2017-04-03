@@ -2,6 +2,7 @@ inputfiles<- as.character(Sys.getenv("INPUT"))
 outputdir<- as.character(Sys.getenv("OUTPUT"))
 markersFile<- as.character(Sys.getenv("MARKERS"))
 configFile<- as.character(Sys.getenv("CONFIG"))
+template<- as.character(Sys.getenv("TEMPLATE"))
 
 library("cytofkit") 
 library(flowCore)
@@ -100,7 +101,7 @@ if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
 
 if(autogating == 'yes'){
 
-	gt<-gatingTemplate("${CYTOFPIPE_HOME}/gating_template_transform.csv")
+	gt<-gatingTemplate(template)
 
 	#------------------------------------------------------------------------------------------------
 	#- gates are based on arcSinh transformed data, so raw files need to be transformed before gating
