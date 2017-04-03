@@ -20,7 +20,7 @@
 
 set -o pipefail
 
-module r/recommended
+module load r/recommended
 
 
 id=$PWD/$JOB_ID
