@@ -35,11 +35,11 @@ export R_LIBS=${INSTALL_PREFIX}/${VERSION}/Rlibs:${R_LIBS}
 ## biocUpgrade line below if that is the case.
 R --vanilla <<EOF
 source("https://bioconductor.org/biocLite.R")
-#biocLite("biocUpgrade", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
-#biocLite("flowCore", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
-#biocLite("cytofkit", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
-#biocLite("openCyto", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
-#install.packages("ini", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
-#install.packages("hash", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
-#install.packages("rmarkdown", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+biocLite("biocUpgrade", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("flowCore", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("cytofkit", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("openCyto", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+install.packages("ini", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("hash", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("rmarkdown", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
 EOF
