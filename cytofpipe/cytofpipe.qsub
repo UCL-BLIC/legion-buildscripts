@@ -23,7 +23,8 @@ set -o pipefail
 module unload compilers
 module unload mpi
 module load r/recommended
-
+module load blic-modules
+module load cytofpipe/dev
 
 id=$PWD/$JOB_ID
 
