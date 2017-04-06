@@ -73,7 +73,6 @@ parameters2<-values(h[parameters])
 #------------------------------------------------------------------
 
 projectName = "cytofpipe"
-merge ="fixed"
 
 cluster<-vector()
 visualization<-vector()
@@ -82,8 +81,10 @@ config<-read.ini(configFile)
 
 autogating=config$cytofpipe$GATING
 transform = config$cytofpipe$TRANSFORM
-num=config$cytofpipe$DOWNSAMPLE
+merge = config$cytofpipe$MERGE
 	
+if(length(config$cytofpipe$MERGE)==1){tolower(config$cytofpipe$MERGE);if(config$cytofpipe$MERGE == "fixed" || config$cytofpipe$MERGE == "ceil"){num=config$cytofpipe$DOWNSAMPLE}}
+
 if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);if(config$cytofpipe$PHENOGRAPH == "yes"){cluster<-c(cluster,"Rphenograph")}}
 if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
 if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
@@ -150,7 +151,7 @@ analysis_results <- cytofkit(fcsFiles = files,
                 markers = parameters2, 
                 projectName = projectName,
                 transformMethod = transform, 
-                mergeMethod = "fixed",
+                mergeMethod = merge,
 		fixedNum = as.numeric(num),
                 dimReductionMethod = "tsne",
                 clusterMethods = cluster,

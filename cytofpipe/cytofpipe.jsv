@@ -21,7 +21,7 @@ sub print_usage {
 	my $usage8="";
 	my $usage9="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
 	my $usage10="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
-	my $usage11="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed\n";
+	my $usage11="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
 	my $usage12="";
 	my $usage13="\t#- Clustering methods:";
 	my $usage14="\tPHENOGRAPH = yes|no\n";
@@ -215,7 +215,7 @@ sub check_config_file {
 		jsv_reject("Merge parameter not found in <$config>. Please correct the config file and enter a valid merge method \(\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters \(MERGE = fixed, DOWNSAMPLE = 10000\)");
 		return;
 	}
-	if($merge =~ /^fixed$/i){
+	if($merge =~ /^fixed$/i || $merge =~ /^ceil$/i){
 		if(!$downsample || $downsample eq '' || $downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
 			print_usage();
 			if(!$downsample || $downsample eq ''){
