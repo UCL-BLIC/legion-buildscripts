@@ -16,30 +16,31 @@ sub print_usage {
 	my $usage3="------------------------------------------------------------------------------------";
 	my $usage4="Where CONFIGFILE has the following format:";
 	my $usage5="";
-	my $usage6="\t[ cytofpipe ]  #-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
-	my $usage7="\tGATING = yes|no  #-- MANDATORY FIELD:\n";
+	my $usage6="\t[ cytofpipe ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
+	my $usage7="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
 	my $usage8="";
 	my $usage9="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
-	my $usage10="\tDOWNSAMPLE = number between 500 and 100000  #-- MANDATORY FIELD:\n";
-	my $usage11="";
-	my $usage12="\t#- Clustering methods:";
-	my $usage13="\tPHENOGRAPH = yes|no\n";
-	my $usage14="\tCLUSTERX = yes|no\n";
-	my $usage15="\tDENSVM = yes|no\n";
-	my $usage16="\tFLOWSOM = yes|no\n";
-	my $usage17="\tFLOWSOM_K = number between 2 and 50  #-- MANDATORY FIELD if FLOWSOM = YES:\n";
-	my $usage18="";
-	my $usage19="\t#- Visualization methods:";
-	my $usage20="\tTSNE = yes|no\n";
-	my $usage21="\tPCA = yes|no\n";
-	my $usage22="";
+	my $usage10="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
+	my $usage11="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed\n";
+	my $usage12="";
+	my $usage13="\t#- Clustering methods:";
+	my $usage14="\tPHENOGRAPH = yes|no\n";
+	my $usage15="\tCLUSTERX = yes|no\n";
+	my $usage16="\tDENSVM = yes|no\n";
+	my $usage17="\tFLOWSOM = yes|no\n";
+	my $usage18="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage19="";
+	my $usage20="\t#- Visualization methods:";
+	my $usage21="\tTSNE = yes|no\n";
+	my $usage22="\tPCA = yes|no\n";
+	my $usage23="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
 	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);
+	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
 }
 
 
@@ -103,7 +104,7 @@ jsv_main();
 sub check_config_file {
 	my $config = shift(@_);
 
-	my $gating;my $transform;my $downsample;my $flowsom;my $flowsom_k;
+	my $gating;my $transform;my $merge;my $downsample;my $flowsom;my $flowsom_k;
 
 	local $/ = undef;
 	open(INF, "$config");
@@ -134,11 +135,11 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($line=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
-			$downsample=$1;
-			if($downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
+		if($line=~/^MERGE\s*\=\s*(.*)\s*$/){
+			$merge=$1;
+			if($merge ne "ceil" && $merge ne "all" && $merge ne "min" && $merge ne "fixed"){
 				print_usage();
-				jsv_reject("Can't recognize \"$downsample\" as a valid number of samples in <$config>. Please correct the config file and choose a downsample size between 500 and 100000");
+				jsv_reject("Can't recognize \"$merge\" as a valid merge method in <$config>. Please correct the config file and choose one of the available methods (\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters");
 				return;
 			}
 		}
@@ -190,6 +191,9 @@ sub check_config_file {
 				return;
 			}
 		}
+		if($line=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
+			$downsample=$1;
+		}
 		if($line=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
 			$flowsom_k=$1;
 		}
@@ -206,10 +210,22 @@ sub check_config_file {
 		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters \(TRANSFORMATION = arcsinh\)");
 		return;
 	}
-	if(!$downsample || $downsample eq ''){
+	if(!$merge || $merge eq ''){
 		print_usage();
-		jsv_reject("Downsample parameter not found in <$config>. Please correct the config file and enter a valid downsample size between 500 and 100000");
+		jsv_reject("Merge parameter not found in <$config>. Please correct the config file and enter a valid merge method \(\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters \(MERGE = fixed, DOWNSAMPLE = 10000\)");
 		return;
+	}
+	if($merge =~ /^fixed$/i){
+		if(!$downsample || $downsample eq '' || $downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
+			print_usage();
+			if(!$downsample || $downsample eq ''){
+				jsv_reject("Downsample parameter not found in <$config>. Please correct the config file and enter a valid size between 50 and 100000");
+				return;
+			}elsif($downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
+				jsv_reject("Can't recognize \"$downsample\" as a valid downsample number in <$config>. Please correct the config file and choose a downsample size between 500 and 100000");
+				return;
+			}
+		}
 	}
 	if($flowsom =~ /^yes$/i){
 		if(!$flowsom_k || $flowsom_k eq '' || $flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
