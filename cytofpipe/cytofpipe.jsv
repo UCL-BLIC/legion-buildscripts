@@ -104,24 +104,29 @@ sub check_config_file {
 	my $config = shift(@_);
 
 	my $gating;my $transform;my $downsample;my $flowsom;my $flowsom_k;
+
+	local $/ = undef;
 	open(INF, "$config");
-	my $line=1;
-	while(<INF>){
+	my $content = <INF>;
+	my @lines = split /\r\n|\n|\r/, $content;
+
+	my $first_line=1;
+	foreach my $line(@lines){
 		chomp $_;
-		if($line == 1 && $_ !~ /^\s*\[\s*cytofpipe\s*\]\s*$/i){
+		if($first_line == 1 && $line !~ /^\s*\[\s*cytofpipe\s*\]\s*$/i){
 			print_usage();
 			jsv_reject("Invalid config file. Please make sure that the first line of the config file is \"[ cytofpipe ]\"");
 			return;
 		}
-		if($_=~/^GATING\s*\=\s*(.*)\s*$/){
+		if($line=~/^GATING\s*\=\s*(.*)\s*$/){
 			$gating=$1;
 			if($gating !~/^yes$/i && $gating !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$gating\" is not a valid GATING option in <$config>. Please correct the config file and choose if you want to include atomatic gating on your analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$gating\" **************** is not a valid GATING option in <$config>. Please correct the config file and choose if you want to include atomatic gating on your analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
-		if($_=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
+		if($line=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
 			$transform=$1;
 			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle" && $transform ne "arcsinh" && $transform ne "none"){
 				print_usage();
@@ -129,7 +134,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
+		if($line=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
 			$downsample=$1;
 			if($downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
 				print_usage();
@@ -137,7 +142,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^TSNE\s*\=\s*(.*)\s*$/){
+		if($line=~/^TSNE\s*\=\s*(.*)\s*$/){
 			my $tsne=$1;
 			if($tsne !~/^yes$/i && $tsne !~/^no$/i){
 				print_usage();
@@ -145,7 +150,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^PCA\s*\=\s*(.*)\s*$/){
+		if($line=~/^PCA\s*\=\s*(.*)\s*$/){
 			my $pca=$1;
 			if($pca !~/^yes$/i && $pca !~/^no$/i){
 				print_usage();
@@ -153,7 +158,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^PHENOGRAPH\s*\=\s*(.*)\s*$/){
+		if($line=~/^PHENOGRAPH\s*\=\s*(.*)\s*$/){
 			my $phenograph=$1;
 			if($phenograph !~/^yes$/i && $phenograph !~/^no$/i){
 				print_usage();
@@ -161,7 +166,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^CLUSTERX\s*\=\s*(.*)\s*$/){
+		if($line=~/^CLUSTERX\s*\=\s*(.*)\s*$/){
 			my $clusterx=$1;
 			if($clusterx !~/^yes$/i && $clusterx !~/^no$/i){
 				print_usage();
@@ -169,7 +174,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^DENSVM\s*\=\s*(.*)\s*$/){
+		if($line=~/^DENSVM\s*\=\s*(.*)\s*$/){
 			my $densvm=$1;
 			if($densvm !~/^yes$/i && $densvm !~/^no$/i){
 				print_usage();
@@ -177,7 +182,7 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^FLOWSOM\s*\=\s*(.*)\s*$/){
+		if($line=~/^FLOWSOM\s*\=\s*(.*)\s*$/){
 			$flowsom=$1;
 			if($flowsom !~/^yes$/i && $flowsom !~/^no$/i){
 				print_usage();
@@ -185,10 +190,10 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($_=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
+		if($line=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
 			$flowsom_k=$1;
 		}
-		$line++;
+		$first_line++;
 	}
 	close(INF);
 	if(!$gating || $gating eq ''){
