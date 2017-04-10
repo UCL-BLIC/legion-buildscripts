@@ -11,9 +11,9 @@
 
 
 #$ -S /bin/bash
-#$ -l h_rt=0:30:00
-#$ -l mem=5G
-#$ -l tmpfs=50G
+#$ -l h_rt=2:00:00
+#$ -l mem=10G
+#$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
 #$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/dev/cytofpipe.jsv
@@ -39,8 +39,7 @@ if [ -n "$4" ]
 	configfile=${PWD}/$4
 fi
 
-
-run "mkdir -p $PWD/$outputfiles"
+mkdir -p $PWD/$outputfiles
 
 FILE=${PWD}/${JOB_ID}.txt
 
@@ -115,7 +114,7 @@ echo "======================================================"
 
 
 
-JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R
+JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
 
 run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf ${PWD}/${outputfiles}/*cluster_median_data.csv"
 
