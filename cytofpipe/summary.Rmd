@@ -1,0 +1,111 @@
+---
+title: "Cytofpipe Summary" 
+date: "`r format(Sys.time(), '%d %B, %Y')`" 
+output: pdf_document 
+---
+
+
+```{r echo=FALSE}
+knitr::read_chunk("${CYTOFPIPE_HOME}/cytofpipe.R")
+```
+
+
+# Inputfiles
+
+**FCS files**
+```{r FCSfiles, echo=F}
+<<parameters>>
+<<fcs>>
+files_short
+```
+
+**Markers**
+```{r Markers, echo=F}
+<<markers>>
+parameters
+```
+
+**Config parameters**
+```{r Config, echo=F}
+library(ini)
+<<parseConfig>>
+str(config)
+```
+
+\newpage						
+
+# Gating
+
+```{r Gates, fig.align='center',echo=FALSE, message=FALSE,warning=FALSE,results="asis"}
+if(length(autogating)==1){
+	tolower(autogating);
+	if(autogating == "yes"){
+		
+		cat("  \n**Gating template**  \n")
+		cat("\\newline")
+		cat(paste0("![Test]( ",outputdir,"/Gating/gating_scheme.pdf)"))
+		cat("\\newline")
+		cat("\\newpage")
+
+		for(i in 1:length(files_short)){
+
+			cat(paste0("  \n**Gating ", files_short[i], "**  \n"))
+			cat("\\newline")
+			cat(paste0("![Test]( ",outputdir,"/Gating/gating_",files_short[i],".pdf)"))
+			cat("\\newline")
+			cat("\\newpage")
+		}
+
+	}else{
+		cat("  \n**NO AUTOMATIC GATING PERFORMED**  \n")
+		cat("\\newpage")
+
+	}
+}
+```
+
+
+# Clustering results
+
+```{r Clustering, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
+
+library(cytofkit)
+load(paste0(outputdir, "/cytofpipe.RData"))
+
+exprs <- as.data.frame(analysis_results$expressionData)
+clusterData <- analysis_results$clusterRes
+visualizationData <- analysis_results$dimReducedRes[analysis_results$visualizationMethods]
+ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
+
+if(!is.null(clusterData) && length(clusterData) > 0){
+	for(j in 1:length(clusterData)){
+		if(!is.null(clusterData[[j]])){
+			methodj <- names(clusterData)[j]
+			dataj <- clusterData[[j]]
+			
+			cat(paste0("  \n**",methodj, "**  \n"))
+			cat("\\newline")
+			if(!is.null(dataj)){
+				for(i in 1:length(visualizationData)){
+					if(!is.null(visualizationData[[i]])){
+						methodi <- names(visualizationData)[i]
+
+						cat(paste0("  \n**",methodi," ",methodj, "**  \n"))
+						cat("\\newline")
+						cat(paste0("![Test]( ",outputdir,"/", methodj,"/cytofpipe_",methodi,"_",methodj,"_cluster_scatter_plot.pdf)"))
+						cat("\\newline")
+						cat("\\newpage")
+					}
+				}
+
+				cat(paste0("  \n**",methodj, " Mean (scaled) Heatmap**  \n"))
+				cat("\\newline")
+				cat(paste0("![Test]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
+				cat("\\newline")
+				cat("\\newpage")                          
+			}
+		}
+	}
+}
+
+```
