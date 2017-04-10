@@ -1,10 +1,19 @@
-inputfiles<- as.character(Sys.getenv("INPUT"))
-outputdir<- as.character(Sys.getenv("OUTPUT"))
-markersFile<- as.character(Sys.getenv("MARKERS"))
-configFile<- as.character(Sys.getenv("CONFIG"))
-template<- as.character(Sys.getenv("TEMPLATE"))
+## @knitr parameters
 
-library("cytofkit") 
+jobid <- as.character(Sys.getenv("JOB_ID"))
+
+input <- paste0(jobid, ".txt")
+lines <- readLines(input, n = 5)
+
+inputfiles <- lines[1]
+outputdir <- lines[2]
+markersFile <- lines[3]
+configFile <- lines[4]
+template <- lines[5]
+
+## @knitr libraries
+
+library(cytofkit) 
 library(flowCore)
 library(ini)
 library(hash)
@@ -15,6 +24,8 @@ library(mvtnorm)
 #---------------------------------------------------------------------------------------------
 #- Functions
 #---------------------------------------------------------------------------------------------
+
+## @knitr functions
 
 
 #- A custom gating function for a DNA/DNA gate on CyTOF data.
@@ -53,10 +64,15 @@ range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 #-----------------
 #- Get input data
 #-----------------
+
+## @knitr fcs
+
 files <- list.files(inputfiles,pattern='.fcs$', full=TRUE)
 files_short <- list.files(inputfiles,pattern='.fcs$', full=F)
-
 parameters <- as.character(read.table(markersFile, header = FALSE)[,1])
+
+
+## @knitr fcs1
 
 fcs1<-read.FCS(files[1])
 markernames<-pData(parameters(fcs1))$name
@@ -71,6 +87,8 @@ parameters2<-values(h[parameters])
 #------------------------------------------------------------------
 #- Parse config file
 #------------------------------------------------------------------
+
+## @knitr parseConfig
 
 projectName = "cytofpipe"
 
@@ -99,6 +117,8 @@ if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
 #------------------------------------------------------------------
 #- Do automatic gating
 #------------------------------------------------------------------
+
+## @knitr gating
 
 if(autogating == 'yes'){
 
@@ -147,6 +167,8 @@ if(autogating == 'yes'){
 #- Run cytofkit wraper
 #------------------------------------------------------------------
 
+## @knitr cytofkit
+
 analysis_results <- cytofkit(fcsFiles = files, 
                 markers = parameters2, 
                 projectName = projectName,
@@ -166,6 +188,8 @@ analysis_results <- cytofkit(fcsFiles = files,
 #------------------------------------------------------------------
 #- Get scaled and norm01 heatmaps for mean and percentage
 #------------------------------------------------------------------
+
+## @knitr scaledHeatmaps
 
 exprs <- as.data.frame(analysis_results$expressionData)
 clusterData <- analysis_results$clusterRes

@@ -27,11 +27,9 @@ module load haskellplatform/2014.2.0.0
 module load blic-modules
 module load cytofpipe/dev
 
-id=$PWD/$JOB_ID
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
-
 
 inputfiles=$1
 outputfiles=$2
@@ -40,6 +38,21 @@ if [ -n "$4" ]
   then
 	configfile=${PWD}/$4
 fi
+
+
+run "mkdir -p $PWD/$outputfiles"
+
+FILE=${PWD}/${JOB_ID}.txt
+
+/bin/cat <<EOM >$FILE
+${PWD}/${inputfiles}
+${PWD}/${outputfiles}
+${PWD}/${markersfile}
+${configfile}
+${gatingtemplate}
+EOM
+
+
 
 ## Sets the name of the output file for the times command
 if [[ ! $SGE_TASK_ID ]]; then \
@@ -101,16 +114,10 @@ echo " ARGS: $*"
 echo "======================================================"
 
 
-run "mkdir -p $PWD/$outputfiles"
 
-TEMPLATE=${gatingtemplate} CONFIG=${configfile} MARKERS=${PWD}/${markersfile} INPUT=${PWD}/${inputfiles} OUTPUT=${PWD}/${outputfiles} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R ${PWD}/${outputfiles}/log_R.txt
+JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R
 
 run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf ${PWD}/${outputfiles}/*cluster_median_data.csv"
-
-#runstr="TEMPLATE=${gatingtemplate} CONFIG=${configfile} MARKERS=${PWD}/${markersfile} INPUT=${PWD}/${inputfiles} OUTPUT=${PWD}/${outputfiles} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R"
-#run "${CYTOFPIPE_HOME}/knit_markdown.pl $id ${runstr}"
-#run "echo ${CYTOFPIPE_HOME}/knit_markdown.pl $id ${runstr}"
- 
 
 for i in $PWD/$outputfiles/*Rphenograph*; do
   if [ -f "$i" ]; 
@@ -170,11 +177,20 @@ for i in $PWD/$outputfiles/gating*; do
   fi
 done
 
+R -e "rmarkdown::render('${CYTOFPIPE_HOME}/summary.Rmd')"
+
 if [ -e "$PWD/Rplots.pdf" ]
   then
       run "rm Rplots.pdf"
 fi
 
+if [ -e "$PWD/${JOB_ID}.txt" ]
+  then
+      run "rm ${JOB_ID}.txt"
+fi
+
+
+ 
 
  
 
