@@ -79,7 +79,11 @@ markernames<-pData(parameters(fcs1))$name
 markerdesc<-pData(parameters(fcs1))$desc
 h<-hash()
 for(i in 1:length(markerdesc)){
-	h[[ strsplit(markerdesc, "[_]")[[i]][2] ]] <- markernames[i]
+	if(grepl("_",markerdesc[i])){
+		h[[ strsplit(markerdesc, "[_]")[[i]][2] ]] <- markernames[i]
+	}else{
+		h[[ markerdesc[i] ]] <- markernames[i]
+	}
 }
 parameters2<-values(h[parameters])
 

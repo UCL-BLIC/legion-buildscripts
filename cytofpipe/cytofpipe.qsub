@@ -84,7 +84,7 @@ function run {
   out=""
   mode="cmd"
   for arg in $*; do
-    if [ $arg == ">" ]; then mode="out"; else
+    if [[ $arg == ">" ]]; then mode="out"; else
       if [ $mode == "cmd" ]; then cmd="$cmd $arg"; else out=$arg; fi
     fi
   done
@@ -159,15 +159,6 @@ for i in $PWD/$outputfiles/*ClusterX*; do
 done
 
 for i in $PWD/$outputfiles/gating*; do
-  if [ -f "$i" ]; 
-	then 
-		run "mkdir -p $PWD/$outputfiles/Gating";
-		run "mv $PWD/$outputfiles/gating* $PWD/$outputfiles/Gating/.";
-		break;
- fi
-done
-
-for i in $PWD/$outputfiles/gating*; do
    if [ -f "$i" ]; 
  	then 
  		run "mkdir -p $PWD/$outputfiles/Gating";
@@ -176,7 +167,14 @@ for i in $PWD/$outputfiles/gating*; do
   fi
 done
 
-R -e "rmarkdown::render('${CYTOFPIPE_HOME}/summary.Rmd')"
+echo "${CYTOFPIPE_HOME}/summary.Rmd";
+
+##echo "library(rmarkdown); render('${CYTOFPIPE_HOME}/summary.Rmd');" | R --vanilla
+##Rscript -e "require("rmarkdown"); render('${CYTOFPIPE_HOME}/summary.Rmd')"
+
+rmd=${CYTOFPIPE_HOME}/summary.Rmd
+R -e "library(\"rmarkdown\");library(\"knitr\");rmarkdown::render('$rmd', output_dir='$PWD/$outputfiles')"
+
 
 if [ -e "$PWD/Rplots.pdf" ]
   then

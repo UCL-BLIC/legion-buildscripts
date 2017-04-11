@@ -43,7 +43,7 @@ if(length(autogating)==1){
 		
 		cat("  \n**Gating template**  \n")
 		cat("\\newline")
-		cat(paste0("![Test]( ",outputdir,"/Gating/gating_scheme.pdf)"))
+		cat(paste0("![Gating scheme]( ",outputdir,"/Gating/gating_scheme.pdf)"))
 		cat("\\newline")
 		cat("\\newpage")
 
@@ -51,7 +51,7 @@ if(length(autogating)==1){
 
 			cat(paste0("  \n**Gating ", files_short[i], "**  \n"))
 			cat("\\newline")
-			cat(paste0("![Test]( ",outputdir,"/Gating/gating_",files_short[i],".pdf)"))
+			cat(paste0("![Gating]( ",outputdir,"/Gating/gating_",files_short[i],".pdf)"))
 			cat("\\newline")
 			cat("\\newpage")
 		}
@@ -92,7 +92,7 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 
 						cat(paste0("  \n**",methodi," ",methodj, "**  \n"))
 						cat("\\newline")
-						cat(paste0("![Test]( ",outputdir,"/", methodj,"/cytofpipe_",methodi,"_",methodj,"_cluster_scatter_plot.pdf)"))
+						cat(paste0("![Cluster plot]( ",outputdir,"/", methodj,"/cytofpipe_",methodi,"_",methodj,"_cluster_scatter_plot.pdf)"))
 						cat("\\newline")
 						cat("\\newpage")
 					}
@@ -100,7 +100,7 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 
 				cat(paste0("  \n**",methodj, " Mean (scaled) Heatmap**  \n"))
 				cat("\\newline")
-				cat(paste0("![Test]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
+				cat(paste0("![HEatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
 				cat("\\newline")
 				cat("\\newpage")                          
 			}
