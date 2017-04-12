@@ -1,6 +1,7 @@
 ## @knitr parameters
 
 jobid <- as.character(Sys.getenv("JOB_ID"))
+#jobid<-"/home/regmond/Scratch/cytof/cytofkit/2818957"
 
 input <- paste0(jobid, ".txt")
 lines <- readLines(input, n = 5)
@@ -111,7 +112,7 @@ if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);
 if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
 if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
 if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
-if(length(cluster) == 0){reduction<-c(cluster,"NULL")}
+if(length(cluster) == 0){cluster<-c(cluster,"NULL")}
 	
 if(length(config$cytofpipe$TSNE)==1){tolower(config$cytofpipe$TSNE);if(config$cytofpipe$TSNE == "yes"){visualization<-c(visualization,"tsne")}}
 if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
@@ -174,19 +175,19 @@ if(autogating == 'yes'){
 ## @knitr cytofkit
 
 analysis_results <- cytofkit(fcsFiles = files, 
-                markers = parameters2, 
-                projectName = projectName,
-                transformMethod = transform, 
-                mergeMethod = merge,
+		markers = parameters2, 
+		projectName = projectName,
+		transformMethod = transform, 
+		mergeMethod = merge,
 		fixedNum = as.numeric(num),
-                dimReductionMethod = "tsne",
-                clusterMethods = cluster,
-                visualizationMethods = visualization,
-                FlowSOM_k = as.numeric(flowsom_num),
+		dimReductionMethod = "tsne",
+		clusterMethods = cluster,
+		visualizationMethods = visualization,
+		FlowSOM_k = as.numeric(flowsom_num),
 		progressionMethod = "NULL",
-                resultDir = outputdir,
-                saveResults = TRUE, 
-                saveObject = TRUE)
+		resultDir = outputdir,
+		saveResults = TRUE, 
+		saveObject = TRUE)
 
 
 #------------------------------------------------------------------

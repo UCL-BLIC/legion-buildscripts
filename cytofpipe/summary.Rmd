@@ -2,11 +2,15 @@
 title: "Cytofpipe Summary" 
 date: "`r format(Sys.time(), '%d %B, %Y')`" 
 output: pdf_document 
+params:
+   rscript: 1
+   inputparams: 1
+   rdata: 1
 ---
 
 
 ```{r echo=FALSE}
-knitr::read_chunk("${CYTOFPIPE_HOME}/cytofpipe.R")
+knitr::read_chunk(params$rscript)
 ```
 
 
@@ -14,7 +18,15 @@ knitr::read_chunk("${CYTOFPIPE_HOME}/cytofpipe.R")
 
 **FCS files**
 ```{r FCSfiles, echo=F}
-<<parameters>>
+
+lines <- readLines(params$inputparams, n = 5)
+
+inputfiles <- lines[1]
+outputdir <- lines[2]
+markersFile <- lines[3]
+configFile <- lines[4]
+template <- lines[5]
+
 <<fcs>>
 files_short
 ```
@@ -70,14 +82,16 @@ if(length(autogating)==1){
 ```{r Clustering, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
 
 library(cytofkit)
-load(paste0(outputdir, "/cytofpipe.RData"))
+
+load(params$rdata)
 
 exprs <- as.data.frame(analysis_results$expressionData)
 clusterData <- analysis_results$clusterRes
 visualizationData <- analysis_results$dimReducedRes[analysis_results$visualizationMethods]
 ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
 
-if(!is.null(clusterData) && length(clusterData) > 0){
+if(!is.null(clusterData[[1]]) && length(clusterData) > 0){
+
 	for(j in 1:length(clusterData)){
 		if(!is.null(clusterData[[j]])){
 			methodj <- names(clusterData)[j]
@@ -100,12 +114,14 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 
 				cat(paste0("  \n**",methodj, " Mean (scaled) Heatmap**  \n"))
 				cat("\\newline")
-				cat(paste0("![HEatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
+				cat(paste0("![Heatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
 				cat("\\newline")
 				cat("\\newpage")                          
 			}
 		}
 	}
+}else{
+	cat("  \n**NO CLUSTERING PERFORMED**  \n")
 }
 
 ```

@@ -11,7 +11,7 @@
 
 
 #$ -S /bin/bash
-#$ -l h_rt=2:00:00
+#$ -l h_rt=4:00:00
 #$ -l mem=10G
 #$ -l tmpfs=100G
 #$ -cwd
@@ -116,7 +116,16 @@ echo "======================================================"
 
 JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
 
-run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf ${PWD}/${outputfiles}/*cluster_median_data.csv"
+if [ -e "$PWD/${outputfiles}/*cluster_median_heatmap.pdf" ]
+  then
+      run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.pdf"
+fi
+
+if [ -e "$PWD/${outputfiles}/*cluster_median_heatmap.csv" ]
+  then
+      run "rm ${PWD}/${outputfiles}/*cluster_median_heatmap.csv"
+fi
+
 
 for i in $PWD/$outputfiles/*Rphenograph*; do
   if [ -f "$i" ]; 
@@ -150,7 +159,7 @@ done
 
 for i in $PWD/$outputfiles/*ClusterX*; do
   if [ -f "$i" ]; 
-	then 
+	then 		
 		run "mkdir -p $PWD/$outputfiles/ClusterX";
 		run "mv $PWD/$outputfiles/*ClusterX*pdf $PWD/$outputfiles/ClusterX/.";
 		run "mv $PWD/$outputfiles/*ClusterX*csv $PWD/$outputfiles/ClusterX/.";
@@ -167,14 +176,11 @@ for i in $PWD/$outputfiles/gating*; do
   fi
 done
 
-echo "${CYTOFPIPE_HOME}/summary.Rmd";
 
-##echo "library(rmarkdown); render('${CYTOFPIPE_HOME}/summary.Rmd');" | R --vanilla
-##Rscript -e "require("rmarkdown"); render('${CYTOFPIPE_HOME}/summary.Rmd')"
 
-rmd=${CYTOFPIPE_HOME}/summary.Rmd
-R -e "library(\"rmarkdown\");library(\"knitr\");rmarkdown::render('$rmd', output_dir='$PWD/$outputfiles')"
-
+run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
+R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
+run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
 
 if [ -e "$PWD/Rplots.pdf" ]
   then
@@ -187,7 +193,6 @@ if [ -e "$PWD/${JOB_ID}.txt" ]
 fi
 
 
- 
 
  
 
