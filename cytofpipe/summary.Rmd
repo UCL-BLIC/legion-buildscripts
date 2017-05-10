@@ -112,9 +112,9 @@ if(!is.null(clusterData[[1]]) && length(clusterData) > 0){
 					}
 				}
 
-				cat(paste0("  \n**",methodj, " Mean (scaled) Heatmap**  \n"))
+				cat(paste0("  \n**",methodj, " Median (scaled) Heatmap**  \n"))
 				cat("\\newline")
-				cat(paste0("![Heatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_mean_heatmap_scaled.pdf)"))
+				cat(paste0("![Heatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_median_heatmap_scaled.pdf)"))
 				cat("\\newline")
 				cat("\\newpage")                          
 			}

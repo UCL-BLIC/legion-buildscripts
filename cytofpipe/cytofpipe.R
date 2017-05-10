@@ -208,20 +208,16 @@ if(!is.null(clusterData) && length(clusterData) > 0){
                     
 			exprs_cluster_sample <- data.frame(exprs, cluster = dataj, check.names = FALSE)
 		
-			## cluster mean 
-			cluster_mean <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "mean")
+			## cluster median 
+			cluster_median <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "median")
 
-			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_mean_heatmap.pdf"))
-			cytof_heatmap(cluster_mean, paste(projectName, methodj, "\ncluster mean", sep = " "))
+			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_median_heatmap_scaled.pdf"))
+			cytof_heatmap(cluster_median, scaleMethod="column", paste(projectName, methodj, "\ncluster median (scaled)", sep = " "))
 			dev.off()
 
-			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_mean_heatmap_scaled.pdf"))
-			cytof_heatmap(cluster_mean, scaleMethod="column", paste(projectName, methodj, "\ncluster mean (scaled)", sep = " "))
-			dev.off()
-
-			cluster_mean_norm01<-as.data.frame( apply(cluster_mean, 2, range01))
-			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_mean_heatmap_norm01.pdf"))
-			cytof_heatmap(cluster_mean_norm01, paste(projectName, methodj, "\ncluster mean (norm01)", sep = " "))
+			cluster_median_norm01<-as.data.frame( apply(cluster_median, 2, range01))
+			pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_median_heatmap_norm01.pdf"))
+			cytof_heatmap(cluster_median_norm01, paste(projectName, methodj, "\ncluster median (norm01)", sep = " "))
 			dev.off()
 
 			## cluster percentage
