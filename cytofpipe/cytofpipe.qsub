@@ -177,9 +177,10 @@ done
 
 
 
-run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
-R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
-run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
+##run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
+##R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
+##run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
+
 
 if [ -e "$PWD/Rplots.pdf" ]
   then
