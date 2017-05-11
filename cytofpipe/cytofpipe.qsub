@@ -117,11 +117,11 @@ echo "======================================================"
 JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
 
 
-for i in $PWD/$outputfiles/*mean_heatmap*; do
+for i in $PWD/$outputfiles/*_mean_*; do
   if [ -f "$i" ]; 
 	then 
 	        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.pdf"
-	        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.csv"
+	        run "rm ${PWD}/${outputfiles}/*cluster_mean_data.csv"
 		break;
  fi
 done
