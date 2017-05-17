@@ -1,7 +1,6 @@
 ## @knitr parameters
 
 jobid <- as.character(Sys.getenv("JOB_ID"))
-#jobid<-"/home/regmond/Scratch/cytof/cytofkit/2818957"
 
 input <- paste0(jobid, ".txt")
 lines <- readLines(input, n = 5)
@@ -191,7 +190,7 @@ analysis_results <- cytofkit(fcsFiles = files,
 
 
 #------------------------------------------------------------------
-#- Get scaled and norm01 heatmaps for mean and percentage
+#- Get scaled and norm01 heatmaps for median and percentage
 #------------------------------------------------------------------
 
 ## @knitr scaledHeatmaps

@@ -22,6 +22,7 @@ set -o pipefail
 
 module unload compilers
 module unload mpi
+module load pandoc/1.19.2.1
 module load r/recommended
 module load haskellplatform/2014.2.0.0 
 module load blic-modules
@@ -177,9 +178,9 @@ done
 
 
 
-##run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
-##R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
-##run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
+run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
+R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
+run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
 
 
 if [ -e "$PWD/Rplots.pdf" ]
