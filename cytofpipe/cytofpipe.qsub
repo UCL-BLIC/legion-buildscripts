@@ -11,8 +11,8 @@
 
 
 #$ -S /bin/bash
-#$ -l h_rt=4:00:00
-#$ -l mem=10G
+#$ -l h_rt=12:00:00
+#$ -l mem=12G
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe

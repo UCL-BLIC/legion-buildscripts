@@ -104,6 +104,8 @@ config<-read.ini(configFile)
 autogating=config$cytofpipe$GATING
 transform = config$cytofpipe$TRANSFORM
 merge = config$cytofpipe$MERGE
+num = 10000
+flowsom_num = 15
 	
 if(length(config$cytofpipe$MERGE)==1){tolower(config$cytofpipe$MERGE);if(config$cytofpipe$MERGE == "fixed" || config$cytofpipe$MERGE == "ceil"){num=config$cytofpipe$DOWNSAMPLE}}
 
