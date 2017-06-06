@@ -6,8 +6,8 @@ TRANSFORM = cytofAsinh
 MERGE = fixed
 DOWNSAMPLE = 10000
 
-TSNE = yes
 PCA = no
+ISOMAP = no
 
 PHENOGRAPH = yes
 CLUSTERX = no

@@ -30,9 +30,9 @@ sub print_usage {
 	my $usage17="\tFLOWSOM = yes|no\n";
 	my $usage18="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
 	my $usage19="";
-	my $usage20="\t#- Visualization methods:";
-	my $usage21="\tTSNE = yes|no\n";
-	my $usage22="\tPCA = yes|no\n";
+	my $usage20="\t#- Additional visualization methods:";
+	my $usage21="\tPCA = yes|no\n";
+	my $usage22="\tISOMAP = yes|no\n";
 	my $usage23="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
@@ -143,19 +143,19 @@ sub check_config_file {
 				return;
 			}
 		}
-		if($line=~/^TSNE\s*\=\s*(.*)\s*$/){
-			my $tsne=$1;
-			if($tsne !~/^yes$/i && $tsne !~/^no$/i){
-				print_usage();
-				jsv_reject("\"$tsne\" is not a valid TSNE option in <$config>. Please correct the config file and choose if you wnat to include TSNE for cell subset visualization in the analysis \(\"YES or NO\"\)");
-				return;
-			}
-		}
 		if($line=~/^PCA\s*\=\s*(.*)\s*$/){
 			my $pca=$1;
 			if($pca !~/^yes$/i && $pca !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$pca\" is not a valid PCA option in <$config>. Please correct the config file and choose if you want to include PCA for cell subset visualization in the analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$pca\" is not a valid PCA option in <$config>. Please correct the config file and choose if you want to include PCA for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^ISOMAP\s*\=\s*(.*)\s*$/){
+			my $isomap=$1;
+			if($isomap !~/^yes$/i && $isomap !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you want to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}

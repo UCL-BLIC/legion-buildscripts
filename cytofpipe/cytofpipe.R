@@ -79,12 +79,16 @@ markernames<-pData(parameters(fcs1))$name
 markerdesc<-pData(parameters(fcs1))$desc
 h<-hash()
 for(i in 1:length(markerdesc)){
-	if(grepl("_",markerdesc[i])){
-		h[[ strsplit(markerdesc, "[_]")[[i]][2] ]] <- markernames[i]
-	}else{
-		h[[ markerdesc[i] ]] <- markernames[i]
-	}
+        h[[ markerdesc[i] ]] <- markernames[i]
 }
+if (sum(has.key( parameters, h )) == 0) {
+        clear(h)
+        for(i in 1:length(markerdesc)){
+                id <- gsub( "^[^_]+_", "", markerdesc[i])
+                h[[ id ]] <- markernames[i]
+        }
+}
+
 parameters2<-values(h[parameters])
 
 
@@ -98,6 +102,7 @@ projectName = "cytofpipe"
 
 cluster<-vector()
 visualization<-vector()
+visualization<-c(visualization,"tsne")
 
 config<-read.ini(configFile)
 
@@ -115,9 +120,8 @@ if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(confi
 if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
 if(length(cluster) == 0){cluster<-c(cluster,"NULL")}
 	
-if(length(config$cytofpipe$TSNE)==1){tolower(config$cytofpipe$TSNE);if(config$cytofpipe$TSNE == "yes"){visualization<-c(visualization,"tsne")}}
 if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
-if(length(visualization) == 0){visualization<-c(visualization,"NULL")}
+if(length(config$cytofpipe$ISOMAP)==1){tolower(config$cytofpipe$ISOMAP);if(config$cytofpipe$ISOMAP == "yes"){visualization<-c(visualization,"isomap")}}
 
 
 #------------------------------------------------------------------
