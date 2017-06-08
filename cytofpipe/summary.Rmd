@@ -104,7 +104,7 @@ if(!is.null(clusterData[[1]]) && length(clusterData) > 0){
 					if(!is.null(visualizationData[[i]])){
 						methodi <- names(visualizationData)[i]
 
-						cat(paste0("  \n**",methodi," ",methodj, "**  \n"))
+						cat(paste0("  \n**",methodi,"**  \n"))
 						cat("\\newline")
 						cat(paste0("![Cluster plot]( ",outputdir,"/", methodj,"/cytofpipe_",methodi,"_",methodj,"_cluster_scatter_plot.pdf)"))
 						cat("\\newline")
@@ -112,7 +112,7 @@ if(!is.null(clusterData[[1]]) && length(clusterData) > 0){
 					}
 				}
 
-				cat(paste0("  \n**",methodj, " Median (scaled) Heatmap**  \n"))
+				cat(paste0("  \n**Median (scaled) Heatmap**  \n"))
 				cat("\\newline")
 				cat(paste0("![Heatmap]( ",outputdir,"/", methodj,"/cytofpipe_",methodj,"_cluster_median_heatmap_scaled.pdf)"))
 				cat("\\newline")
@@ -122,6 +122,29 @@ if(!is.null(clusterData[[1]]) && length(clusterData) > 0){
 	}
 }else{
 	cat("  \n**NO CLUSTERING PERFORMED**  \n")
+	cat("\\newpage")
 }
 
 ```
+
+
+
+# Marker Level Plots
+
+```{r LevelPlots, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
+
+for(i in 1:length(visualizationData)){
+	if(!is.null(visualizationData[[i]])){
+		vis <- names(visualizationData)[i]
+
+		cat(paste0("  \n**Marker level plot (",vis, ")**  \n"))
+		cat("\\newline")
+		cat(paste0("![LevelPlot]( ",outputdir,"/cytofpipe_",vis,"_level_plot.pdf)"))
+		cat("\\newline")
+		cat("\\newpage")
+	
+	}
+}
+
+```
+

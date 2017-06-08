@@ -20,12 +20,20 @@ library(hash)
 library(openCyto)
 library(mvtnorm)
 
+require(cytofkit)
+require(ggplot2)
+require(reshape2)
+require(plyr)
+require(VGAM)
+require(colourpicker)
+require(gplots)
+
 
 #---------------------------------------------------------------------------------------------
 #- Functions
 #---------------------------------------------------------------------------------------------
 
-## @knitr functions
+## @knitr functions_opencyto
 
 
 #- A custom gating function for a DNA/DNA gate on CyTOF data.
@@ -56,6 +64,81 @@ boundry <-  function(xs) {
 }
 
 registerPlugins(fun=.dnaGate,methodName='dnaGate', dep='mvtnorm','gating')
+
+
+## @knitr functions_cytofkit
+
+#- Function to plot all level plots for all markers (https://github.com/JinmiaoChenLab/cytofkit/blob/master/inst/shiny/global.R)
+cytof_wrap_colorPlot <- function(data, xlab, ylab, markers, scaleMarker = FALSE,
+                             colorPalette = c("bluered", "spectral1", "spectral2", "heat"), 
+                             pointSize=1, 
+                             removeOutlier = TRUE){
+     
+     remove_outliers <- function(x, na.rm = TRUE, ...) {
+         qnt <- quantile(x, probs=c(.25, .75), na.rm = na.rm, ...)
+         H <- 1.5 * IQR(x, na.rm = na.rm)
+         y <- x
+         y[x < (qnt[1] - H)] <- qnt[1] - H
+         y[x > (qnt[2] + H)] <- qnt[2] + H
+         y
+     }
+     
+     data <- as.data.frame(data)
+     title <- "Marker Expression Level Plot"
+     data <- data[,c(xlab, ylab, markers)]
+     
+     if(removeOutlier){
+         for(m in markers){
+             data[[m]] <- remove_outliers(data[ ,m])
+         }
+     }
+     
+     if(scaleMarker){
+         data[ ,markers] <- scale(data[ ,markers], center = TRUE, scale = TRUE)
+         ev <- "ScaledExpression"
+         data <- melt(data, id.vars = c(xlab, ylab), 
+                      measure.vars = markers,
+                      variable.name = "markers", 
+                      value.name = ev)
+     }else{
+         ev <- "Expression"
+         data <- melt(data, id.vars = c(xlab, ylab), 
+                      measure.vars = markers,
+                      variable.name = "markers", 
+                      value.name = ev)
+     }
+     
+ 
+     colorPalette <- match.arg(colorPalette)
+     switch(colorPalette,
+            bluered = {
+                myPalette <- colorRampPalette(c("blue", "white", "red"))
+            },
+            spectral1 = {
+                myPalette <- colorRampPalette(c("#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4",
+                                                "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61",
+                                                "#F46D43", "#D53E4F", "#9E0142"))
+            },
+            spectral2 = {
+                myPalette <- colorRampPalette(rev(c("#7F0000","red","#FF7F00","yellow","white", 
+                                                    "cyan", "#007FFF", "blue","#00007F")))
+            },
+            heat = {
+                myPalette <- colorRampPalette(heat.colors(50))
+            }
+     )
+     zlength <- nrow(data)
+     grid_row_num <- round(sqrt(length(markers)))
+     gp <- ggplot(data, aes_string(x = xlab, y = ylab, colour = ev)) + 
+         facet_wrap(~markers, nrow = grid_row_num, scales = "fixed") +
+         scale_colour_gradientn(name = ev, colours = myPalette(zlength)) +
+         geom_point(size = pointSize) + theme_bw() + coord_fixed() +
+         theme(legend.position = "right") + xlab(xlab) + ylab(ylab) + ggtitle(title) +
+         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+         theme(axis.text=element_text(size=8), axis.title=element_text(size=12,face="bold"))
+     
+     return(gp)
+}
 
 #- A function to normalize expression values to a 0-1 range
 range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
@@ -195,17 +278,36 @@ analysis_results <- cytofkit(fcsFiles = files,
 		saveObject = TRUE)
 
 
+
+
 #------------------------------------------------------------------
 #- Get scaled and norm01 heatmaps for median and percentage
+#-	and level Plots
 #------------------------------------------------------------------
 
 ## @knitr scaledHeatmaps
 
 exprs <- as.data.frame(analysis_results$expressionData)
 clusterData <- analysis_results$clusterRes
+dimRed<-as.data.frame(analysis_results$dimReducedRes)
+
 ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
 
+## Level plots
+data_all<-cbind(exprs, dimRed)
+for(i in 1:length(visualization)){
+	vis<-visualization[i]
+	
+	pdf(paste0(outputdir,"/",projectName, "_", vis, "_level_plot.pdf"))
+	gp<-cytof_wrap_colorPlot(data=data_all, xlab=paste0(vis, ".",vis,"_1"), ylab=paste0(vis, ".",vis,"_2"), markers=colnames(exprs), colorPalette = c("spectral1"), pointSize=0.1)
+	print(gp)
+	dev.off()
+
+}
+
 if(!is.null(clusterData) && length(clusterData) > 0){
+
+	## Heatmaps
 	for(j in 1:length(clusterData)){
 		methodj <- names(clusterData)[j]
 		dataj <- clusterData[[j]]
@@ -232,7 +334,9 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 				cytof_heatmap(cluster_percentage,scaleMethod="column", paste(projectName, methodj, "cluster\ncell percentage (scaled)", sep = " "))
 				dev.off()
 			}
+
 		}
 	}
 }
+
 

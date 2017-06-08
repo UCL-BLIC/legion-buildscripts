@@ -1,3 +1,4 @@
+
 #!/bin/bash -l
 
 # ========================================================================
@@ -120,8 +121,8 @@ JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outp
 for i in $PWD/$outputfiles/*_mean_*; do
   if [ -f "$i" ]; 
 	then 
-	        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.pdf"
-	        run "rm ${PWD}/${outputfiles}/*cluster_mean_data.csv"
+	        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.*"
+	        run "rm ${PWD}/${outputfiles}/*cluster_mean_data.*"
 		break;
  fi
 done
@@ -130,8 +131,7 @@ for i in $PWD/$outputfiles/*Rphenograph*; do
   if [ -f "$i" ]; 
 	then 
 		run "mkdir -p $PWD/$outputfiles/Rphenograph";
-		run "mv $PWD/$outputfiles/*Rphenograph*pdf $PWD/$outputfiles/Rphenograph/.";
-		run "mv $PWD/$outputfiles/*Rphenograph*csv $PWD/$outputfiles/Rphenograph/.";
+		run "mv $PWD/$outputfiles/*Rphenograph*\.* $PWD/$outputfiles/Rphenograph/.";
 		break;
  fi
 done
@@ -140,8 +140,7 @@ for i in $PWD/$outputfiles/*FlowSOM*; do
   if [ -f "$i" ]; 
 	then 
 		run "mkdir -p $PWD/$outputfiles/FlowSOM";
-		run "mv $PWD/$outputfiles/*FlowSOM*pdf $PWD/$outputfiles/FlowSOM/.";
-		run "mv $PWD/$outputfiles/*FlowSOM*csv $PWD/$outputfiles/FlowSOM/.";
+		run "mv $PWD/$outputfiles/*FlowSOM*\.* $PWD/$outputfiles/FlowSOM/.";
 		break;
  fi
 done
@@ -150,8 +149,7 @@ for i in $PWD/$outputfiles/*DensVM*; do
   if [ -f "$i" ]; 
 	then 
 		run "mkdir -p $PWD/$outputfiles/DensVM";
-		run "mv $PWD/$outputfiles/*DensVM*pdf $PWD/$outputfiles/DensVM/.";
-		run "mv $PWD/$outputfiles/*DensVM*csv $PWD/$outputfiles/DensVM/.";
+		run "mv $PWD/$outputfiles/*DensVM*\.* $PWD/$outputfiles/DensVM/.";
 		break;
  fi
 done
@@ -160,8 +158,7 @@ for i in $PWD/$outputfiles/*ClusterX*; do
   if [ -f "$i" ]; 
 	then 		
 		run "mkdir -p $PWD/$outputfiles/ClusterX";
-		run "mv $PWD/$outputfiles/*ClusterX*pdf $PWD/$outputfiles/ClusterX/.";
-		run "mv $PWD/$outputfiles/*ClusterX*csv $PWD/$outputfiles/ClusterX/.";
+		run "mv $PWD/$outputfiles/*ClusterX*\.* $PWD/$outputfiles/ClusterX/.";
 		break;
  fi
 done
@@ -176,25 +173,24 @@ for i in $PWD/$outputfiles/gating*; do
 done
 
 
-
 run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
 R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
 run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
 
 
-if [ -e "$PWD/Rplots.pdf" ]
-  then
-      run "rm Rplots.pdf"
-fi
+for i in $PWD/Rplots*; do
+   if [ -f "$i" ]; 
+ 	then 
+ 		run "rm -rf $PWD/Rplots*";
+ 		break;
+  fi
+done
 
 if [ -e "$PWD/${JOB_ID}.txt" ]
   then
-      run "rm ${JOB_ID}.txt"
+      run "rm $PWD/${JOB_ID}.txt"
 fi
 
-
-
- 
 
 echo
 echo "======================================================"
