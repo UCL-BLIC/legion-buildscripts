@@ -17,23 +17,29 @@ sub print_usage {
 	my $usage4="Where CONFIGFILE has the following format:";
 	my $usage5="";
 	my $usage6="\t[ cytofpipe ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
-	my $usage7="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
-	my $usage8="";
-	my $usage9="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
-	my $usage10="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
-	my $usage11="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
-	my $usage12="";
-	my $usage13="\t#- Clustering methods:";
-	my $usage14="\tPHENOGRAPH = yes|no\n";
-	my $usage15="\tCLUSTERX = yes|no\n";
-	my $usage16="\tDENSVM = yes|no\n";
-	my $usage17="\tFLOWSOM = yes|no\n";
-	my $usage18="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
-	my $usage19="";
-	my $usage20="\t#- Additional visualization methods:";
-	my $usage21="\tPCA = yes|no\n";
-	my $usage22="\tISOMAP = yes|no\n";
-	my $usage23="";
+	my $usage7="";
+	my $usage8="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
+	my $usage9="";
+	my $usage10="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
+	my $usage11="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
+	my $usage12="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
+	my $usage13="";
+	my $usage14="\t#- DimRed method (tSNE) parameters:";
+	my $usage15="\tPERPLEXITY = 30\n";
+	my $usage16="\tTHETA = 0.5\n";
+	my $usage17="\tMAX_ITER = 1000\n";
+	my $usage18="";
+	my $usage19="\t#- Clustering methods:";
+	my $usage20="\tPHENOGRAPH = yes|no\n";
+	my $usage21="\tCLUSTERX = yes|no\n";
+	my $usage22="\tDENSVM = yes|no\n";
+	my $usage23="\tFLOWSOM = yes|no\n";
+	my $usage24="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage25="";
+	my $usage26="\t#- Additional visualization methods:";
+	my $usage27="\tPCA = yes|no\n";
+	my $usage28="\tISOMAP = yes|no\n";
+	my $usage29="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
@@ -41,6 +47,8 @@ sub print_usage {
 	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
 	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
+	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
+	jsv_log_info($usage28);	jsv_log_info($usage29);
 }
 
 
@@ -105,6 +113,7 @@ sub check_config_file {
 	my $config = shift(@_);
 
 	my $gating;my $transform;my $merge;my $downsample;my $flowsom;my $flowsom_k;
+	my $perplexity; my $theta; my $max_iter;
 
 	local $/ = undef;
 	open(INF, "$config");
@@ -155,7 +164,7 @@ sub check_config_file {
 			my $isomap=$1;
 			if($isomap !~/^yes$/i && $isomap !~/^no$/i){
 				print_usage();
-				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you want to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
+				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you wnat to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
 				return;
 			}
 		}
@@ -196,6 +205,30 @@ sub check_config_file {
 		}
 		if($line=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
 			$flowsom_k=$1;
+		}
+		if($line=~/^PERPLEXITY\s*\=\s*(.*)\s*$/){
+			$perplexity=$1;
+			if($perplexity !~/^\d+$/ || $perplexity < 5 || $perplexity > 50){
+				print_usage();
+				jsv_reject("\"$perplexity\" is not a valid PERPLEXITY option in <$config>. Please correct the config file and choose a value between 5 and 50");
+				return;
+			}
+		}
+		if($line=~/^THETA\s*\=\s*(.*)\s*$/){
+			$theta=$1;
+			if($theta !~/([0-9]*[.])?[0-9]+$/ || $theta < 0 || $theta > 1){
+				print_usage();
+				jsv_reject("\"$theta\" is not a valid THETA option in <$config>. Please correct the config file and choose a value between 0 and 1");
+				return;
+			}
+		}
+		if($line=~/^MAX_ITER\s*\=\s*(.*)\s*$/){
+			$max_iter=$1;
+			if($max_iter !~/^\d+$/ || $max_iter < 100 || $max_iter > 5000){
+				print_usage();
+				jsv_reject("\"$max_iter\" is not a valid MAX_ITER option in <$config>. Please correct the config file and choose a value between 100 and 5000");
+				return;
+			}
 		}
 		$first_line++;
 	}

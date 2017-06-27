@@ -6,6 +6,10 @@ TRANSFORM = cytofAsinh
 MERGE = fixed
 DOWNSAMPLE = 10000
 
+PERPLEXITY = 30
+THETA = 0.5
+MAX_ITER = 1000
+
 PCA = no
 ISOMAP = no
 

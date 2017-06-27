@@ -16,7 +16,7 @@
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
-#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/dev/cytofpipe.jsv
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/1.0/cytofpipe.jsv
 
 set -o pipefail
 
@@ -25,7 +25,7 @@ module unload mpi
 module load pandoc/1.19.2.1
 module load r/recommended
 module load blic-modules
-module load cytofpipe/dev
+module load cytofpipe/1.0
 
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"

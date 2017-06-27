@@ -162,17 +162,17 @@ markernames<-pData(parameters(fcs1))$name
 markerdesc<-pData(parameters(fcs1))$desc
 h<-hash()
 for(i in 1:length(markerdesc)){
-        h[[ markerdesc[i] ]] <- markernames[i]
+	h[[ markerdesc[i] ]] <- markernames[i]
 }
 if (sum(has.key( parameters, h )) == 0) {
-        clear(h)
-        for(i in 1:length(markerdesc)){
-                id <- gsub( "^[^_]+_", "", markerdesc[i])
-                h[[ id ]] <- markernames[i]
-        }
+	clear(h)
+	for(i in 1:length(markerdesc)){
+		id <- gsub( "^[^_]+_", "", markerdesc[i])
+		h[[ id ]] <- markernames[i]
+	}
 }
 
-parameters2<-values(h[parameters])
+markers<-values(h[parameters])
 
 
 #------------------------------------------------------------------
@@ -183,28 +183,35 @@ parameters2<-values(h[parameters])
 
 projectName = "cytofpipe"
 
-cluster<-vector()
-visualization<-vector()
-visualization<-c(visualization,"tsne")
+dimReductionMethod="tsne"
+clusterMethods<-vector()
+visualizationMethods<-vector()
+visualizationMethods<-c(visualizationMethods,"tsne")
 
 config<-read.ini(configFile)
 
 autogating=config$cytofpipe$GATING
-transform = config$cytofpipe$TRANSFORM
-merge = config$cytofpipe$MERGE
-num = 10000
+transformMethod = config$cytofpipe$TRANSFORM
+mergeMethod = config$cytofpipe$MERGE
+fixedNum = 10000
 flowsom_num = 15
+perplexity = 30
+theta = 0.5
+max_iter = 1000
 	
-if(length(config$cytofpipe$MERGE)==1){tolower(config$cytofpipe$MERGE);if(config$cytofpipe$MERGE == "fixed" || config$cytofpipe$MERGE == "ceil"){num=config$cytofpipe$DOWNSAMPLE}}
+if(length(config$cytofpipe$MERGE)==1){tolower(config$cytofpipe$MERGE);if(config$cytofpipe$MERGE == "fixed" || config$cytofpipe$MERGE == "ceil"){fixedNum=config$cytofpipe$DOWNSAMPLE}}
+if(length(config$cytofpipe$PERPLEXITY)==1){perplexity=config$cytofpipe$PERPLEXITY}
+if(length(config$cytofpipe$THETA)==1){theta=config$cytofpipe$THETA}
+if(length(config$cytofpipe$MAX_ITER)==1){max_iter=config$cytofpipe$MAX_ITER}
 
-if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);if(config$cytofpipe$PHENOGRAPH == "yes"){cluster<-c(cluster,"Rphenograph")}}
-if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){cluster<-c(cluster,"ClusterX")}}
-if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){cluster<-c(cluster,"DensVM")}}
-if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){cluster<-c(cluster,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
-if(length(cluster) == 0){cluster<-c(cluster,"NULL")}
-	
-if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualization<-c(visualization,"pca")}}
-if(length(config$cytofpipe$ISOMAP)==1){tolower(config$cytofpipe$ISOMAP);if(config$cytofpipe$ISOMAP == "yes"){visualization<-c(visualization,"isomap")}}
+if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);if(config$cytofpipe$PHENOGRAPH == "yes"){clusterMethods<-c(clusterMethods,"Rphenograph")}}
+if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){clusterMethods<-c(clusterMethods,"ClusterX")}}
+if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){clusterMethods<-c(clusterMethods,"DensVM")}}
+if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){clusterMethods<-c(clusterMethods,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
+if(length(clusterMethods) == 0){clusterMethods<-c(clusterMethods,"NULL")}
+
+if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualizationMethods<-c(visualizationMethods,"pca")}}
+if(length(config$cytofpipe$ISOMAP)==1){tolower(config$cytofpipe$ISOMAP);if(config$cytofpipe$ISOMAP == "yes"){visualizationMethods<-c(visualizationMethods,"isomap")}}
 
 
 #------------------------------------------------------------------
@@ -262,22 +269,42 @@ if(autogating == 'yes'){
 
 ## @knitr cytofkit
 
-analysis_results <- cytofkit(fcsFiles = files, 
-		markers = parameters2, 
-		projectName = projectName,
-		transformMethod = transform, 
-		mergeMethod = merge,
-		fixedNum = as.numeric(num),
-		dimReductionMethod = "tsne",
-		clusterMethods = cluster,
-		visualizationMethods = visualization,
-		FlowSOM_k = as.numeric(flowsom_num),
-		progressionMethod = "NULL",
-		resultDir = outputdir,
-		saveResults = TRUE, 
-		saveObject = TRUE)
+exprs_data <- cytof_exprsMerge(fcsFiles = files, comp = FALSE, verbose = FALSE, 
+                                   markers = markers, transformMethod = transformMethod, 
+                                   mergeMethod = mergeMethod, fixedNum = as.numeric(fixedNum))
+
+## dimension reduced data, a list
+alldimReductionMethods <- unique(c(visualizationMethods, dimReductionMethod))
+allDimReducedList <- lapply(alldimReductionMethods, 
+                             cytof_dimReduction, data = exprs_data, 
+			     perplexity = as.numeric(perplexity),
+			     theta = as.numeric(theta),
+			     max_iter = as.numeric(max_iter))
+names(allDimReducedList) <- alldimReductionMethods
+
+## cluster results, a list
+cluster_res <- lapply(clusterMethods, cytof_cluster, 
+                          ydata = allDimReducedList[[dimReductionMethod]], 
+                          xdata = exprs_data,
+                          FlowSOM_k = as.numeric(flowsom_num))
+names(cluster_res) <- clusterMethods
 
 
+## wrap the results
+analysis_results <- list(expressionData = exprs_data,
+                             dimReductionMethod = dimReductionMethod,
+                             visualizationMethods = alldimReductionMethods,
+                             dimReducedRes = allDimReducedList,
+                             clusterRes = cluster_res, 
+                             projectName = projectName,
+                             rawFCSdir = inputfiles,
+                             resultDir = outputdir)
+        
+## save the results
+cytof_writeResults(analysis_results = analysis_results,
+                       saveToRData = TRUE,
+                       saveToFCS = TRUE,
+                       saveToFiles = TRUE)
 
 
 #------------------------------------------------------------------
@@ -295,8 +322,8 @@ ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
 
 ## Level plots
 data_all<-cbind(exprs, dimRed)
-for(i in 1:length(visualization)){
-	vis<-visualization[i]
+for(i in 1:length(visualizationMethods)){
+	vis<-visualizationMethods[i]
 	
 	pdf(paste0(outputdir,"/",projectName, "_", vis, "_level_plot.pdf"))
 	gp<-cytof_wrap_colorPlot(data=data_all, xlab=paste0(vis, ".",vis,"_1"), ylab=paste0(vis, ".",vis,"_2"), markers=colnames(exprs), colorPalette = c("spectral1"), pointSize=0.1)
@@ -339,4 +366,5 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 	}
 }
 
+		
 
