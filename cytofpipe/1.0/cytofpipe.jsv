@@ -1,0 +1,276 @@
+#! /usr/bin/env perl
+use strict;
+use warnings;
+
+no warnings qw/uninitialized/;
+
+use File::Basename;
+use Env qw(SGE_ROOT);
+use lib "$SGE_ROOT/util/resources/jsv";
+use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
+
+sub print_usage {
+	my $usage0="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "USAGE: cytofpipe <INPUTDIR> <OUTPUTDIR> <MARKERSFILE> [<CONFIGFILE>]\n";
+	my $usage3="------------------------------------------------------------------------------------";
+	my $usage4="Where CONFIGFILE has the following format:";
+	my $usage5="";
+	my $usage6="\t[ cytofpipe ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
+	my $usage7="";
+	my $usage8="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
+	my $usage9="";
+	my $usage10="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
+	my $usage11="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
+	my $usage12="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
+	my $usage13="";
+	my $usage14="\t#- DimRed method (tSNE) parameters:";
+	my $usage15="\tPERPLEXITY = 30\n";
+	my $usage16="\tTHETA = 0.5\n";
+	my $usage17="\tMAX_ITER = 1000\n";
+	my $usage18="";
+	my $usage19="\t#- Clustering methods:";
+	my $usage20="\tPHENOGRAPH = yes|no\n";
+	my $usage21="\tCLUSTERX = yes|no\n";
+	my $usage22="\tDENSVM = yes|no\n";
+	my $usage23="\tFLOWSOM = yes|no\n";
+	my $usage24="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage25="";
+	my $usage26="\t#- Additional visualization methods:";
+	my $usage27="\tPCA = yes|no\n";
+	my $usage28="\tISOMAP = yes|no\n";
+	my $usage29="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
+	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
+	jsv_log_info($usage28);	jsv_log_info($usage29);
+}
+
+
+jsv_on_start(sub {
+    jsv_send_env();
+});
+
+
+jsv_on_verify(sub {
+    my %params = jsv_get_param_hash();
+    my $do_correct = 0;
+    my $do_wait = 0;
+
+    if ($params{CMDARGS} < 3) {
+	print_usage();
+	jsv_reject("You must specify inputdir, outputdir, markers file, and optionally a config file (E.g. \"cytofpipe Tcell_fcs results_Tcell markers.txt <config.txt>\")");
+        return;
+    }
+
+    my $inputdir = $params{CMDARG0};
+    if (!-e "$inputdir") {
+	print_usage();
+        jsv_reject("Can't find directory with fcs files <$inputdir>");
+        return;
+    }
+
+    my $outputdir = $params{CMDARG1};
+    if (-e "$outputdir") {
+	print_usage();
+        jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir");
+        return;
+    }
+
+    my $markersfile = $params{CMDARG2};
+    if (!-e "$markersfile") {
+	print_usage();
+        jsv_reject("Can't find markers file <$markersfile>");
+        return;
+    }
+
+    if($params{CMDARG3} ne ''){
+	    my $config = $params{CMDARG3};
+	    if (!-e "$config") {
+		print_usage();
+	        jsv_reject("Can't find config file <$config>");
+	        return;
+	    }else{
+		check_config_file($config)
+
+	    }
+    }
+
+    jsv_set_param('N', "cytof-${inputdir}");
+
+    jsv_accept('Job is accepted');
+
+});
+
+jsv_main();
+
+sub check_config_file {
+	my $config = shift(@_);
+
+	my $gating;my $transform;my $merge;my $downsample;my $flowsom;my $flowsom_k;
+	my $perplexity; my $theta; my $max_iter;
+
+	local $/ = undef;
+	open(INF, "$config");
+	my $content = <INF>;
+	my @lines = split /\r\n|\n|\r/, $content;
+
+	my $first_line=1;
+	foreach my $line(@lines){
+		chomp $_;
+		if($first_line == 1 && $line !~ /^\s*\[\s*cytofpipe\s*\]\s*$/i){
+			print_usage();
+			jsv_reject("Invalid config file. Please make sure that the first line of the config file is \"[ cytofpipe ]\"");
+			return;
+		}
+		if($line=~/^GATING\s*\=\s*(.*)\s*$/){
+			$gating=$1;
+			if($gating !~/^yes$/i && $gating !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$gating\" **************** is not a valid GATING option in <$config>. Please correct the config file and choose if you want to include atomatic gating on your analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
+			$transform=$1;
+			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle" && $transform ne "arcsinh" && $transform ne "none"){
+				print_usage();
+				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods (\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
+				return;
+			}
+		}
+		if($line=~/^MERGE\s*\=\s*(.*)\s*$/){
+			$merge=$1;
+			if($merge ne "ceil" && $merge ne "all" && $merge ne "min" && $merge ne "fixed"){
+				print_usage();
+				jsv_reject("Can't recognize \"$merge\" as a valid merge method in <$config>. Please correct the config file and choose one of the available methods (\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters");
+				return;
+			}
+		}
+		if($line=~/^PCA\s*\=\s*(.*)\s*$/){
+			my $pca=$1;
+			if($pca !~/^yes$/i && $pca !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$pca\" is not a valid PCA option in <$config>. Please correct the config file and choose if you want to include PCA for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^ISOMAP\s*\=\s*(.*)\s*$/){
+			my $isomap=$1;
+			if($isomap !~/^yes$/i && $isomap !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you wnat to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^PHENOGRAPH\s*\=\s*(.*)\s*$/){
+			my $phenograph=$1;
+			if($phenograph !~/^yes$/i && $phenograph !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$phenograph\" is not a valid PHENOGRAPH option in <$config>. Please correct the config file and choose if you want to include PHENOGRAPH as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^CLUSTERX\s*\=\s*(.*)\s*$/){
+			my $clusterx=$1;
+			if($clusterx !~/^yes$/i && $clusterx !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$clusterx\" is not a valid CLUSTERX option in <$config>. Please correct the config file and choose if you want to include CLUSTERX as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^DENSVM\s*\=\s*(.*)\s*$/){
+			my $densvm=$1;
+			if($densvm !~/^yes$/i && $densvm !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$densvm\" is not a valid DENSVM option in <$config>. Please correct the config file and choose if you want to include DENSVM as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^FLOWSOM\s*\=\s*(.*)\s*$/){
+			$flowsom=$1;
+			if($flowsom !~/^yes$/i && $flowsom !~/^no$/i){
+				print_usage();
+				jsv_reject("\"$flowsom\" is not a valid FLOWSOM option in <$config>. Please correct the config file and choose if you want to include FLOWSOM as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
+			$downsample=$1;
+		}
+		if($line=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
+			$flowsom_k=$1;
+		}
+		if($line=~/^PERPLEXITY\s*\=\s*(.*)\s*$/){
+			$perplexity=$1;
+			if($perplexity !~/^\d+$/ || $perplexity < 5 || $perplexity > 50){
+				print_usage();
+				jsv_reject("\"$perplexity\" is not a valid PERPLEXITY option in <$config>. Please correct the config file and choose a value between 5 and 50");
+				return;
+			}
+		}
+		if($line=~/^THETA\s*\=\s*(.*)\s*$/){
+			$theta=$1;
+			if($theta !~/([0-9]*[.])?[0-9]+$/ || $theta < 0 || $theta > 1){
+				print_usage();
+				jsv_reject("\"$theta\" is not a valid THETA option in <$config>. Please correct the config file and choose a value between 0 and 1");
+				return;
+			}
+		}
+		if($line=~/^MAX_ITER\s*\=\s*(.*)\s*$/){
+			$max_iter=$1;
+			if($max_iter !~/^\d+$/ || $max_iter < 100 || $max_iter > 5000){
+				print_usage();
+				jsv_reject("\"$max_iter\" is not a valid MAX_ITER option in <$config>. Please correct the config file and choose a value between 100 and 5000");
+				return;
+			}
+		}
+		$first_line++;
+	}
+	close(INF);
+	if(!$gating || $gating eq ''){
+		print_usage();
+		jsv_reject("Gating parameter not found in <$config>. Please correct the config file and enter a valid Gating option \(\"YES\" or \"NO\"\) or omit the config file to run with default parameters \(GATING = NO\)");
+		return;
+	}
+	if(!$transform || $transform eq ''){
+		print_usage();
+		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters \(TRANSFORMATION = arcsinh\)");
+		return;
+	}
+	if(!$merge || $merge eq ''){
+		print_usage();
+		jsv_reject("Merge parameter not found in <$config>. Please correct the config file and enter a valid merge method \(\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters \(MERGE = fixed, DOWNSAMPLE = 10000\)");
+		return;
+	}
+	if($merge =~ /^fixed$/i || $merge =~ /^ceil$/i){
+		if(!$downsample || $downsample eq '' || $downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
+			print_usage();
+			if(!$downsample || $downsample eq ''){
+				jsv_reject("Downsample parameter not found in <$config>. Please correct the config file and enter a valid size between 50 and 100000");
+				return;
+			}elsif($downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
+				jsv_reject("Can't recognize \"$downsample\" as a valid downsample number in <$config>. Please correct the config file and choose a downsample size between 500 and 100000");
+				return;
+			}
+		}
+	}
+	if($flowsom =~ /^yes$/i){
+		if(!$flowsom_k || $flowsom_k eq '' || $flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
+			print_usage();
+			if(!$flowsom_k || $flowsom_k eq ''){
+				jsv_reject("FlowSOM_k parameter not found in <$config>. Please correct the config file and enter a valid cluster number between 2 and 50");
+				return;
+			}elsif($flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
+				jsv_reject("Can't recognize \"$flowsom_k\" as a valid number of FlowSOM clusters in <$config>. Please correct the config file and choose a cluster number between 2 and 50");
+				return;
+			}
+		}
+	}
+
+}

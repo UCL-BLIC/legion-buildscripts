@@ -1,0 +1,206 @@
+#!/bin/bash -l
+
+# ========================================================================
+#  NAME: cytofpipe
+# ========================================================================
+#
+# ========================================================================
+# USAGE: cytofpipe INPUTDIR OUTPUTDIR MARKERSFILE <CONFIGFILE>
+# ========================================================================
+
+
+
+#$ -S /bin/bash
+#$ -l h_rt=12:00:00
+#$ -l mem=12G
+#$ -l tmpfs=100G
+#$ -cwd
+#$ -N cytofpipe
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/1.0/cytofpipe.jsv
+
+set -o pipefail
+
+module unload compilers
+module unload mpi
+module load pandoc/1.19.2.1
+module load r/recommended
+module load blic-modules
+module load cytofpipe/1.0
+
+
+configfile="${CYTOFPIPE_HOME}/default_config.txt"
+gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
+
+inputfiles=$1
+outputfiles=$2
+markersfile=$3
+if [ -n "$4" ]
+  then
+	configfile=${PWD}/$4
+fi
+
+mkdir -p $PWD/$outputfiles
+
+FILE=${PWD}/${JOB_ID}.txt
+
+/bin/cat <<EOM >$FILE
+${PWD}/${inputfiles}
+${PWD}/${outputfiles}
+${PWD}/${markersfile}
+${configfile}
+${gatingtemplate}
+EOM
+
+
+
+## Sets the name of the output file for the times command
+if [[ ! $SGE_TASK_ID ]]; then \
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID
+else
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID.$SGE_TASK_ID
+fi
+ 
+## Required by function die
+trap "exit 1" TERM
+export TOP_PID=$$
+ 
+function die {
+  echo "******************************************************"
+  echo "["`date`"] ERROR while running $1"
+  echo "******************************************************"
+  cat $TIMES_FILE
+  rm $TIMES_FILE
+  kill -s TERM $TOP_PID
+}
+ 
+function run {
+  echo ""
+  echo "======================================================"
+  echo "["`date`"] Starting $1"
+  echo " $*"
+  echo "======================================================"
+
+  cmd=""
+  out=""
+  mode="cmd"
+  for arg in $*; do
+    if [[ $arg == ">" ]]; then mode="out"; else
+      if [ $mode == "cmd" ]; then cmd="$cmd $arg"; else out=$arg; fi
+    fi
+  done
+
+  if [ $mode == "out" ]
+  then
+    if ! /usr/bin/time -va -o $TIMES_FILE \
+      $cmd > $out
+    then
+      die $*
+    fi
+  else
+    if ! /usr/bin/time  -va -o $TIMES_FILE \
+      $*
+    then
+      die $*
+    fi
+  fi
+}
+
+
+echo "======================================================"
+echo " HOST: "`hostname`
+echo " TIME: "`date`
+echo " ARGS: $*"
+echo "======================================================"
+
+
+
+JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
+
+
+for i in $PWD/$outputfiles/*_mean_*; do
+  if [ -f "$i" ]; 
+	then 
+	        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.*"
+	        run "rm ${PWD}/${outputfiles}/*cluster_mean_data.*"
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*Rphenograph*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/Rphenograph";
+		run "mv $PWD/$outputfiles/*Rphenograph*\.* $PWD/$outputfiles/Rphenograph/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*FlowSOM*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/FlowSOM";
+		run "mv $PWD/$outputfiles/*FlowSOM*\.* $PWD/$outputfiles/FlowSOM/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*DensVM*; do
+  if [ -f "$i" ]; 
+	then 
+		run "mkdir -p $PWD/$outputfiles/DensVM";
+		run "mv $PWD/$outputfiles/*DensVM*\.* $PWD/$outputfiles/DensVM/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/*ClusterX*; do
+  if [ -f "$i" ]; 
+	then 		
+		run "mkdir -p $PWD/$outputfiles/ClusterX";
+		run "mv $PWD/$outputfiles/*ClusterX*\.* $PWD/$outputfiles/ClusterX/.";
+		break;
+ fi
+done
+
+for i in $PWD/$outputfiles/gating*; do
+   if [ -f "$i" ]; 
+ 	then 
+ 		run "mkdir -p $PWD/$outputfiles/Gating";
+ 		run "mv $PWD/$outputfiles/gating* $PWD/$outputfiles/Gating/.";
+ 		break;
+  fi
+done
+
+
+run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
+R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
+run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
+
+
+for i in $PWD/Rplots*; do
+   if [ -f "$i" ]; 
+ 	then 
+ 		run "rm -rf $PWD/Rplots*";
+ 		break;
+  fi
+done
+
+if [ -e "$PWD/${JOB_ID}.txt" ]
+  then
+      run "rm $PWD/${JOB_ID}.txt"
+fi
+
+
+echo
+echo "======================================================"
+echo "["`date`"] times:"
+echo "======================================================"
+cat $TIMES_FILE
+rm $TIMES_FILE
+echo "------------------------------------------------------"
+echo
+echo "======================================================"
+echo "["`date`"] Done."
+echo "======================================================"
+
+
