@@ -32,7 +32,7 @@ num_clusters <- as.numeric(200)
 num_samples <- as.numeric(50)
 asinh.cofactor <- as.numeric(asinh_cofactor) 
 
-#scaffold:::cluster_fcs_files_in_dir(working.dir, num.cores, col.names, num_clusters, num_samples, asinh.cofactor)
+scaffold:::cluster_fcs_files_in_dir(working.dir, num.cores, col.names, num_clusters, num_samples, asinh.cofactor)
 
 
 #——————————————
@@ -129,7 +129,7 @@ for (i in 1:length(data$graphs)) {
 	colnames(edges) <- c("X1","Y1","X2","Y2")
 	
 	pdf(paste0(outputdir,"/scaffold_map_",name2,".pdf"))
-	p<-ggplot(data=plotcord, xlim=xlim, ylim=ylim) + geom_segment(aes(x=X1, y=Y1, xend = X2, yend = Y2), data=edges, size = 0.5, colour="grey") + 
+	p<-ggplot() + geom_segment(aes(x=X1, y=Y1, xend = X2, yend = Y2), data=edges, size = 0.5, colour="grey") + 
 		geom_point(aes(X1, X2), size =sizes, colour=colors, data=plotcord) +
 		geom_text_repel(aes(X1, X2),data=plotcord, label = labels) +
 		xlim(xlim) +
