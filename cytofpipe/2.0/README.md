@@ -18,9 +18,10 @@ _________________
 
 #### 1.1. Connect to legion and bring the inputfiles
 
-You will need to connect to legion, and transfer there a folder with the input FCS files, a file with the list of markers (which will be the ones used for clustering), and optionally a config file (at the moment only for cytofpipe --clustering).
+You will need to connect to legion(apply for an account here: https://wiki.rc.ucl.ac.uk/wiki/Account_Services), and transfer there a folder with the input FCS files, a file with the list of markers (which will be 
+the ones used for clustering), and optionally a config file (at the moment only for cytofpipe --clustering).
 
-To connect to legion, you will use SSH:
+To connect to legion, you can use Putty if you have Windows (check this UCL link: https://wiki.rc.ucl.ac.uk/wiki/Accessing_RC_Systems) or use SSH from your Mac terminal:
 
 `$ ssh UCL_ID@legion.rc.ucl.ac.uk`
 
