@@ -100,7 +100,14 @@ x<-vector()
 y<-vector()
 for (i in 1:length(data$graphs)) {
 	G <- data$graphs[[i]]
-	layout<-layout.auto(G)  
+	
+#	layout<-layout.auto(G)
+#	layout<-layout.forceatlas2(G, iterations=1000, plotstep=500)
+#	fixed <- rep(FALSE, vcount(G))
+#	fixed[1:length(att.labels)] <- TRUE
+#	layout<-scaffold:::layout.forceatlas2(G, fixed = fixed)
+	
+	layout<-cbind(V(G)$x,V(G)$y)  
 	x<-c(x, layout[,1])
 	y<-c(y, layout[,2])
 }
@@ -114,11 +121,14 @@ for (i in 1:length(data$graphs)) {
 	name2=gsub(pattern = "\\.fcs.*", "", name)
 	
 	labels<-c(V(G)$name[1:length(att.labels)], rep(NA, length(V(G)$name)-length(att.labels)))
-	colors<-c(rep(rgb(1,0,0,0.9), length(att.labels)), rep(rgb(0,0,1,.1), length(V(G)$name)-length(att.labels)))
+	colores<-c(rep(rgb(1,0,0,0.9), length(att.labels)), rep(rgb(0,0,1,.1), length(V(G)$name)-length(att.labels)))
 	sizes<-c(rep(10, length(att.labels)), rep(5, length(V(G)$name)-length(att.labels)))
+#	V(G)$label.cex<-c(rep(1, length(att.labels)), rep(0.8, length(V(G)$name)-length(att.labels)))
+    
 
 	#-get the node coordinates
-	plotcord <- data.frame(layout.auto(G))
+#	plotcord <- data.frame(layout.auto(G))
+	plotcord <- data.frame(cbind(V(G)$x,V(G)$y), row.names=V(G)$name)
 	colnames(plotcord) = c("X1","X2")
 	
 	#-get edges, which are pairs of node IDs
@@ -130,7 +140,7 @@ for (i in 1:length(data$graphs)) {
 	
 	pdf(paste0(outputdir,"/scaffold_map_",name2,".pdf"))
 	p<-ggplot() + geom_segment(aes(x=X1, y=Y1, xend = X2, yend = Y2), data=edges, size = 0.5, colour="grey") + 
-		geom_point(aes(X1, X2), size =sizes, colour=colors, data=plotcord) +
+		geom_point(aes(X1, X2), size =sizes, colour=colores, data=plotcord) +
 		geom_text_repel(aes(X1, X2),data=plotcord, label = labels) +
 		xlim(xlim) +
 		ylim(ylim) +
