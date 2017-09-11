@@ -7,7 +7,7 @@
 #
 
 APPNAME=${APPNAME:-cytofpipe}
-VERSION=${VERSION:-2.0}
+VERSION=${VERSION:-v0.2}
 INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
 MD5=${MD5:-REPLACE}
 SHA1=${SHA1:-REPLACE}

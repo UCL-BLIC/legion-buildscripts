@@ -38,7 +38,7 @@ or if you have a FTP transfer program (for example cyberduck: http://download.cn
 Once you are in legion, you will need to load the modules necessary for the pipeline to work.
 
 `$ module load blic-modules`
-<br />
+
 `$ module load cytofpipe/2.0`
 
 <br />

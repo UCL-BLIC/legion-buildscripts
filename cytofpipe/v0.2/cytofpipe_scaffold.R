@@ -21,6 +21,30 @@ library(reshape)
 library(ggrepel)
 
 
+#——————————————————————
+#- DOWNSAMPLE FCS FILES
+#——————————————————————
+
+#— Downsample to 10000 events to speed up clustering 
+
+fixedNum=10000
+downsampled.dir<-paste0(working.dir,"/downsampled_",fixedNum)
+dir.create(file.path(working.dir, paste0("downsampled_",fixedNum)))
+
+downsampleFCS <- function(x) {
+	x[sample(nrow(x), size = fixedNum, replace = ifelse(nrow(x) < fixedNum, TRUE, FALSE)), , drop=FALSE]
+}
+
+files.list <- list.files(path = working.dir, pattern = "*.fcs$")
+for(file in files.list) {
+	outfile<-basename(file_path_sans_ext(file))
+	fcs<-read.FCS(paste0(working.dir, "/", file))
+
+	exp<-exprs(fcs)
+	downsampled<-downsampleFCS(exp)
+	exprs(fcs)<-downsampled
+	write.FCS(fcs, filename=paste0(downsampled.dir, "/", outfile, ".fcs"))
+}
 
 #————————————
 #- CLUSTERING
@@ -32,7 +56,7 @@ num_clusters <- as.numeric(200)
 num_samples <- as.numeric(50)
 asinh.cofactor <- as.numeric(asinh_cofactor) 
 
-scaffold:::cluster_fcs_files_in_dir(working.dir, num.cores, col.names, num_clusters, num_samples, asinh.cofactor)
+scaffold:::cluster_fcs_files_in_dir(downsampled.dir, num.cores, col.names, num_clusters, num_samples, asinh.cofactor)
 
 
 #——————————————
@@ -42,7 +66,7 @@ scaffold:::cluster_fcs_files_in_dir(working.dir, num.cores, col.names, num_clust
 
 ew_influence<- ceiling(length(col.names) / 3)
 
-files.list <- list.files(path = working.dir, pattern = "*.clustered.txt$")
+files.list <- list.files(path = downsampled.dir, pattern = "*.clustered.txt$")
 files.list <- files.list[files.list != ref.file]
 print(sprintf("Markers used for SCAFFoLD: %s", paste(col.names, collapse = ", ")))
 
@@ -59,7 +83,7 @@ ret <- list(graphs = list(), clustered.data = list())
 
 for(fi in files.list)
 {
-    f <- paste0(working.dir,"/",fi)
+    f <- paste0(downsampled.dir,"/",fi)
     print (paste("Processing", f, sep = " "))
     tab <- read.table(f, header = T, sep = "\t", quote = "", check.names = F, comment.char = "", stringsAsFactors = F)
     col.names.inter_cluster <- col.names
@@ -82,7 +106,6 @@ ret <- c(ret, list(dataset.statistics = scaffold:::get_dataset_statistics(ret)))
 ret <- c(list(scaffold.col.names = col.names, landmarks.data = gated_data$downsampled.data), ret)
 ref=gsub(pattern = "\\.fcs.*", "", ref.file)
 scaffold:::my_save(ret, paste(outputdir, sprintf("%s.scaffold", ref), sep = "/"))
-
 
 
 #———————————----———
@@ -111,6 +134,8 @@ for (i in 1:length(data$graphs)) {
 	x<-c(x, layout[,1])
 	y<-c(y, layout[,2])
 }
+range.x<-max(x)-min(x)
+range.y<-max(y)-min(y)
 xlim=c(min(x), max(x))
 ylim=c(min(y), max(y))
 
@@ -118,29 +143,37 @@ for (i in 1:length(data$graphs)) {
 	G <- data$graphs[[i]]
 	
 	name=names(data$graphs[i])
-	name2=gsub(pattern = "\\.fcs.*", "", name)
-	
-	labels<-c(V(G)$name[1:length(att.labels)], rep(NA, length(V(G)$name)-length(att.labels)))
-	colores<-c(rep(rgb(1,0,0,0.9), length(att.labels)), rep(rgb(0,0,1,.1), length(V(G)$name)-length(att.labels)))
-	sizes<-c(rep(10, length(att.labels)), rep(5, length(V(G)$name)-length(att.labels)))
-#	V(G)$label.cex<-c(rep(1, length(att.labels)), rep(0.8, length(V(G)$name)-length(att.labels)))
-    
+	name2=gsub(pattern = "\\.fcs.*", "", name)    
 
 	#-get the node coordinates
 #	plotcord <- data.frame(layout.auto(G))
 	plotcord <- data.frame(cbind(V(G)$x,V(G)$y), row.names=V(G)$name)
 	colnames(plotcord) = c("X1","X2")
+
+	#-reverse data so that lanmark populatios are plotted last
+	plotcord <- plotcord[rev(rownames(plotcord)),]
 	
 	#-get edges, which are pairs of node IDs
 	edgelist <- get.edgelist(G)
 	
-	#-convert to a four column edge data frame with source and destination coordinates
+	#-convert to a four column edge data frame with source and destination coordinates, and reverse
 	edges <- data.frame(plotcord[edgelist[,1],], plotcord[edgelist[,2],])
 	colnames(edges) <- c("X1","Y1","X2","Y2")
-	
+	edges <- edges[rev(rownames(edges)),]
+
+	#- labels, colours, node sizes.. and reverse
+	labels<-c(V(G)$name[1:length(att.labels)], rep(NA, vcount(G)-length(att.labels)))
+	labels<-rev(labels)
+	colores<-c(rep(rgb(255/255,117/255,128/255, 0.9),length(att.labels)), rep(rgb(79/255, 147/255, 222/255, 0.3), vcount(G)-length(att.labels)))
+	colores<-rev(colores)
+#	V(G)$label.cex<-c(rep(1, length(att.labels)), rep(0.8, vcount(G)-length(att.labels)))
+	popsize<-(V(G)$popsize/sum(V(G)$popsize, na.rm = T))*(range.x/8)
+	popsize[is.na(V(G)$popsize)]<-quantile(popsize, .80,na.rm = TRUE)
+	popsize <- rev(popsize)
+
 	pdf(paste0(outputdir,"/scaffold_map_",name2,".pdf"))
 	p<-ggplot() + geom_segment(aes(x=X1, y=Y1, xend = X2, yend = Y2), data=edges, size = 0.5, colour="grey") + 
-		geom_point(aes(X1, X2), size =sizes, colour=colores, data=plotcord) +
+		geom_point(aes(X1, X2), size=popsize, colour=colores, data=plotcord) +
 		geom_text_repel(aes(X1, X2),data=plotcord, label = labels) +
 		xlim(xlim) +
 		ylim(ylim) +

@@ -133,7 +133,7 @@ jsv_on_verify(sub {
 			check_config_file($config)
 		    }
 	    }	
-	    jsv_set_param('N', "cytof-${inputdir}");
+	    jsv_set_param('N', "cytf-clust-${inputdir}");
 	    jsv_accept('Job is accepted');
 
     }elsif ($command eq '--scaffold'){
@@ -181,7 +181,7 @@ jsv_on_verify(sub {
 		        return;
 		    }
 	    }	
-	    jsv_set_param('N', "cytof-${inputdir}");
+	    jsv_set_param('N', "cytf-scff-${inputdir}");
 	    jsv_accept('Job is accepted');
     }else{
 	print_usage();
