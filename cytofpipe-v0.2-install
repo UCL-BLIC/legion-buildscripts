@@ -25,7 +25,7 @@ mkdir -p $INSTALL_PREFIX
 rm -rf ${INSTALL_PREFIX}/${VERSION}
 mkdir -p ${INSTALL_PREFIX}/${VERSION}
 
-cp cytofpipe/${VERSION}/* $INSTALL_PREFIX/${VERSION}
+cp -r cytofpipe/${VERSION}/* $INSTALL_PREFIX/${VERSION}
 
 mkdir -p ${INSTALL_PREFIX}/${VERSION}/Rlibs
 
