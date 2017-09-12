@@ -257,6 +257,9 @@ Cytofpipe **--scaffold** can be used to generate scaffold maps to compare cell p
 
 Cytofpipe clusters each FCS sample file independently (currently set up to 200 clusters) using the clara function in R, as implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. A graph is then constructed connecting the nodes fom the manually gated populations and the clusters from the reference FCS file, with edge weights defined as the cosine similarity between the vectors of median marker values of each cluster. Edges of low weight are filtered out and the graph is then laid out (shaped) using a ForceAtlas2 algorithm implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. Graphs are generated for every FCS file, where the position of the landmark nodes stay constant, providing a visual reference that allows the comparison of the different datasets.
 
+Because the clustering is very computationally intensive, cytofpipe first downsamples the original FCS files to 10,000 events (with replacement when the total number of cell in the file is less than 10,000), and **all the 
+clustering and construction of maps are done on these downsampled files** to be able to run the jobs in a timely fashion. If you wish to run a scaffold analysis on the whole dataset, please contact me.
+ 
 Cytofpipe assumes that the FCS data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. With regards to compensation, please note that the software will try to apply a compensation matrix if one is found in the FCS file. So if the data in the file is already compensated, it will be erroneously compensated again. If your data needs compensation make sure that the FCS file has a spillover matrix embedded and the data is uncompensated.
 
 <br />
@@ -306,6 +309,8 @@ The landmark populations have to be provided as single FCS files (one for each p
 *.clustered.txt: this file contains the marker medians for each cluster
 *.clustered.all_events.RData: this file is an RData object which contains all the events in the original FCS file but with an added column that specifies the cluster membership. The data in this file is arcsinh transformed
 
+- **downsampled_1000**: Contains the FCS files created after downsampling the original FCS files to 10,000 events. **These are the FCS files that are actually analised**.
+
 - **log_R.txt**: This is just the log file from the R script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error. 
 
 - **scaffold_map_XXX.pdf**: These are the PDFs with the scaffold maps, one for each input dataset. By default, landmark nodes are coloured in red and population clusters in blue. 
@@ -317,7 +322,7 @@ The landmark populations have to be provided as single FCS files (one for each p
 
 <p align="right">
 Questions? Email me <a href="mailto:l.conde@ucl.ac.uk?">here</a>.
-<br>Last modified Aug 2017.
+<br>Last modified Sep 2017.
 </p>
 
 <br />
