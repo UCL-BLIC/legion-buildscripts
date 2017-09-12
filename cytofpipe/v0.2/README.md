@@ -1,9 +1,9 @@
-Cytofpipe v2.0
+Cytofpipe v0.2
 ==============
 _________________
 
 
-This pipeline was developed to by Lucia Conde at the BLIC, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and mass cytometry data in the UCL cluster __Legion__. The methods underneath Cytofpipe v2.0 are based on available R packages. Currently, Cytofpipe v2.0 can be used to run standard cytometry data analysis for subset identification, and to construct scaffold maps for visualizing complex relationships between samples. 
+This pipeline was developed to by Lucia Conde at the BLIC, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and mass cytometry data in the UCL cluster __Legion__. The methods underneath Cytofpipe v0.2 are based on available R packages. Currently, Cytofpipe v0.2 can be used to run standard cytometry data analysis for subset identification, and to construct scaffold maps for visualizing complex relationships between samples. 
 
 - Cytofpipe **--clustering** is based mainly on cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html), which is used for preprocessing/clustering, and openCyto (https://www.bioconductor.org/packages/release/bioc/html/openCyto.html), for basic automated gating. 
 
@@ -39,7 +39,7 @@ Once you are in legion, you will need to load the modules necessary for the pipe
 
 `$ module load blic-modules`
 
-`$ module load cytofpipe/2.0`
+`$ module load cytofpipe/v0.2`
 
 <br />
 
@@ -149,7 +149,7 @@ Cytofpipe assumes that the data has been properly preprocessed beforehand, i.e.,
 However, if manual gating has not been done, automatic gating of live events can be done by setting the "Gating" option in the config file to "YES". But importantly, the default Cytofpipe gating strategy (shown below) is based on the manual gating example provided by Jake. **The gating will not work properly on datasets coming from other sources where the staining panel, instrument, or other factors are different than the ones used by Jake at the Cancer Institute.**
 
 <p align="center">
-![](/shared/ucl/depts/cancer/apps/cytofpipe/2.0/doc/gating.png)
+![](/shared/ucl/depts/cancer/apps/cytofpipe/v0.2/doc/gating.png)
 </p>
 
 Automated gating can be performed for more complex assays, however, a proper gating template needs to be created before using the pipeline for gating these dtasets. Any type of dataset can be used with the current pipeline if gating is not needed.
@@ -219,7 +219,7 @@ The config file is not mandatory. If is not provided, the pipeline will use a de
 
 
 <p align="center">
-![](/shared/ucl/depts/cancer/apps/cytofpipe/2.0/doc/clustering.png)
+![](/shared/ucl/depts/cancer/apps/cytofpipe/v0.2/doc/clustering.png)
 </p>
 
 
@@ -298,7 +298,7 @@ The landmark populations have to be provided as single FCS files (one for each p
 
 
 <p align="center">
-![](/shared/ucl/depts/cancer/apps/cytofpipe/2.0/doc/scaffold.png)
+![](/shared/ucl/depts/cancer/apps/cytofpipe/v0.2/doc/scaffold.png)
 </p>
 
 
