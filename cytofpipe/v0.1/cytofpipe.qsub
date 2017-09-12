@@ -114,7 +114,7 @@ echo "======================================================"
 
 
 
-JOB=${JOB_ID} R CMD BATCH --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
+JOB=${JOB_ID} R CMD BATCH --vanilla --no-save ${CYTOFPIPE_HOME}/cytofpipe.R  ${PWD}/${outputfiles}/log_R.txt
 
 
 for i in $PWD/$outputfiles/*_mean_*; do
