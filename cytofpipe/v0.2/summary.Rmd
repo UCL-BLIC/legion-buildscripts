@@ -34,7 +34,7 @@ files_short
 **Markers**
 ```{r Markers, echo=F}
 <<markers>>
-parameters
+usermarkers
 ```
 
 **Config parameters**
