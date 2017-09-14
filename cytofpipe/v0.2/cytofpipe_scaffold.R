@@ -52,7 +52,7 @@ for(file in files.list) {
 
 
 usermarkers <- as.character(read.table(markersFile, header = FALSE)[,1])
-fcs1<-read.FCS(paste0(working.dir, "/", file.list[1]))
+fcs1<-read.FCS(paste0(working.dir, "/", files.list[1]))
 
 allMarkerNames<-pData(parameters(fcs1))$name
 allMarkerDesc<-pData(parameters(fcs1))$desc
