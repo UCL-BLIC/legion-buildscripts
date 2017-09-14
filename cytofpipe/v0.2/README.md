@@ -3,7 +3,8 @@ Cytofpipe v0.2
 _________________
 
 
-This pipeline was developed to by Lucia Conde at the BLIC, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and mass cytometry data in the UCL cluster __Legion__. The methods underneath Cytofpipe v0.2 are based on available R packages. Currently, Cytofpipe v0.2 can be used to run standard cytometry data analysis for subset identification, and to construct scaffold maps for visualizing complex relationships between samples. 
+This pipeline was developed to by Lucia Conde at the BLIC - UCL Cancer Institute, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and 
+mass cytometry data in the UCL cluster __Legion__. Currently, Cytofpipe v0.2 can be used to run standard cytometry data analysis for subset identification, and to construct scaffold maps for visualizing complex relationships between samples. The methods underneath Cytofpipe v0.2 are based on publicly available R packages for flow/cytof data analysis
 
 - Cytofpipe **--clustering** is based mainly on cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html), which is used for preprocessing/clustering, and openCyto (https://www.bioconductor.org/packages/release/bioc/html/openCyto.html), for basic automated gating. 
 
@@ -29,7 +30,9 @@ To transfer the files to legion, you can either use SCP from your laptop, for ex
 
 `$ scp -r FILES UCL_ID@legion.rc.ucl.ac.uk:/home/user/Scratch/my_cytof_analysis/.`
 
-or if you have a FTP transfer program (for example cyberduck: http://download.cnet.com/Cyberduck/3000-2160_4-10246246.html) you can also transfer the files from/to legion simply by dragging them from one window to another.
+or if you have a FTP transfer program (for example cyberduck: http://download.cnet.com/Cyberduck/3000-2160_4-10246246.html or WinSCP: https://winscp.net/eng/download.php) you can also transfer the files from/to legion simply 
+by dragging them from one window to 
+another.
 
 <br />
 
@@ -45,7 +48,8 @@ Once you are in legion, you will need to load the modules necessary for the pipe
 
 #### 1.3. Run the pipeline
 
-Let’s say you have a folder called my_cytof_analyses in your home in legion that contains a directory with the FCS files, the parameters file and perhaps a config file, for example:
+Let’s say you have a folder called my_cytof_analyses in your home in legion that contains a directory with the FCS files, a file that contains the markers that you wnat to use for clustering, and perhaps a config file, for 
+example:
 
 ```
 /home/user/Scratch/my_cytof_analyses/
@@ -57,20 +61,20 @@ Let’s say you have a folder called my_cytof_analyses in your home in legion th
 /home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType2.fcs
 /home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType3.fcs
 /home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType4.fcs
-/home/user/Scratch/my_cytof_analyses/parameters.txt
+/home/user/Scratch/my_cytof_analyses/markers.txt
 /home/user/Scratch/my_cytof_analyses/config.txt
 ```
 
 
 To run the pipeline in "clustering" mode, just go to the my_cytof_analyses folder and run:
 
-`$ cytofpipe --clustering inputfiles results parameters.txt config.txt`
+`$ cytofpipe --clustering inputfiles results markers.txt config.txt`
 
 That will crate a new folder called “results” that will contain all the results of the analysis.
 
 Similarly, to run the pipeline in "scaffold" mode (using file1.fcs as reference and asinh_cofactor = 5):
 
-`$ cytofpipe --scaffold inputfiles file1.fcs results parameters.txt 5`
+`$ cytofpipe --scaffold inputfiles file1.fcs results markers.txt 5`
 
 <br />
 
@@ -143,6 +147,12 @@ Cytofpipe **--clustering** can be used to analyze data from multiple FCS files.
 <br />
 
 First, FCS files will be merged, expression data for selected markers will be transformed, and data will be downsampled according to the user's specifications. Then, clustering will be performed to detect cell types. Finally, the high dimensional flow/mass cytometry data will be visualized into a two-dimensional map with colors representing cell type, and heatmaps to visualize the median expression for each marker in each cell type will be generated.
+
+Note 1: Ideally the markers uploaded by the user should be the ones provided in the “Description” filed of the FCS. This will usually be a longer format (141Pr_CD38) in cytof 
+data and a shorter format (CD38) in Flow data. However, the shorter version can be used when uploading cytod data.
+Note 2: Markers uploaded by the user are used for clustering and dimensional reduction, however all the markers (with exception of Time and Event channels) will be included in the 
+results (heatmaps, etc..). All markers are transformed with exception of FSC/SSC. 
+Note 3: Cytofpipe v0.2 runs cytofkit_1_8_3 (as opposed to cytofpipe v0.1 which was running cytofkit_1.6.5). Cytofpipe v0.2 will **not** work with the old cytofkit 1.6 version, not Cytofpipe v0.1 will work with cytofkit 1.8
 <br />
 
 Cytofpipe assumes that the data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. 
@@ -155,6 +165,7 @@ However, if manual gating has not been done, automatic gating of live events can
 Automated gating can be performed for more complex assays, however, a proper gating template needs to be created before using the pipeline for gating these dtasets. Any type of dataset can be used with the current pipeline if gating is not needed.
 
 <br />
+
 
 #### 2.1. Inputfiles
 
@@ -255,12 +266,18 @@ Cytofpipe **--scaffold** can be used to generate scaffold maps to compare cell p
 <br />
 
 
-Cytofpipe clusters each FCS sample file independently (currently set up to 200 clusters) using the clara function in R, as implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. A graph is then constructed connecting the nodes fom the manually gated populations and the clusters from the reference FCS file, with edge weights defined as the cosine similarity between the vectors of median marker values of each cluster. Edges of low weight are filtered out and the graph is then laid out (shaped) using a ForceAtlas2 algorithm implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. Graphs are generated for every FCS file, where the position of the landmark nodes stay constant, providing a visual reference that allows the comparison of the different datasets.
+Cytofpipe clusters each FCS sample file independently (currently set up to 200 clusters) using the clara function in R, as implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. A graph is then 
+constructed connecting the nodes fom the manually gated populations and the clusters from the reference FCS file, with edge weights defined as the cosine similarity between the vectors of median marker values of each cluster. Edges of 
+low weight are filtered out and the graph is then laid out (shaped) using a ForceAtlas2 algorithm implemented in <a href="https://github.com/nolanlab/scaffold">scaffold</a>. Graphs are generated for every FCS file, where the 
+position of the landmark nodes stay constant, providing a visual reference that allows the comparison of the different datasets.
 
-Because the clustering is very computationally intensive, cytofpipe first downsamples the original FCS files to 10,000 events (with replacement when the total number of cell in the file is less than 10,000), and **all the 
-clustering and construction of maps are done on these downsampled files** to be able to run the jobs in a timely fashion. If you wish to run a scaffold analysis on the whole dataset, please contact me.
+Note 1: Because the clustering is very computationally intensive, cytofpipe first downsamples the original FCS files to 10,000 events (with replacement when the total number of cell in the file is less than 10,000), and 
+**all the clustering and construction of maps are done on these downsampled files** to be able to run the jobs in a timely fashion. If you wish to run a scaffold analysis on the whole dataset, please contact me.
+Note 2: Cytofpipe v0.2 is running scaffold_0.1
  
-Cytofpipe assumes that the FCS data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. With regards to compensation, please note that the software will try to apply a compensation matrix if one is found in the FCS file. So if the data in the file is already compensated, it will be erroneously compensated again. If your data needs compensation make sure that the FCS file has a spillover matrix embedded and the data is uncompensated.
+Cytofpipe assumes that the FCS data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg 
+events were removed before analysis. With regards to compensation, please note that the software will try to apply a compensation matrix if one is found in the FCS file. So if the data in the file is already compensated, it will be 
+erroneously compensated again. If your data needs compensation make sure that the FCS file has a spillover matrix embedded and the data is uncompensated.
 
 <br />
 
@@ -311,7 +328,8 @@ The landmark populations have to be provided as single FCS files (one for each p
 
 - **downsampled_1000**: Contains the FCS files created after downsampling the original FCS files to 10,000 events. **These are the FCS files that are actually analised**.
 
-- **log_R.txt**: This is just the log file from the R script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error. 
+- **log_R.txt**: This is just the log file from the R 
+script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error. 
 
 - **scaffold_map_XXX.pdf**: These are the PDFs with the scaffold maps, one for each input dataset. By default, landmark nodes are coloured in red and population clusters in blue. 
 
@@ -322,7 +340,7 @@ The landmark populations have to be provided as single FCS files (one for each p
 
 <p align="right">
 Questions? Email me <a href="mailto:l.conde@ucl.ac.uk?">here</a>.
-<br>Last modified Sep 2017.
+<br>Last modified Sept 2017.
 </p>
 
 <br />

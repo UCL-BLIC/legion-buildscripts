@@ -50,7 +50,28 @@ for(file in files.list) {
 #- CLUSTERING
 #————————————
 
-col.names <- as.character(read.table(markersFile, header = FALSE)[,1])
+
+usermarkers <- as.character(read.table(markersFile, header = FALSE)[,1])
+fcs1<-read.FCS(paste0(working.dir, "/", file.list[1]))
+
+allMarkerNames<-pData(parameters(fcs1))$name
+allMarkerDesc<-pData(parameters(fcs1))$desc
+ 
+UserName2Desc <-hash()
+for(i in 1:length(allMarkerDesc)){
+	UserName2Desc[[ allMarkerDesc[i] ]] <- allMarkerDesc[i]
+}
+if (sum(has.key( usermarkers, UserName2Desc )) == 0) {
+ 	clear(UserName2Desc)
+ 	for(i in 1:length(allMarkerDesc)){
+ 		id <- gsub( "^[^_]+_", "", allMarkerDesc[i])
+ 		UserName2Desc[[ id ]] <- allMarkerDesc[i]
+ 	}
+}
+
+markersDesc<-values(UserName2Desc[usermarkers])
+ 
+col.names <- markersDesc
 num.cores <- as.numeric(1)
 num_clusters <- as.numeric(200)
 num_samples <- as.numeric(50)

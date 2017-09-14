@@ -20,10 +20,9 @@ library(hash)
 library(openCyto)
 library(mvtnorm)
 
-require(cytofkit)
-require(ggplot2)
+##require(ggplot2)
+##require(plyr)
 require(reshape2)
-require(plyr)
 require(VGAM)
 require(colourpicker)
 require(gplots)
@@ -152,28 +151,64 @@ range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
 
 files <- list.files(inputfiles,pattern='.fcs$', full=TRUE)
 files_short <- list.files(inputfiles,pattern='.fcs$', full=F)
-parameters <- as.character(read.table(markersFile, header = FALSE)[,1])
+usermarkers <- as.character(read.table(markersFile, header = FALSE)[,1])
 
 
 ## @knitr fcs1
 
 fcs1<-read.FCS(files[1])
-markernames<-pData(parameters(fcs1))$name
-markerdesc<-pData(parameters(fcs1))$desc
-h<-hash()
-for(i in 1:length(markerdesc)){
-	h[[ markerdesc[i] ]] <- markernames[i]
+
+#— Ideally the user should upload the marker names as provided in the “Description” column of Flowjo. However, if the user uploads the shorter version (i.e., CD38 instead of 141Pr_CD38), the below will do the trick. This is irrelevant for flow data, as the description field given by Flowjo for Flow is always in the short form
+#- Also, the colnames in the expression data are on the “Name<Desc>” form, so I am making another hash to be able to substitute these colnames for the markers given by the user (i.e., description or the short version of the description)
+ 
+allMarkerNames<-pData(parameters(fcs1))$name
+allMarkerDesc<-pData(parameters(fcs1))$desc
+allMarkerNameAndDesc<-paste0(allMarkerNames, "<", allMarkerDesc, ">")
+ 
+UserName2Desc <-hash()
+Desc2UserName <-hash()
+for(i in 1:length(allMarkerDesc)){
+	UserName2Desc[[ allMarkerDesc[i] ]] <- allMarkerDesc[i]
+	Desc2UserName[[ allMarkerDesc[i] ]] <- allMarkerDesc[i]
 }
-if (sum(has.key( parameters, h )) == 0) {
-	clear(h)
-	for(i in 1:length(markerdesc)){
-		id <- gsub( "^[^_]+_", "", markerdesc[i])
-		h[[ id ]] <- markernames[i]
+if (sum(has.key( usermarkers, UserName2Desc )) == 0) {
+ 	clear(UserName2Desc)
+	clear(Desc2UserName)
+ 	for(i in 1:length(allMarkerDesc)){
+ 		id <- gsub( "^[^_]+_", "", allMarkerDesc[i])
+ 		UserName2Desc[[ id ]] <- allMarkerDesc[i]
+ 		Desc2UserName[[ allMarkerNames[i] ]] <- id
+ 	}
+}
+
+Desc2NameDesc <-hash()
+for(i in 1:length(allMarkerDesc)){
+	Desc2NameDesc[[ allMarkerDesc[i] ]] <- allMarkerNameAndDesc[i]
+}
+ 
+NameDesc2UserName<-hash()
+for(i in 1:length(allMarkerNameAndDesc)){
+	UserName=values(Desc2UserName, keys=allMarkerDesc[i])
+	if(is.na(UserName)){
+	 	NameDesc2UserName[[ allMarkerNameAndDesc[i] ]] <- allMarkerNames[i]
+	}else{
+	 	NameDesc2UserName[[ allMarkerNameAndDesc[i] ]] <- UserName
 	}
-}
+}  
 
-markers<-values(h[parameters])
-
+markersDesc <-vector()
+for(i in 1:length(usermarkers)){
+	markersDesc[i]<-values(UserName2Desc,  keys=usermarkers[i])
+ }
+markersNameDesc <-vector()
+for(i in 1:length(markersDesc)){
+	markersNameDesc[i]<-values(Desc2NameDesc, keys=markersDesc[i])
+ }
+markersUserName <-vector()
+for(i in 1:length(markersNameDesc)){
+	markersUserName[i] <-values(NameDesc2UserName, keys=markersNameDesc[i])
+ }
+ 
 
 #------------------------------------------------------------------
 #- Parse config file
@@ -284,14 +319,22 @@ if(autogating == 'yes'){
 #		saveResults = TRUE, 
 #		saveObject = TRUE)
 
+#- cytof_exprsMerge calls cytof_exprsExtract, which excludes Time and Event channels from the expression matrix, and excludes FSC/SSC from transformation
 exprs_data <- cytof_exprsMerge(fcsFiles = files, comp = FALSE, verbose = FALSE, 
-                                   markers = markers, transformMethod = transformMethod, 
+                                   transformMethod = transformMethod, 
                                    mergeMethod = mergeMethod, fixedNum = as.numeric(fixedNum))
+
+#- change the colnames here so that the plots show the markers as uploaded by the user
+for(i in 1:length(colnames(exprs_data))){
+	colnames(exprs_data)[i]<-values(NameDesc2UserName, keys=colnames(exprs_data)[i])
+
+ }
 
 ## dimension reduced data, a list
 alldimReductionMethods <- unique(c(visualizationMethods, dimReductionMethod))
 allDimReducedList <- lapply(alldimReductionMethods, 
                              cytof_dimReduction, data = exprs_data, 
+			     markers = markersUserName,
 			     perplexity = as.numeric(perplexity),
 			     theta = as.numeric(theta),
 			     max_iter = as.numeric(max_iter))
@@ -313,7 +356,8 @@ analysis_results <- list(expressionData = exprs_data,
                              clusterRes = cluster_res, 
                              projectName = projectName,
                              rawFCSdir = inputfiles,
-                             resultDir = outputdir)
+                             resultDir = outputdir,
+			     dimRedMarkers = markersUserName)
         
 ## save the results
 cytof_writeResults(analysis_results = analysis_results,
@@ -381,5 +425,4 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 	}
 }
 
-		
 
