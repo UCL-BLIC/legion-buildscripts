@@ -426,3 +426,4 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 }
 
 
+sessionInfo()
