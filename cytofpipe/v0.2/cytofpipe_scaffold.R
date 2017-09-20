@@ -70,7 +70,10 @@ if (sum(has.key( usermarkers, UserName2Desc )) == 0) {
  	}
 }
 
-markersDesc<-values(UserName2Desc[usermarkers])
+markersDesc<-vector()
+for(i in 1:length(usermarkers)){
+  	markersDesc[i]<-values(UserName2Desc, keys=usermarkers[i])
+}
  
 col.names <- markersDesc
 num.cores <- as.numeric(1)
