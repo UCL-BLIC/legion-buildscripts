@@ -28,7 +28,7 @@ module load r/recommended
 module load blic-modules
 module load cytofpipe/v0.2.1
 
-CYTOFPIPE_HOME="/home/regmond/Scratch/cytof/cytofpipe/v0.2.1"
+CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v0.2.1"
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
