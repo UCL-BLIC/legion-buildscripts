@@ -20,8 +20,6 @@ library(hash)
 library(openCyto)
 library(mvtnorm)
 
-##require(ggplot2)
-##require(plyr)
 require(reshape2)
 require(VGAM)
 require(colourpicker)
@@ -422,17 +420,17 @@ for(i in 1:length(visualizationData)){
 						print(cluster_grid_plot)
 						dev.off()
 
-#						## Level plots per file
-#						X<-split(dataij, dataij$sample)				
-#						for (d in 1:length(X)){
-#							samplename=X[[d]]$sample[1]
-#							data_all_sample <- subset(data_all, rownames(data_all) %in% rownames(X[[d]]))
-#
-#							pdf(paste0(outputdir,"/",projectName, "_", methodi,  "_", samplename,  "_level_plot.pdf"))
-#							gp<-cytof_wrap_colorPlot(data=data_all_sample, xlab=paste0(methodi,".", methodi,"_1"), ylab=paste0(methodi,".", methodi,"_2"), markers= markersUserName, colorPalette = c("spectral1"), pointSize=0.1)
-#							print(gp)
-#							dev.off()		
-#                      	    			}
+						## Level plots per file
+						X<-split(dataij, dataij$sample)				
+						for (d in 1:length(X)){
+							samplename=X[[d]]$sample[1]
+							data_all_sample <- subset(data_all, rownames(data_all) %in% rownames(X[[d]]))
+
+							pdf(paste0(outputdir,"/",projectName, "_", methodi,  "_", samplename,  "_sample_level_plot.pdf"))
+							gp<-cytof_wrap_colorPlot(data=data_all_sample, xlab=paste0(methodi,".", methodi,"_1"), ylab=paste0(methodi,".", methodi,"_2"), markers= markersUserName, colorPalette = c("spectral1"), pointSize=0.1)
+							print(gp)
+							dev.off()		
+                      	    			}
 
 					}
 				}

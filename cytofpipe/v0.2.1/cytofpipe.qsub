@@ -12,11 +12,11 @@
 
 #$ -S /bin/bash
 #$ -l h_rt=12:00:00
-#$ -l mem=30G
+#$ -l mem=50G
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
-#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v0.2.1/cytofpipe.jsv
+#$ -jsv /home/regmond/Scratch/cytof/cytofpipe/v0.2.1/cytofpipe.jsv
 
 set -o pipefail
 
@@ -25,10 +25,10 @@ module unload mpi
 module load pandoc/1.19.2.1
 module load r/recommended
 
-module load blic-modules
-module load cytofpipe/v0.2.1
+module load personal-modules
+module load cytofpipe/v0.2
 
-CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v0.2.1"
+CYTOFPIPE_HOME="/home/regmond/Scratch/cytof/cytofpipe/v0.2.1"
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
@@ -193,6 +193,15 @@ function run_clustering {
 	 	then 
 	 		run "mkdir -p $PWD/$outputfiles/Gating";
 	 		run "mv $PWD/$outputfiles/gating* $PWD/$outputfiles/Gating/.";
+	 		break;
+	  fi
+	done
+
+	for i in $PWD/$outputfiles/*_sample_level_plot*; do
+	   if [ -f "$i" ]; 
+	 	then 
+	 		run "mkdir -p $PWD/$outputfiles/Marker_level_plots_by_sample";
+	 		run "mv $PWD/$outputfiles/*_sample_level_plot* $PWD/$outputfiles/Marker_level_plots_by_sample/.";
 	 		break;
 	  fi
 	done
