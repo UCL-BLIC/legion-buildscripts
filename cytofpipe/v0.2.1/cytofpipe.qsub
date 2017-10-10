@@ -16,7 +16,7 @@
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
-#$ -jsv /home/regmond/Scratch/cytof/cytofpipe/v0.2.1/cytofpipe.jsv
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v0.2.1/cytofpipe.jsv
 
 set -o pipefail
 
@@ -25,10 +25,10 @@ module unload mpi
 module load pandoc/1.19.2.1
 module load r/recommended
 
-module load personal-modules
-module load cytofpipe/v0.2
+module load blic-modules
+module load cytofpipe/v0.2.1
 
-CYTOFPIPE_HOME="/home/regmond/Scratch/cytof/cytofpipe/v0.2.1"
+CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v0.2.1"
 
 configfile="${CYTOFPIPE_HOME}/default_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
