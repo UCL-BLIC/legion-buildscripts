@@ -338,7 +338,7 @@ names(allDimReducedList) <- alldimReductionMethods
 ## cluster results, a list
 cluster_res <- lapply(clusterMethods, cytof_cluster, 
                           ydata = allDimReducedList[[dimReductionMethod]], 
-                          xdata = exprs_data,
+                          xdata = exprs_data[, markersUserName],
                           FlowSOM_k = as.numeric(flowsom_num))
 names(cluster_res) <- clusterMethods
 
