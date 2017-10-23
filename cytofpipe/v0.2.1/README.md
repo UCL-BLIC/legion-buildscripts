@@ -221,7 +221,8 @@ ISOMAP = yes|no
 
 ```
 
-The config file is not mandatory. If is not provided, the pipeline will use a default config.txt file, which has GATING = no, TRANSFORM = cytofAsinh, MERGE = fixed (n = 10,000), PHENOGRAPH = yes (other clustering methods = no), TSNE parameters: perplexity =30, theta = 0.5, max_iter = 1000.
+The config file is not mandatory. If is not provided, the pipeline will use a default config.txt file, which has GATING = no, TRANSFORM = cytofAsinh, MERGE = ceil (n = 10,000), PHENOGRAPH = yes (other 
+clustering methods = no), TSNE parameters: perplexity =30, theta = 0.5, max_iter = 1000.
 
 
 <br />
