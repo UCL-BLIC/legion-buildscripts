@@ -1,0 +1,62 @@
+#!/usr/bin/bash -i
+
+###############################################
+# Installing cytofpipe
+#
+# by Javier Herrero, 2017
+#
+
+APPNAME=${APPNAME:-cytofpipe}
+VERSION=${VERSION:-v0.3}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-REPLACE}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-NA}
+
+set -e
+
+module purge
+module load r/recommended
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+mkdir -p $INSTALL_PREFIX
+
+rm -rf ${INSTALL_PREFIX}/${VERSION}
+mkdir -p ${INSTALL_PREFIX}/${VERSION}
+
+cp -r cytofpipe/${VERSION}/* $INSTALL_PREFIX/${VERSION}
+
+mkdir -p ${INSTALL_PREFIX}/${VERSION}/Rlibs
+
+export R_LIBS=${INSTALL_PREFIX}/${VERSION}/Rlibs:${R_LIBS}
+
+## If this fails, check that Bioconductor is not out of date. Uncomment the
+## biocUpgrade line below if that is the case.
+R --vanilla <<EOF
+install.packages("ini", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("hash", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("rmarkdown", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+
+#- cytofkit/openCyto
+source("https://bioconductor.org/biocLite.R")
+biocLite("biocUpgrade", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("flowCore", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("cytofkit", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+biocLite("openCyto", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+
+#- scaffold
+install.packages("devtools", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+library(devtools)
+install_github("nolanlab/scaffold", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+
+#- citrus
+install.packages("glmnet", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/") 
+install.packages("pamr", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/") 
+install.packages("ggplot2", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install.packages("survival", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+biocLite("impute", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+install.packages("samr", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs", repos = "https://cran.ma.imperial.ac.uk/")
+install_github("nolanlab/Rclusterpp", lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+install_github('nolanlab/citrus', lib = "${INSTALL_PREFIX}/${VERSION}/Rlibs")
+EOF

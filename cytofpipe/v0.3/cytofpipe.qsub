@@ -1,0 +1,321 @@
+#!/bin/bash -l
+
+# =========================================================================================
+#  NAME: cytofpipe v0.3
+# =========================================================================================
+#
+#==========================================================================================
+# USAGE (clustering): cytofpipe --clustering INPUTDIR OUTPUTDIR MARKERSFILE <CONFIGFILE>
+# USAGE (scaffold): cytofpipe --scaffold INPUTDIR REF_FCS OUTPUTDIR MARKERSFILE <ASINH_COFACTOR>
+# USAGE (citrus): cytofpipe --citrus INPUTDIR CONDITIONSFILE OUTPUTDIR MARKERSFILE <ASINH_COFACTOR>
+# =========================================================================================
+
+
+#$ -S /bin/bash
+#$ -l h_rt=12:00:00
+#$ -l mem=50G
+#$ -l tmpfs=100G
+#$ -cwd
+#$ -N cytofpipe
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v0.3/cytofpipe.jsv
+
+set -o pipefail
+
+module unload compilers
+module unload mpi
+module load pandoc/1.19.2.1
+module load r/recommended
+
+module load blic-modules
+module load cytofpipe/v0.3
+
+CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v0.3"
+
+configfile="${CYTOFPIPE_HOME}/default_config.txt"
+gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
+asinh=5
+
+command=$1
+
+if [ $command == "--clustering" ]
+then
+	inputfiles=$2
+	outputfiles=$3
+	markersfile=$4
+	if [ -n "$5" ]
+	  then
+		configfile=${PWD}/$5
+	fi
+	
+	mkdir -p $PWD/$outputfiles
+	
+	FILE=${PWD}/${JOB_ID}.txt
+	
+/bin/cat <<EOM >$FILE
+${PWD}/${inputfiles}
+${PWD}/${outputfiles}
+${PWD}/${markersfile}
+${configfile}
+${gatingtemplate}
+EOM
+
+elif [ $command == "--scaffold" ]
+then
+	inputfiles=$2
+	ref_fcs=$3
+	outputfiles=$4
+	markersfile=$5
+	if [ -n "$6" ]
+	  then
+		asinh=$6
+	fi
+	
+	mkdir -p $PWD/$outputfiles
+	
+	FILE=${PWD}/${JOB_ID}.txt
+	
+/bin/cat <<EOM >$FILE
+${PWD}/${inputfiles}
+${ref_fcs}
+${PWD}/${outputfiles}
+${PWD}/${markersfile}
+${asinh}
+EOM
+
+elif [ $command == "--citrus" ]
+then
+	inputfiles=$2
+	conditionsfile=$3
+	outputfiles=$4
+	markersfile=$5
+	if [ -n "$6" ]
+	  then
+		asinh=$6
+	fi
+	
+	mkdir -p $PWD/$outputfiles
+	
+	FILE=${PWD}/${JOB_ID}.txt
+	
+/bin/cat <<EOM >$FILE
+${PWD}/${inputfiles}
+${PWD}/${conditionsfile}
+${PWD}/${outputfiles}
+${PWD}/${markersfile}
+${asinh}
+EOM
+
+else
+	echo "This shoud not be happening: command $command";
+	die $*;
+fi
+
+
+
+## Sets the name of the output file for the times command
+if [[ ! $SGE_TASK_ID ]]; then \
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID
+else
+  TIMES_FILE=.times.$JOB_NAME.$JOB_ID.$SGE_TASK_ID
+fi
+ 
+## Required by function die
+trap "exit 1" TERM
+export TOP_PID=$$
+ 
+function die {
+  echo "******************************************************"
+  echo "["`date`"] ERROR while running $1"
+  echo "******************************************************"
+  cat $TIMES_FILE
+  rm $TIMES_FILE
+  kill -s TERM $TOP_PID
+}
+ 
+function run {
+  echo ""
+  echo "======================================================"
+  echo "["`date`"] Starting $1"
+  echo " $*"
+  echo "======================================================"
+
+  cmd=""
+  out=""
+  mode="cmd"
+  for arg in $*; do
+    if [[ $arg == ">" ]]; then mode="out"; else
+      if [ $mode == "cmd" ]; then cmd="$cmd $arg"; else out=$arg; fi
+    fi
+  done
+
+  if [ $mode == "out" ]
+  then
+    if ! /usr/bin/time -va -o $TIMES_FILE \
+      $cmd > $out
+    then
+      die $*
+    fi
+  else
+    if ! /usr/bin/time  -va -o $TIMES_FILE \
+      $*
+    then
+      die $*
+    fi
+  fi
+}
+
+function run_clustering {
+
+	JOB=${JOB_ID} R CMD BATCH --vanilla --no-save ${CYTOFPIPE_HOME}/cytofpipe_clustering.R  ${PWD}/${outputfiles}/log_R.txt
+	
+	for i in $PWD/$outputfiles/*_mean_*; do
+	  if [ -f "$i" ]; 
+		then 
+		        run "rm ${PWD}/${outputfiles}/*cluster_mean_heatmap.*"
+		        run "rm ${PWD}/${outputfiles}/*cluster_mean_data.*"
+			break;
+	 fi
+	done
+	
+	for i in $PWD/$outputfiles/*Rphenograph*; do
+	  if [ -f "$i" ]; 
+		then 
+			run "mkdir -p $PWD/$outputfiles/Rphenograph";
+			run "mv $PWD/$outputfiles/*Rphenograph*\.* $PWD/$outputfiles/Rphenograph/.";
+			break;
+	 fi
+	done
+	
+	for i in $PWD/$outputfiles/*FlowSOM*; do
+	  if [ -f "$i" ]; 
+		then 
+			run "mkdir -p $PWD/$outputfiles/FlowSOM";
+			run "mv $PWD/$outputfiles/*FlowSOM*\.* $PWD/$outputfiles/FlowSOM/.";
+			break;
+	 fi
+	done
+	
+	for i in $PWD/$outputfiles/*DensVM*; do
+	  if [ -f "$i" ]; 
+		then 
+			run "mkdir -p $PWD/$outputfiles/DensVM";
+			run "mv $PWD/$outputfiles/*DensVM*\.* $PWD/$outputfiles/DensVM/.";
+			break;
+	 fi
+	done
+	
+	for i in $PWD/$outputfiles/*ClusterX*; do
+	  if [ -f "$i" ]; 
+		then 		
+			run "mkdir -p $PWD/$outputfiles/ClusterX";
+			run "mv $PWD/$outputfiles/*ClusterX*\.* $PWD/$outputfiles/ClusterX/.";
+			break;
+	 fi
+	done
+	
+	for i in $PWD/$outputfiles/gating*; do
+	   if [ -f "$i" ]; 
+	 	then 
+	 		run "mkdir -p $PWD/$outputfiles/Gating";
+	 		run "mv $PWD/$outputfiles/gating* $PWD/$outputfiles/Gating/.";
+	 		break;
+	  fi
+	done
+
+	for i in $PWD/$outputfiles/*_sample_level_plot*; do
+	   if [ -f "$i" ]; 
+	 	then 
+	 		run "mkdir -p $PWD/$outputfiles/Marker_level_plots_by_sample";
+	 		run "mv $PWD/$outputfiles/*_sample_level_plot* $PWD/$outputfiles/Marker_level_plots_by_sample/.";
+	 		break;
+	  fi
+	done	
+	
+	run "cp ${CYTOFPIPE_HOME}/summary.Rmd ${PWD}/${outputfiles}/."
+	R --vanilla  -e "rmarkdown::render('${PWD}/${outputfiles}/summary.Rmd',params=list(rscript='${CYTOFPIPE_HOME}/cytofpipe_clustering.R',rdata='${PWD}/${outputfiles}/cytofpipe.RData',inputparams='${FILE}'))"
+	run "rm -rf ${PWD}/${outputfiles}/summary.Rmd"
+	
+	
+	for i in $PWD/Rplots*; do
+	   if [ -f "$i" ]; 
+	 	then 
+	 		run "rm -rf $PWD/Rplots*";
+	 		break;
+	  fi
+	done
+	
+	if [ -e "$PWD/${JOB_ID}.txt" ]
+	  then
+	      run "rm $PWD/${JOB_ID}.txt"
+	fi
+}
+
+function run_scaffold {
+
+	JOB=${JOB_ID} R CMD BATCH --vanilla --no-save ${CYTOFPIPE_HOME}/cytofpipe_scaffold.R  ${PWD}/${outputfiles}/log_R.txt
+	
+	if [ -d "$PWD/$inputfiles/downsampled_10000" ]; 
+	   then 
+	 	run "mv $PWD/$inputfiles/downsampled_10000 $PWD/$outputfiles/.";
+	fi
+
+	for i in $PWD/$outputfiles/downsampled_10000/*clustered*; do
+	   if [ -f "$i" ]; 
+	 	then 
+	 		run "mkdir -p $PWD/$outputfiles/clustering";
+	 		run "mv $PWD/$outputfiles/downsampled_10000/*clustered* $PWD/$outputfiles/clustering/.";
+	 		break;
+	  fi
+	done
+
+	if [ -e "$PWD/${JOB_ID}.txt" ]
+	  then
+	      run "rm $PWD/${JOB_ID}.txt"
+	fi
+}
+
+function run_citrus {
+
+	JOB=${JOB_ID} R CMD BATCH --vanilla --no-save ${CYTOFPIPE_HOME}/cytofpipe_citrus.R  ${PWD}/${outputfiles}/log_R.txt
+	
+	if [ -e "$PWD/${JOB_ID}.txt" ]
+	  then
+	      run "rm $PWD/${JOB_ID}.txt"
+	fi
+}
+
+
+echo "======================================================"
+echo " HOST: "`hostname`
+echo " TIME: "`date`
+echo " ARGS: $*"
+echo "======================================================"
+
+
+if [ $command == "--clustering" ]
+then
+	run_clustering;
+elif [ $command == "--scaffold" ]
+then
+	run_scaffold;
+elif [ $command == "--citrus" ]
+then
+	run_citrus;
+else
+	echo "This shoud not be happening: command $command"
+	die $*
+fi
+
+echo
+echo "======================================================"
+echo "["`date`"] times:"
+echo "======================================================"
+cat $TIMES_FILE
+rm $TIMES_FILE
+echo "------------------------------------------------------"
+echo
+echo "======================================================"
+echo "["`date`"] Done."
+echo "======================================================"
+
+
