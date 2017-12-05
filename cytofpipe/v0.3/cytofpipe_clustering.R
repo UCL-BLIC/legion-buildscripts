@@ -234,28 +234,33 @@ visualizationMethods<-c(visualizationMethods,"tsne")
 
 config<-read.ini(configFile)
 
-autogating=config$cytofpipe$GATING
-transformMethod = config$cytofpipe$TRANSFORM
-mergeMethod = config$cytofpipe$MERGE
+autogating=config$clustering$GATING
+transformMethod = config$clustering$TRANSFORM
+mergeMethod = config$clustering$MERGE
 fixedNum = 10000
 flowsom_num = 15
 perplexity = 30
 theta = 0.5
 max_iter = 1000
-	
-if(length(config$cytofpipe$MERGE)==1){tolower(config$cytofpipe$MERGE);if(config$cytofpipe$MERGE == "fixed" || config$cytofpipe$MERGE == "ceil"){fixedNum=config$cytofpipe$DOWNSAMPLE}}
-if(length(config$cytofpipe$PERPLEXITY)==1){perplexity=config$cytofpipe$PERPLEXITY}
-if(length(config$cytofpipe$THETA)==1){theta=config$cytofpipe$THETA}
-if(length(config$cytofpipe$MAX_ITER)==1){max_iter=config$cytofpipe$MAX_ITER}
 
-if(length(config$cytofpipe$PHENOGRAPH)==1){tolower(config$cytofpipe$PHENOGRAPH);if(config$cytofpipe$PHENOGRAPH == "yes"){clusterMethods<-c(clusterMethods,"Rphenograph")}}
-if(length(config$cytofpipe$CLUSTERX)==1){tolower(config$cytofpipe$CLUSTERX);if(config$cytofpipe$CLUSTERX == "yes"){clusterMethods<-c(clusterMethods,"ClusterX")}}
-if(length(config$cytofpipe$DENSVM)==1){tolower(config$cytofpipe$DENSVM);if(config$cytofpipe$DENSVM == "yes"){clusterMethods<-c(clusterMethods,"DensVM")}}
-if(length(config$cytofpipe$FLOWSOM)==1){tolower(config$cytofpipe$FLOWSOM);if(config$cytofpipe$FLOWSOM == "yes"){clusterMethods<-c(clusterMethods,"FlowSOM");flowsom_num=config$cytofpipe$FLOWSOM_K}}
+if(length(config$clustering$MERGE)==1){tolower(config$clustering$MERGE);if(config$clustering$MERGE == "fixed" || config$clustering$MERGE == 
+"ceil"){fixedNum=config$clustering$DOWNSAMPLE}}
+if(length(config$clustering$PERPLEXITY)==1){perplexity=config$clustering$PERPLEXITY}
+if(length(config$clustering$THETA)==1){theta=config$clustering$THETA}
+if(length(config$clustering$MAX_ITER)==1){max_iter=config$clustering$MAX_ITER}
+
+if(length(config$clustering$PHENOGRAPH)==1){tolower(config$clustering$PHENOGRAPH);if(config$clustering$PHENOGRAPH == 
+"yes"){clusterMethods<-c(clusterMethods,"Rphenograph")}}
+if(length(config$clustering$CLUSTERX)==1){tolower(config$clustering$CLUSTERX);if(config$clustering$CLUSTERX == "yes"){clusterMethods<-c(clusterMethods,"ClusterX")}}
+if(length(config$clustering$DENSVM)==1){tolower(config$clustering$DENSVM);if(config$clustering$DENSVM == "yes"){clusterMethods<-c(clusterMethods,"DensVM")}}
+if(length(config$clustering$FLOWSOM)==1){tolower(config$clustering$FLOWSOM);if(config$clustering$FLOWSOM == 
+"yes"){clusterMethods<-c(clusterMethods,"FlowSOM");flowsom_num=config$clustering$FLOWSOM_K}}
 if(length(clusterMethods) == 0){clusterMethods<-c(clusterMethods,"NULL")}
 
-if(length(config$cytofpipe$PCA)==1){tolower(config$cytofpipe$PCA);if(config$cytofpipe$PCA == "yes"){visualizationMethods<-c(visualizationMethods,"pca")}}
-if(length(config$cytofpipe$ISOMAP)==1){tolower(config$cytofpipe$ISOMAP);if(config$cytofpipe$ISOMAP == "yes"){visualizationMethods<-c(visualizationMethods,"isomap")}}
+if(length(config$clustering$PCA)==1){tolower(config$clustering$PCA);if(config$clustering$PCA == "yes"){visualizationMethods<-c(visualizationMethods,"pca")}}
+if(length(config$clustering$ISOMAP)==1){tolower(config$clustering$ISOMAP);if(config$clustering$ISOMAP == 
+"yes"){visualizationMethods<-c(visualizationMethods,"isomap")}}
+
 
 
 #------------------------------------------------------------------
