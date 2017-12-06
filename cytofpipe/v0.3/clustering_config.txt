@@ -3,7 +3,7 @@
 GATING = no
 
 TRANSFORM = cytofAsinh
-MERGE = fixed
+MERGE = ceil
 DOWNSAMPLE = 10000
 
 PERPLEXITY = 30
