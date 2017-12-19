@@ -4,36 +4,390 @@ use warnings;
 
 no warnings qw/uninitialized/;
 
+#- pass_through: anything unknown, ambiguous or supplied with an invalid option will not be flagged as an error. Instead the unknown
+#-	 option(s) will be passed to the catchall <> if present, otherwise through to @ARGV
+#- bundling: so that long options must always start with a double dash (otherwise f.e. '-clustering' would go through the jsv but will fail in the qsub)
+use Getopt::Long qw(GetOptionsFromArray :config pass_through no_auto_abbrev bundling);
+
 use File::Basename;
 use Env qw(SGE_ROOT);
 use lib "$SGE_ROOT/util/resources/jsv";
 use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
 
+
+
+jsv_on_start(sub {
+    jsv_send_env();
+});
+
+
+jsv_on_verify(sub {
+	my %params = jsv_get_param_hash();
+	my $do_correct = 0;
+	my $do_wait = 0;
+
+	my @arg0=();
+	push(@arg0, $params{"CMDARG0"});
+
+	my $command='';
+	GetOptionsFromArray (
+	    \@arg0,
+	    "clustering" => \&parse_clustering,
+	    "scaffold" => \&parse_scaffold,
+	    "citrus" => \&parse_citrus,
+	    "<>"   => \&print_usage,
+	);
+
+	jsv_reject("THIS SHOULD NEVER HAPPEN.. :?\n");
+	return;
+	
+});
+
+jsv_main();
+
+
+sub parse_clustering {
+
+	my %params = jsv_get_param_hash();
+
+	my @args=();
+	my $numargs=$params{CMDARGS};
+	for (my $i=1;$i<$numargs;$i++){
+		push(@args, $params{"CMDARG".$i});
+	}
+
+	my $inputdir=''; my $outputdir=''; my $markersfile='';
+	my $configfile='';
+	my $flow='0';
+	my $cytof='0';
+	my $all='';
+	my $downsample='';
+	GetOptionsFromArray (
+	    \@args,
+	    "i=s" => \$inputdir,
+	    "o=s"   => \$outputdir,
+	    "m=s"   => \$markersfile,
+	    "config=s"   => \$configfile,
+	    "flow"   => \$flow,
+	    "cytof"   => \$cytof,
+	    "all"   => \$all,
+	    "downsample=i"   => \$downsample,
+	    "<>"   => \&print_usage_clustering_with_error,
+	);
+
+
+        if ($inputdir eq '' || $outputdir eq '' || $markersfile eq ''){
+                print_usage_clustering();
+                jsv_reject("Please check that you are providing a inputdir (-i), outputdir (-o) and markersfile (-m)\n");
+                return;
+        }
+	if (!-e "$inputdir") {
+		print_usage_clustering();
+		jsv_reject("Can't find directory with fcs files <$inputdir>\n");
+		return;
+	}		
+	if (-e "$outputdir") {
+		print_usage_clustering();
+		jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir\n");
+		return;
+	}
+	if (!-e "$markersfile") {
+		print_usage_clustering();
+		jsv_reject("Can't find markers file <$markersfile>\n");
+		return;
+	}
+	if(($flow + $cytof > 1) || ($flow eq '1' && $configfile ne '') || ($cytof eq '1' && $configfile ne '')){
+		print_usage_clustering();
+		jsv_reject("These three parameters [--flow, --cytof, --conf CONFIGFILE] can not be used jointly, please choose one of them (or none for default options)\n");
+		return;
+	}
+	if($downsample ne ''){
+		if($all eq '1' && $downsample ne ''){
+			print_usage_clustering();
+        	      	jsv_reject("These two parameters [--all, --downsample NUM] can not be used jointly, please choose one of them (or none for default options)\n");
+        	      	return;
+		}
+		if(!isnum($downsample) || ($downsample < 500 || $downsample > 100000)){
+			print_usage_clustering();
+		       	jsv_reject("<$downsample> is not a valid downsample numebr. Please insert a number between 500 and 100,000\n");
+			return;
+		}	
+	}
+	if ($configfile ne ''){
+		if (!-e "$configfile") {
+			print_usage_clustering();
+			jsv_reject("Can't find config file <$configfile>\n");
+			return;
+		}else{
+			check_config_clustering($configfile)
+		}
+	}
+	jsv_set_param('N', "clust-${inputdir}");
+	jsv_accept('Job is accepted');
+}
+
+
+
+sub parse_scaffold {
+
+	my %params = jsv_get_param_hash();
+	my @args=();
+	my $numargs=$params{CMDARGS};
+	for (my $i=1;$i<$numargs;$i++){
+		push(@args, $params{"CMDARG".$i});
+	}
+
+	my $inputdir=''; my $outputdir=''; my $markersfile='';
+	my $reference="";
+	my $flow=0;
+	my $cytof=0;
+	my $all='';
+	my $downsample='';
+	GetOptionsFromArray (
+	    \@args,
+	    "i=s" => \$inputdir,
+	    "o=s"   => \$outputdir,
+	    "m=s"   => \$markersfile,
+	    "ref=s"   => \$reference,
+	    "flow"   => \$flow,
+	    "cytof"   => \$cytof,
+	    "all"   => \$all,
+	    "downsample=i"   => \$downsample,
+	    "<>"   => \&print_usage_scaffold_with_error,
+	);
+
+	if ($inputdir eq '' || $outputdir eq '' || $markersfile eq '' || $reference eq '') {
+		print_usage_scaffold();
+		jsv_reject("Please check that you are providing a inputdir (-i), outputdir (-o), markersfile (-m) and reference FCS (--ref)\n");
+		return;
+	}		
+
+	if (!-e "$inputdir") {
+		print_usage_scaffold();
+		jsv_reject("Can't find directory with fcs files <$inputdir>\n");
+		return;
+	}		
+	if (!-e "${inputdir}/gated") {
+		print_usage_scaffold();
+	       	jsv_reject("Can't find the \'gated/\' subfolder inside inputdir <$inputdir>\n");
+	       	return;
+	}
+	if (!-e "${inputdir}/${reference}") {
+		print_usage_scaffold();
+		jsv_reject("Can't find the reference FCS file <$reference> inside inputdir <$inputdir>\n");
+		return;
+	}
+	if (-e "$outputdir") {
+		print_usage_scaffold();
+		jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir\n");
+		return;
+	}
+	if (!-e "$markersfile") {
+		print_usage_scaffold();
+		jsv_reject("Can't find markers file <$markersfile>\n");
+		return;
+	}
+	if($flow+$cytof > 1) {
+		print_usage_scaffold();
+		jsv_reject("These two parameters [--flow, --cytof] can not be used jointly, please choose one of them (or none for default options)\n");
+		return;
+	}
+	if($downsample ne ''){
+		if($all eq '1' && $downsample ne ''){
+			print_usage_scaffold();
+        	      	jsv_reject("These two parameters [--all, --downsample NUM] can not be used jointly, please choose one of them (or none for default options)\n");
+        	      	return;
+		}
+		if(!isnum($downsample) || ($downsample < 500 || $downsample > 100000)){
+			print_usage_scaffold();
+		       	jsv_reject("<$downsample> is not a valid downsample numebr. Please insert a number between 500 and 100,000\n");
+			return;
+		}	
+	}
+	jsv_set_param('N', "scaffold-${inputdir}");
+	jsv_accept('Job is accepted');
+
+}
+
+
+sub parse_citrus {
+
+	my %params = jsv_get_param_hash();
+	my @args=();
+	my $numargs=$params{CMDARGS};
+	for (my $i=1;$i<$numargs;$i++){
+		push(@args, $params{"CMDARG".$i});
+	}
+
+	my $inputdir=''; my $outputdir=''; my $markersfile='';
+	my $conditions="";
+	my $flow=0;
+	my $cytof=0;
+	my $all='';
+	my $downsample='';
+	GetOptionsFromArray (
+	    \@args,
+	    "i=s" => \$inputdir,
+	    "o=s"   => \$outputdir,
+	    "m=s"   => \$markersfile,
+	    "cond=s"   => \$conditions,
+	    "flow"   => \$flow,
+	    "cytof"   => \$cytof,
+	    "all"   => \$all,
+	    "downsample=i"   => \$downsample,
+	    "<>"   => \&print_usage_citrus_with_error,
+	);
+
+	if ($inputdir eq '' || $outputdir eq '' || $markersfile eq '' || $conditions eq '') {
+		print_usage_scaffold();
+		jsv_reject("Please check that you are providing a inputdir (-i), outputdir (-o), markersfile (-m) and conditions file (--cond)\n");
+		return;
+	}		
+
+	if (!-e "$inputdir") {
+		print_usage_citrus();
+		jsv_reject("Can't find directory with fcs files <$inputdir>\n");
+		return;
+	}		
+	if (!-e "$conditions") {
+		print_usage_citrus();
+		jsv_reject("Can't find the conditions file <$conditions>\n");
+		return;
+	}
+	if (-e "$outputdir") {
+		print_usage_citrus();
+		jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir\n");
+		return;
+	}
+	if (!-e "$markersfile") {
+		print_usage_citrus();
+		jsv_reject("Can't find markers file <$markersfile>\n");
+		return;
+	}
+	if($flow+$cytof > 1) {
+		print_usage_citrus();
+		jsv_reject("These two parameters [--flow, --cytof] can not be used jointly, please choose one of them (or none for default options)\n");
+		return;
+	}
+	if($downsample ne ''){
+		if($all eq '1' && $downsample ne ''){
+			print_usage_citrus();
+        	      	jsv_reject("These two parameters [--all, --downsample NUM] can not be used jointly, please choose one of them (or none for default options)\n");
+        	      	return;
+		}
+		if(!isnum($downsample) || ($downsample < 500 || $downsample > 100000)){
+			print_usage_citrus();
+		       	jsv_reject("<$downsample> is not a valid downsample numebr. Please insert a number between 500 and 100,000\n");
+			return;
+		}	
+	}
+	jsv_set_param('N', "citrus-${inputdir}");
+	jsv_accept('Job is accepted');
+
+}
+
+
 sub print_usage {
 	my $usage0="";
 	my $usage1="-------------------------------------------";
-	my $usage2 = "Cytofpipe v0.3\n";
+	my $usage2 = "Cytofpipe v1.0\n";
 	my $usage3 = "USAGE: cytofpipe <command> [options]\n";
 	my $usage4="-------------------------------------------";
 	my $usage5="Commands:";
 	my $usage6="";
-	my $usage7="--clustering	Performs preprocessing of data and clustering/visualization (based on cytofkit) \n";
-	my $usage8="--scaffold		Constructs scaffold maps (based on Scaffold)\n";
-	my $usage9="--citrus		Performs citrus analysis (based on citrus)\n";
+	my $usage7="\t--clustering	Performs preprocessing of data and clustering/visualization (based on cytofkit) \n";
+	my $usage8="\t--scaffold		Constructs scaffold maps (based on Scaffold)\n";
+	my $usage9="\t--citrus		Performs citrus analysis (based on citrus)\n";
 	my $usage10="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);
+
+
+	jsv_reject("Please select one of the available commands\n");
+	return;
+
 }
 
+
+
 sub print_usage_clustering {
+
 	my $usage0="";
 	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "Cytofpipe v0.3\n";
-	my $usage3 = "USAGE: cytofpipe --clustering <INPUTDIR> <OUTPUTDIR> <MARKERSFILE> [<CONFIGFILE>]\n";
+	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
+	my $usage3 = "\t\t\t--clustering";
 	my $usage4="------------------------------------------------------------------------------------";
-	my $usage5="Where CONFIGFILE has the following format:";
+	
+	my $usage5="Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="\t-i DIR		Input directory with the FCS files\n";
+	my $usage9="\t-o DIR		Output directory where results will be generated\n";
+	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage11="";
+	my $usage12="Options:";
+	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below) [DEFAULT]\n";
+	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage15="\t				(transformation = cytofAsinh)\n";
+	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
+	my $usage17="\t				each FCS file to the specified number of events \n";
+	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
+	my $usage19="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+
+}
+
+sub print_usage_clustering_with_error {
+
+	my $usage0="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
+	my $usage3 = "\t\t\t--clustering";
+	my $usage4="------------------------------------------------------------------------------------";
+	
+	my $usage5="Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="\t-i DIR		Input directory with the FCS files\n";
+	my $usage9="\t-o DIR		Output directory where results will be generated\n";
+	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage11="";
+	my $usage12="Options:";
+	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below) [DEFAULT]\n";
+	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage15="\t				(transformation = cytofAsinh)\n";
+	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
+	my $usage17="\t				each FCS file to the specified number of events \n";
+	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
+	my $usage19="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+
+	jsv_reject("ERROR: Invalid or missing argument in --clustering mode\n");
+	return;
+
+}
+
+sub print_usage_clustering_config {
+
+	my $usage0="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
+	my $usage3 = "\t\t\t --clustering";
+	my $usage4="------------------------------------------------------------------------------------";
+
+	my $usage5="CONFIG file format";
 	my $usage6="";
 	my $usage7="\t[ clustering ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
 	my $usage8="";
@@ -68,187 +422,155 @@ sub print_usage_clustering {
 	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
 	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
 	jsv_log_info($usage28);	jsv_log_info($usage29);jsv_log_info($usage30);
+
 }
+
 
 sub print_usage_scaffold {
 	my $usage0="";
-	my $usage1="-------------------------------------------------------------------------------------------------";
-	my $usage2 = "Cytofpipe v0.3\n";
-	my $usage3 = "USAGE: cytofpipe --scaffold <INPUTDIR> <REF_FCS> <OUTPUTDIR> <MARKERSFILE> [<ASINH_COFACTOR>]\n";
-	my $usage4="--------------------------------------------------------------------------------------------------";
-	my $usage5="INPUTDIR show contain a gated/ subfolder with the manually gated landmark populations\n";
-	my $usage6="REF_FCS is the FCS file that will act as the reference. This FCS file needs to be in the INPUTDIR folder";
-	my $usage7="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t **  Cytofpipe v1.0  **";
+	my $usage3 = "\t\t\t--scaffold";
+	my $usage4="------------------------------------------------------------------------------------";
+	
+	my $usage5="Usage: cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="";
+	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
+	my $usage10="\t-o DIR		Output directory where results will be generated\n";
+	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage12="\t--ref FILE	Reference FCS file (should be inside the Input directory)\n";
+	my $usage13="";
+	my $usage14="Options:";
+	my $usage15="";
+	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage17="\t				(transformation = cytofAsinh)\n";
+	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
+	my $usage19="\t					each FCS file to the specified number of events \n";
+	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
+	my $usage21="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);jsv_log_info($usage21);
+
+}
+
+sub print_usage_scaffold_with_error {
+
+	my $usage0="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t **  Cytofpipe v1.0  **";
+	my $usage3 = "\t\t\t--scaffold";
+	my $usage4="------------------------------------------------------------------------------------";
+	
+	my $usage5="Usage: cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="";
+	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
+	my $usage10="\t-o DIR		Output directory where results will be generated\n";
+	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage12="\t--ref FILE	Reference FCS file (should be inside the Input directory)\n";
+	my $usage13="";
+	my $usage14="Options:";
+	my $usage15="";
+	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage17="\t				(transformation = cytofAsinh)\n";
+	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
+	my $usage19="\t					each FCS file to the specified number of events \n";
+	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
+	my $usage21="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);jsv_log_info($usage21);
+
+	jsv_reject("ERROR: Invalid or missing argument in --scaffold mode\n");
+	return;
 }
 
 sub print_usage_citrus {
 	my $usage0="";
-	my $usage1="-------------------------------------------------------------------------------------------------";
-	my $usage2 = "Cytofpipe v0.3\n";
-	my $usage3 = "USAGE: cytofpipe --citrus <INPUTDIR> <CONDITIONS> <OUTPUTDIR> <MARKERSFILE> [<ASINH_COFACTOR>]\n";
-	my $usage4="--------------------------------------------------------------------------------------------------";
-	my $usage5="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t  **  Cytofpipe v1.0 **";
+	my $usage3 = "\t\t\t--citrus";
+	my $usage4="------------------------------------------------------------------------------------";
+	
+	my $usage5="Usage: cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="";
+	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
+	my $usage10="\t-o DIR		Output directory where results will be generated\n";
+	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage12="\t--cond FILE	File indicating which samples belong to each condition\n";
+	my $usage13="";
+	my $usage14="Options:";
+	my $usage15="";
+	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage17="\t				(transformation = cytofAsinh)\n";
+	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
+	my $usage19="\t					each FCS file to the specified number of events \n";
+	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
+	my $usage21="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
-	jsv_log_info($usage4);jsv_log_info($usage5);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);jsv_log_info($usage21);
+
+}
+sub print_usage_citrus_with_error {
+
+	my $usage0="";
+	my $usage1="------------------------------------------------------------------------------------";
+	my $usage2 = "\t\t  **  Cytofpipe v1.0 **";
+	my $usage3 = "\t\t\t--citrus";
+	my $usage4="------------------------------------------------------------------------------------";
+	
+	my $usage5="Usage: cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options] ";
+	my $usage6="";
+	my $usage7="Required:";
+	my $usage8="";
+	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
+	my $usage10="\t-o DIR		Output directory where results will be generated\n";
+	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
+	my $usage12="\t--cond FILE	File indicating which samples belong to each condition\n";
+	my $usage13="";
+	my $usage14="Options:";
+	my $usage15="";
+	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
+	my $usage17="\t				(transformation = cytofAsinh)\n";
+	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
+	my $usage19="\t					each FCS file to the specified number of events \n";
+	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
+	my $usage21="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);jsv_log_info($usage21);
+
+	jsv_reject("ERROR: Invalid or missing argument in --citrus mode\n");
+	return;
 }
 
-
-jsv_on_start(sub {
-    jsv_send_env();
-});
-
-
-jsv_on_verify(sub {
-    my %params = jsv_get_param_hash();
-    my $do_correct = 0;
-    my $do_wait = 0;
-
-    my $command = $params{CMDARG0};
-
-    if ($command eq '--clustering'){
-	    if ($params{CMDARGS} < 4) {
-		print_usage_clustering();
-		jsv_reject("You must specify inputdir, outputdir, markers file, and optionally a config file (E.g. \"cytofpipe Tcell_fcs results_Tcell markers.txt <config.txt>\")");
-	        return;
-	    }
-	    if ($params{CMDARGS} < 4) {
-		print_usage_clustering();
-		jsv_reject("You must specify inputdir, outputdir, markers file, and optionally a config file (E.g. \"cytofpipe Tcell_fcs results_Tcell markers.txt <config.txt>\")");
-	        return;
-	    }
-	    my $inputdir = $params{CMDARG1};
-	    if (!-e "$inputdir") {
-		print_usage_clustering();
-	        jsv_reject("Can't find directory with fcs files <$inputdir>");
-	        return;
-	    }
-	
-	    my $outputdir = $params{CMDARG2};
-	    if (-e "$outputdir") {
-		print_usage_clustering();
-	        jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir");
-	        return;
-	    }
-	    my $markersfile = $params{CMDARG3};
-	    if (!-e "$markersfile") {
-		print_usage_clustering();
-	        jsv_reject("Can't find markers file <$markersfile>");
-	        return;
-	    }
-	    if($params{CMDARG4} ne ''){
-		    my $config = $params{CMDARG4};
-		    if (!-e "$config") {
-			print_usage_clustering();
-		        jsv_reject("Can't find config file <$config>");
-		        return;
-		    }else{
-			check_config_clustering($config)
-		    }
-	    }	
-	    jsv_set_param('N', "cytf-clust-${inputdir}");
-	    jsv_accept('Job is accepted');
-
-    }elsif ($command eq '--scaffold'){
-
-	    if ($params{CMDARGS} < 5) {
-		print_usage_scaffold();
-		jsv_reject("You must specify inputdir, reference file, outputdir, markers file, and optionally the asinh_cofactor (E.g. \"cytofpipe --scaffold Tissues/ BoneMarrow.fcs results/ markers.txt 5\")");
-	        return;
-	    }
-	    my $inputdir = $params{CMDARG1};
-	    if (!-e "$inputdir") {
-		print_usage_scaffold();
-	        jsv_reject("Can't find directory with fcs files <$inputdir>");
-	        return;
-	    }
-	    if (!-e "${inputdir}/gated") {
-		print_usage_scaffold();
-	        jsv_reject("Can't find the \'gated/\' subfolder inside inputdir <$inputdir>");
-	        return;
-	    }
-	
-	    my $ref_fcs = $params{CMDARG2};
-	    if (!-e "${inputdir}/${ref_fcs}") {
-		print_usage_scaffold();
-	        jsv_reject("Can't find the reference FCS file <$ref_fcs> inside inputdir <$inputdir>");
-	        return;
-	    }
-	    my $outputdir = $params{CMDARG3};
-	    if (-e "$outputdir") {
-		print_usage_scaffold();
-	        jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir");
-	        return;
-	    }
-	    my $markersfile = $params{CMDARG4};
-	    if (!-e "$markersfile") {
-		print_usage_scaffold();
-	        jsv_reject("Can't find markers file <$markersfile>");
-	        return;
-	    }
-	    if($params{CMDARG5} ne ''){
-		    my $asinh_cofactor= $params{CMDARG5};
-		    if ($asinh_cofactor !~ /^\d+$/) {
-			print_usage_scaffold();
-		        jsv_reject("<$asinh_cofactor> is not a valid asinh_cofactor, please insert a valid one");
-		        return;
-		    }
-	    }	
-	    jsv_set_param('N', "cytf-scff-${inputdir}");
-	    jsv_accept('Job is accepted');
-    }elsif ($command eq '--citrus'){
-
-	    if ($params{CMDARGS} < 4) {
-		print_usage_citrus();
-		jsv_reject("You must specify inputdir, outputdir, markers file, and optionally the asinh_cofactor (E.g. \"cytofpipe --citrus inputfiles/ results/ markers.txt 5\")");
-	        return;
-	    }
-	    my $inputdir = $params{CMDARG1};
-	    if (!-e "$inputdir") {
-		print_usage_citrus();
-	        jsv_reject("Can't find directory with fcs files <$inputdir>");
-	        return;
-	    }
-	    my $conditionsFile = $params{CMDARG2};
-	    if (!-e "$conditionsFile") {
-		print_usage_citrus();
-	        jsv_reject("Can't find conditions file <$conditionsFile>");
-	        return;
-	    }
-	    my $outputdir = $params{CMDARG3};
-	    if (-e "$outputdir") {
-		print_usage_citrus();
-	        jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir");
-	        return;
-	    }
-	    my $markersfile = $params{CMDARG4};
-	    if (!-e "$markersfile") {
-		print_usage_citrus();
-	        jsv_reject("Can't find markers file <$markersfile>");
-	        return;
-	    }
-	    if($params{CMDARG5} ne ''){
-		    my $asinh_cofactor= $params{CMDARG5};
-		    if ($asinh_cofactor !~ /^\d+$/) {
-			print_usage_citrus();
-		        jsv_reject("<$asinh_cofactor> is not a valid asinh_cofactor, please insert a valid one");
-		        return;
-		    }
-	    }	
-	    jsv_set_param('N', "cytf-citrs-${inputdir}");
-	    jsv_accept('Job is accepted');
-    }else{
-	print_usage();
-	jsv_reject("You must specify a valid command (--clustering, --scaffold or --citrus)");
-        return;
-    }
-
-});
-
-jsv_main();
+sub isnum ($) {
+    return 0 if $_[0] eq '';
+    $_[0] ^ $_[0] ? 0 : 1
+}
 
 sub check_config_clustering {
 	my $config = shift(@_);
@@ -265,14 +587,14 @@ sub check_config_clustering {
 	foreach my $line(@lines){
 		chomp $_;
 		if($first_line == 1 && $line !~ /^\s*\[\s*clustering\s*\]\s*$/i){
-			print_usage_clustering();
+			print_usage_clustering_config();
 			jsv_reject("Invalid config file. Please make sure that the first line of the config file is \"[ clustering ]\"");
 			return;
 		}
 		if($line=~/^GATING\s*\=\s*(.*)\s*$/){
 			$gating=$1;
 			if($gating !~/^yes$/i && $gating !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$gating\" **************** is not a valid GATING option in <$config>. Please correct the config file and choose if you want to include atomatic gating on your analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -280,7 +602,7 @@ sub check_config_clustering {
 		if($line=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
 			$transform=$1;
 			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle" && $transform ne "arcsinh" && $transform ne "none"){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods (\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
 				return;
 			}
@@ -288,7 +610,7 @@ sub check_config_clustering {
 		if($line=~/^MERGE\s*\=\s*(.*)\s*$/){
 			$merge=$1;
 			if($merge ne "ceil" && $merge ne "all" && $merge ne "min" && $merge ne "fixed"){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("Can't recognize \"$merge\" as a valid merge method in <$config>. Please correct the config file and choose one of the available methods (\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters");
 				return;
 			}
@@ -296,7 +618,7 @@ sub check_config_clustering {
 		if($line=~/^PCA\s*\=\s*(.*)\s*$/){
 			my $pca=$1;
 			if($pca !~/^yes$/i && $pca !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$pca\" is not a valid PCA option in <$config>. Please correct the config file and choose if you want to include PCA for cluster visualization in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -304,7 +626,7 @@ sub check_config_clustering {
 		if($line=~/^ISOMAP\s*\=\s*(.*)\s*$/){
 			my $isomap=$1;
 			if($isomap !~/^yes$/i && $isomap !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you wnat to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -312,7 +634,7 @@ sub check_config_clustering {
 		if($line=~/^PHENOGRAPH\s*\=\s*(.*)\s*$/){
 			my $phenograph=$1;
 			if($phenograph !~/^yes$/i && $phenograph !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$phenograph\" is not a valid PHENOGRAPH option in <$config>. Please correct the config file and choose if you want to include PHENOGRAPH as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -320,7 +642,7 @@ sub check_config_clustering {
 		if($line=~/^CLUSTERX\s*\=\s*(.*)\s*$/){
 			my $clusterx=$1;
 			if($clusterx !~/^yes$/i && $clusterx !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$clusterx\" is not a valid CLUSTERX option in <$config>. Please correct the config file and choose if you want to include CLUSTERX as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -328,7 +650,7 @@ sub check_config_clustering {
 		if($line=~/^DENSVM\s*\=\s*(.*)\s*$/){
 			my $densvm=$1;
 			if($densvm !~/^yes$/i && $densvm !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$densvm\" is not a valid DENSVM option in <$config>. Please correct the config file and choose if you want to include DENSVM as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -336,7 +658,7 @@ sub check_config_clustering {
 		if($line=~/^FLOWSOM\s*\=\s*(.*)\s*$/){
 			$flowsom=$1;
 			if($flowsom !~/^yes$/i && $flowsom !~/^no$/i){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$flowsom\" is not a valid FLOWSOM option in <$config>. Please correct the config file and choose if you want to include FLOWSOM as clustering method in the analysis \(\"YES or NO\"\)");
 				return;
 			}
@@ -350,7 +672,7 @@ sub check_config_clustering {
 		if($line=~/^PERPLEXITY\s*\=\s*(.*)\s*$/){
 			$perplexity=$1;
 			if($perplexity !~/^\d+$/ || $perplexity < 5 || $perplexity > 50){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$perplexity\" is not a valid PERPLEXITY option in <$config>. Please correct the config file and choose a value between 5 and 50");
 				return;
 			}
@@ -358,7 +680,7 @@ sub check_config_clustering {
 		if($line=~/^THETA\s*\=\s*(.*)\s*$/){
 			$theta=$1;
 			if($theta !~/([0-9]*[.])?[0-9]+$/ || $theta < 0 || $theta > 1){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$theta\" is not a valid THETA option in <$config>. Please correct the config file and choose a value between 0 and 1");
 				return;
 			}
@@ -366,7 +688,7 @@ sub check_config_clustering {
 		if($line=~/^MAX_ITER\s*\=\s*(.*)\s*$/){
 			$max_iter=$1;
 			if($max_iter !~/^\d+$/ || $max_iter < 100 || $max_iter > 5000){
-				print_usage_clustering();
+				print_usage_clustering_config();
 				jsv_reject("\"$max_iter\" is not a valid MAX_ITER option in <$config>. Please correct the config file and choose a value between 100 and 5000");
 				return;
 			}
@@ -375,23 +697,23 @@ sub check_config_clustering {
 	}
 	close(INF);
 	if(!$gating || $gating eq ''){
-		print_usage_clustering();
+		print_usage_clustering_config();
 		jsv_reject("Gating parameter not found in <$config>. Please correct the config file and enter a valid Gating option \(\"YES\" or \"NO\"\) or omit the config file to run with default parameters \(GATING = NO\)");
 		return;
 	}
 	if(!$transform || $transform eq ''){
-		print_usage_clustering();
+		print_usage_clustering_config();
 		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters \(TRANSFORMATION = arcsinh\)");
 		return;
 	}
 	if(!$merge || $merge eq ''){
-		print_usage_clustering();
+		print_usage_clustering_config();
 		jsv_reject("Merge parameter not found in <$config>. Please correct the config file and enter a valid merge method \(\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters \(MERGE = fixed, DOWNSAMPLE = 10000\)");
 		return;
 	}
 	if($merge =~ /^fixed$/i || $merge =~ /^ceil$/i){
 		if(!$downsample || $downsample eq '' || $downsample !~/^\d+$/ || $downsample < 500 || $downsample > 100000){
-			print_usage_clustering();
+			print_usage_clustering_config();
 			if(!$downsample || $downsample eq ''){
 				jsv_reject("Downsample parameter not found in <$config>. Please correct the config file and enter a valid size between 50 and 100000");
 				return;
@@ -403,7 +725,7 @@ sub check_config_clustering {
 	}
 	if($flowsom =~ /^yes$/i){
 		if(!$flowsom_k || $flowsom_k eq '' || $flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
-			print_usage_clustering();
+			print_usage_clustering_config();
 			if(!$flowsom_k || $flowsom_k eq ''){
 				jsv_reject("FlowSOM_k parameter not found in <$config>. Please correct the config file and enter a valid cluster number between 2 and 50");
 				return;

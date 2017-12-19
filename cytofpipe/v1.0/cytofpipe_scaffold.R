@@ -1,17 +1,4 @@
-options(stringsAsFactors = F)
-rm(list = ls())
-
-jobid <- as.character(Sys.getenv("JOB_ID"))
-
-input <- paste0(jobid, ".txt")
-lines <- readLines(input, n = 5)
-
-working.dir <- lines[1]
-ref.file <- paste0(lines[2], ".clustered.txt")
-outputdir <- lines[3]
-markersFile <- lines[4]
-asinh_cofactor <- lines[5]
-
+## @knitr libraries
 
 library(scaffold)
 library(flowCore)
@@ -20,31 +7,64 @@ library(igraph)
 library(reshape)
 library(ggrepel)
 library(hash)
+library(ini)
 
+options(stringsAsFactors = F)
+rm(list = ls())
+
+
+#------------------------------------------------------------------
+#- Parse arguments
+#------------------------------------------------------------------
+
+## @knitr arguments
+
+jobid <- as.character(Sys.getenv("JOB_ID"))
+input <- paste0(jobid, ".txt")
+
+args<-read.ini(input)
+
+working.dir=args$paramsscaffold$INPUTFILE
+ref.file=paste0(args$paramsscaffold$REF, ".clustered.txt")
+outputdir=args$paramsscaffold$OUTPUTFILE
+markersFile=args$paramsscaffold$MARKERSFILE
+asinh_cofactor=args$paramsscaffold$ASINH
+mergeMethod = args$paramsscaffold$MERGE
+fixedNum = args$paramsscaffold$DOWNSAMPLE
+
+if(asinh_cofactor == '-'){
+	asinh_cofactor=5;
+}
 
 #——————————————————————
 #- DOWNSAMPLE FCS FILES
 #——————————————————————
 
-#— Downsample to 10000 events to speed up clustering 
-
-fixedNum=10000
-downsampled.dir<-paste0(working.dir,"/downsampled_",fixedNum)
-dir.create(file.path(working.dir, paste0("downsampled_",fixedNum)))
-
-downsampleFCS <- function(x) {
-	x[sample(nrow(x), size = fixedNum, replace = ifelse(nrow(x) < fixedNum, TRUE, FALSE)), , drop=FALSE]
-}
+#— Downsample to 10000 events to speed up clustering (unless they add the --all parameter)
 
 files.list <- list.files(path = working.dir, pattern = "*.fcs$")
-for(file in files.list) {
-	outfile<-basename(file_path_sans_ext(file))
-	fcs<-read.FCS(paste0(working.dir, "/", file))
+if(mergeMethod == '-'){
 
-	exp<-exprs(fcs)
-	downsampled<-downsampleFCS(exp)
-	exprs(fcs)<-downsampled
-	write.FCS(fcs, filename=paste0(downsampled.dir, "/", outfile, ".fcs"))
+	if(fixedNum == '-'){fixedNum = 10000}
+
+	downsampled.dir<-paste0(outputdir,"/downsampled_",fixedNum)
+	dir.create(file.path(outputdir, paste0("downsampled_",fixedNum)))
+	
+	downsampleFCS <- function(x) {
+		x[sample(nrow(x), size = as.numeric(fixedNum), replace = ifelse(nrow(x) < as.numeric(fixedNum), TRUE, FALSE)), , drop=FALSE]
+	}
+	
+	for(file in files.list) {
+		outfile<-basename(file_path_sans_ext(file))
+		fcs<-read.FCS(paste0(working.dir, "/", file))
+	
+		exp<-exprs(fcs)
+		downsampled<-downsampleFCS(exp)
+		exprs(fcs)<-downsampled
+		write.FCS(fcs, filename=paste0(downsampled.dir, "/", outfile, ".fcs"))
+	}
+}else{
+	downsampled.dir<-working.dir
 }
 
 #————————————
@@ -75,11 +95,17 @@ for(i in 1:length(usermarkers)){
   	markersDesc[i]<-values(UserName2Desc, keys=usermarkers[i])
 }
  
-col.names <- markersDesc
-num.cores <- as.numeric(1)
-num_clusters <- as.numeric(200)
-num_samples <- as.numeric(50)
-asinh.cofactor <- as.numeric(asinh_cofactor) 
+
+## @knitr fixedparameters
+
+num.cores = 1
+num_clusters = 200
+num_samples = 50
+
+## @knitr parameters
+
+col.names = markersDesc
+asinh.cofactor = as.numeric(asinh_cofactor)
 
 scaffold:::cluster_fcs_files_in_dir(downsampled.dir, num.cores, col.names, num_clusters, num_samples, asinh.cofactor)
 
@@ -130,14 +156,14 @@ for(fi in files.list)
 ret <- c(ret, list(dataset.statistics = scaffold:::get_dataset_statistics(ret)))
 ret <- c(list(scaffold.col.names = col.names, landmarks.data = gated_data$downsampled.data), ret)
 ref=gsub(pattern = "\\.fcs.*", "", ref.file)
-scaffold:::my_save(ret, paste(outputdir, sprintf("%s.scaffold", ref), sep = "/"))
+scaffold:::my_save(ret, paste(outputdir, "cytofpipe.scaffold", sep = "/"))
 
 
 #———————————----———
 #- SCAFFOLD PLOTS
 #——————————————---
 
-f_name <- paste(outputdir, sprintf("%s.scaffold", ref), sep = "/")
+f_name <- paste(outputdir, "cytofpipe.scaffold", sep = "/")
 
 con <- file(f_name, "rb")
 data <- unserialize(con)
@@ -219,6 +245,20 @@ for (i in 1:length(data$graphs)) {
 	dev.off()
 
 }
+
+paste0("FCS_files: ",files.list)
+paste0("Ref: ",ref)
+paste0("Clustering_markers: ",usermarkers)
+if(mergeMethod == '-'){
+	paste0("Events: ", fixedNum)
+}else{
+        paste0("Events: ", mergeMethod)
+}
+paste0("Asinh cofactor: ", asinh.cofactor)
+paste0("Num. cores: ",num.cores)
+paste0("Num. clusters: ",num_clusters)
+paste0("Num. samples: ",num_samples)
+
 
 sessionInfo()
 

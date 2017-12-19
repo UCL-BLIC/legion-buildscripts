@@ -1,16 +1,3 @@
-## @knitr parameters
-
-jobid <- as.character(Sys.getenv("JOB_ID"))
-
-input <- paste0(jobid, ".txt")
-lines <- readLines(input, n = 5)
-
-inputfiles <- lines[1]
-outputdir <- lines[2]
-markersFile <- lines[3]
-configFile <- lines[4]
-template <- lines[5]
-
 ## @knitr libraries
 
 library(cytofkit) 
@@ -24,6 +11,26 @@ require(reshape2)
 require(VGAM)
 require(colourpicker)
 require(gplots)
+
+#------------------------------------------------------------------
+#- Parse parameters
+#------------------------------------------------------------------
+
+## @knitr parameters
+
+jobid <- as.character(Sys.getenv("JOB_ID"))
+input <- paste0(jobid, ".txt")
+
+args<-read.ini(input)
+
+inputfiles=args$paramsclustering$INPUTFILE
+outputdir=args$paramsclustering$OUTPUTFILE
+markersFile=args$paramsclustering$MARKERSFILE
+configFile=args$paramsclustering$CONFIGFILE
+template=args$paramsclustering$GATINGFILE
+transformMethod = args$paramsclustering$TRANSFORM
+mergeMethod = args$paramsclustering$MERGE
+fixedNum = args$paramsclustering$DOWNSAMPLE
 
 
 #---------------------------------------------------------------------------------------------
@@ -218,7 +225,6 @@ for(i in 1:length(markersNameDesc)){
 }
 
 
-
 #------------------------------------------------------------------
 #- Parse config file
 #------------------------------------------------------------------
@@ -235,16 +241,15 @@ visualizationMethods<-c(visualizationMethods,"tsne")
 config<-read.ini(configFile)
 
 autogating=config$clustering$GATING
-transformMethod = config$clustering$TRANSFORM
-mergeMethod = config$clustering$MERGE
-fixedNum = 10000
+if(transformMethod == '-'){transformMethod = config$clustering$TRANSFORM}
+if(mergeMethod == '-'){mergeMethod = config$clustering$MERGE}
+if(fixedNum == '-'){fixedNum = config$clustering$DOWNSAMPLE}
 flowsom_num = 15
 perplexity = 30
 theta = 0.5
 max_iter = 1000
 
-if(length(config$clustering$MERGE)==1){tolower(config$clustering$MERGE);if(config$clustering$MERGE == "fixed" || config$clustering$MERGE == 
-"ceil"){fixedNum=config$clustering$DOWNSAMPLE}}
+
 if(length(config$clustering$PERPLEXITY)==1){perplexity=config$clustering$PERPLEXITY}
 if(length(config$clustering$THETA)==1){theta=config$clustering$THETA}
 if(length(config$clustering$MAX_ITER)==1){max_iter=config$clustering$MAX_ITER}
@@ -258,9 +263,7 @@ if(length(config$clustering$FLOWSOM)==1){tolower(config$clustering$FLOWSOM);if(c
 if(length(clusterMethods) == 0){clusterMethods<-c(clusterMethods,"NULL")}
 
 if(length(config$clustering$PCA)==1){tolower(config$clustering$PCA);if(config$clustering$PCA == "yes"){visualizationMethods<-c(visualizationMethods,"pca")}}
-if(length(config$clustering$ISOMAP)==1){tolower(config$clustering$ISOMAP);if(config$clustering$ISOMAP == 
-"yes"){visualizationMethods<-c(visualizationMethods,"isomap")}}
-
+if(length(config$clustering$ISOMAP)==1){tolower(config$clustering$ISOMAP);if(config$clustering$ISOMAP == "yes"){visualizationMethods<-c(visualizationMethods,"isomap")}}
 
 
 #------------------------------------------------------------------

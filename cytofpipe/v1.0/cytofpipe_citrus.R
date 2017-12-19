@@ -1,20 +1,32 @@
+library(citrus)
+library(hash)
+library(ini)
+
+
 options(stringsAsFactors = F)
 rm(list = ls())
 
+#------------------------------------------------------------------
+#- Parse arguments
+#------------------------------------------------------------------
+
+
 jobid <- as.character(Sys.getenv("JOB_ID"))
-
 input <- paste0(jobid, ".txt")
-lines <- readLines(input, n = 5)
 
-dataDirectory <- lines[1]
-conditionsFile <- lines[2]
-outputDirectory <- lines[3]
-markersFile <- lines[4]
-asinh_cofactor <- lines[5]
+args<-read.ini(input)
 
-library(citrus)
-library(hash)
+dataDirectory=args$paramscitrus$INPUTFILE
+conditionsFile=args$paramscitrus$CONDITIONS
+outputDirectory=args$paramscitrus$OUTPUTFILE
+markersFile=args$paramscitrus$MARKERSFILE
+asinh_cofactor=args$paramscitrus$ASINH
+mergeMethod = args$paramscitrus$MERGE
+fileSampleSize = args$paramscitrus$DOWNSAMPLE
 
+if(asinh_cofactor == '-'){
+	asinh_cofactor=5;
+}
 
 
 #——————————————————————--------
@@ -71,18 +83,26 @@ for(i in 1:length(markersDesc)){
 #- PARAMETERS
 #——————————————---
 
+
+## @knitr fixedparameters
+
+family = "classification"
+minimumClusterSizePercent = 0.05
+nFolds = 1
+featureType = c("abundances")
+
+if(mergeMethod == '-'){
+	if(fileSampleSize == '-'){fileSampleSize = 10000}
+}else{
+	fileSampleSize="NULL";
+}
+
+## @knitr parameters
+
 clusteringColumns<-markersName
 transformColumns<-allMarkerNames[-c(grep("Time|Event|Cell_length|viability", allMarkerNames, ignore.case = TRUE))]
 scaleColumns = transformColumns
 transformCofactor <- as.numeric(asinh_cofactor) 
-family = "classification"
-
-minimumClusterSizePercent = 0.05
-modelTypes = c("pamr","glmnet","sam")
-
-fileSampleSize = 10000
-nFolds = 1
-featureType = c("abundances")
 
 data_conditions<-read.table(conditionsFile, sep="\t",header=F)
 fileList = data.frame(defaultCondition=data_conditions[,1])
@@ -96,12 +116,14 @@ if(length(levels(labels)) > 2){
 }
 
 
+
 #———————————----———
 #- CITRUS
 #——————————————---
 
+
 # Read Data
-citrus.combinedFCSSet = citrus.readFCSSet(dataDirectory,fileList,fileSampleSize,transformColumns,transformCofactor)
+citrus.combinedFCSSet = citrus.readFCSSet(dataDirectory,fileList,as.numeric(fileSampleSize),transformColumns,transformCofactor)
 
 # Cluster all the data
 citrus.foldClustering = citrus.clusterAndMapFolds(citrus.combinedFCSSet,clusteringColumns,labels,nFolds)
@@ -123,6 +145,21 @@ citrus.regressionResults = mclapply(modelTypes,citrus.endpointRegress,citrus.fol
 # Plot Results for each model
 lapply(citrus.regressionResults,plot,outputDirectory=outputDirectory,citrus.foldClustering=citrus.foldClustering,citrus.foldFeatureSet=citrus.foldFeatureSet,citrus.combinedFCSSet=citrus.combinedFCSSet,
 	theme="white")
+
+paste0("files: ", files)
+paste0("data_conditions: ", data_conditions)
+paste0("markersName: ", markersName)
+if(mergeMethod == '-'){
+	paste0("fileSampleSize: ", as.numeric(fileSampleSize))
+}else{
+	paste0("mergeMethod: ", mergeMethod)
+}
+paste0("asinh_cofactor: ", as.numeric(asinh_cofactor))
+paste0("family: ", family)
+paste0("minimumClusterSizePercent: ", minimumClusterSizePercent)
+paste0("nFolds: ", nFolds)
+paste0("featureType: ", featureType)
+paste0("modelTypes: ", modelTypes)
 
 
 sessionInfo()

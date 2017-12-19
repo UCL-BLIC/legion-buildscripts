@@ -1,0 +1,101 @@
+---
+title: "Cytofpipe --citrus Summary" 
+date: "`r format(Sys.time(), '%d %B, %Y')`" 
+output: pdf_document
+params:
+   rscript: 1
+   inputparams: 1
+---
+
+
+```{r echo=FALSE}
+knitr::read_chunk(params$rscript)
+```
+
+
+# Inputfiles
+
+**Command arguments**
+```{r args, echo=F, tidy=TRUE, tidy.opts=list(width.cutoff=60)}
+
+library(ini)
+
+args<-read.ini(params$inputparams)
+arguments=args$paramscitrus$ARGS
+arguments
+```
+
+**FCS files**
+```{r FCSfiles, echo=F}
+
+inputfiles=args$paramscitrus$INPUTFILE
+
+files.list <- list.files(inputfiles, pattern='.fcs$', full=F)
+files.list
+```
+
+**Conditions**
+```{r ref, echo=F}
+
+cond=args$paramscitrus$CONDITIONS
+data_conditions<-read.table(cond, sep="\t",header=F)
+data_conditions
+
+```
+
+**Markers used for clustering**
+```{r Markers, echo=F}
+
+markersFile=args$paramscitrus$MARKERSFILE
+
+usermarkers <- as.character(read.table(markersFile, header = FALSE)[,1])
+usermarkers
+```
+
+**Config parameters**
+```{r Config, echo=F}
+
+mergeMethod=args$paramscitrus$MERGE
+fileSampleSize=args$paramscitrus$DOWNSAMPLE
+if(mergeMethod == '-'){
+        cat(paste0("Events: ", fileSampleSize))
+}else{
+        cat(paste0("Events: ", mergeMethod))
+}
+
+asinh.cofactor=args$paramscitrus$ASINH
+if(asinh.cofactor == '-'){asinh.cofactor=5}
+
+cat(paste0("Asinh cofactor: ", asinh.cofactor))
+
+fileList = data.frame(defaultCondition=data_conditions[,1])
+labels = as.factor(data_conditions[,2])
+
+modelTypes<-vector()
+if(length(levels(labels)) > 2){
+        modelTypes = c("pamr","sam")
+}else{
+        modelTypes = c("pamr","glmnet","sam")
+}
+
+cat("Model types: ")
+modelTypes
+
+<<fixedparameters>>
+
+cat(paste0("Family: ",family))
+cat(paste0("Min. cluster size percent: ",minimumClusterSizePercent))
+cat(paste0("nFolds: ",nFolds))
+cat(paste0("Feature type: ",featureType))
+
+```
+
+\newpage
+
+```{r markerPlots, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
+
+outputdir=args$paramscitrus$OUTPUTFILE
+
+cat(paste0("![Marker plots](",outputdir,"/markerPlotsAll.pdf)"))
+
+```
