@@ -92,7 +92,11 @@ nFolds = 1
 featureType = c("abundances")
 
 if(mergeMethod == '-'){
-	if(fileSampleSize == '-'){fileSampleSize = 10000}
+	if(fileSampleSize == '-'){
+		fileSampleSize = 10000
+	}else{
+		fileSampleSize = as.numerics(fileSampleSize)
+	}	
 }else{
 	fileSampleSize="NULL";
 }
@@ -123,7 +127,7 @@ if(length(levels(labels)) > 2){
 
 
 # Read Data
-citrus.combinedFCSSet = citrus.readFCSSet(dataDirectory,fileList,as.numeric(fileSampleSize),transformColumns,transformCofactor)
+citrus.combinedFCSSet = citrus.readFCSSet(dataDirectory,fileList,fileSampleSize,transformColumns,transformCofactor)
 
 # Cluster all the data
 citrus.foldClustering = citrus.clusterAndMapFolds(citrus.combinedFCSSet,clusteringColumns,labels,nFolds)

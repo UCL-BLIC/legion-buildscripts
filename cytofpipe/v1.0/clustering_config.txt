@@ -13,6 +13,8 @@ MAX_ITER = 1000
 PCA = no
 ISOMAP = no
 
+DISPLAY_ALL = no
+
 PHENOGRAPH = yes
 CLUSTERX = no
 DENSVM = no

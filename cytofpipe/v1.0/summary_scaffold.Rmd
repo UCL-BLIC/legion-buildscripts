@@ -23,7 +23,8 @@ library(ini)
 
 args<-read.ini(params$inputparams)
 arguments=args$paramsscaffold$ARGS
-arguments
+arguments2=strsplit(arguments, " -")
+paste0("-",unlist(arguments2))
 ```
 
 **FCS files**

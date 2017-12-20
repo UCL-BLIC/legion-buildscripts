@@ -31,6 +31,7 @@ template=args$paramsclustering$GATINGFILE
 transformMethod = args$paramsclustering$TRANSFORM
 mergeMethod = args$paramsclustering$MERGE
 fixedNum = args$paramsclustering$DOWNSAMPLE
+displayAll = args$paramsclustering$DISPLAY_ALL
 
 
 #---------------------------------------------------------------------------------------------
@@ -73,7 +74,7 @@ registerPlugins(fun=.dnaGate,methodName='dnaGate', dep='mvtnorm','gating')
 ## @knitr functions_cytofkit
 
 #- Function to plot all level plots for all markers (https://github.com/JinmiaoChenLab/cytofkit/blob/master/inst/shiny/global.R)
-cytof_wrap_colorPlot <- function(data, xlab, ylab, markers, scaleMarker = FALSE,
+cytof_wrap_colorPlot <- function(data, xlim=NULL, ylim=NULL, xlab, ylab, markers, scaleMarker = FALSE,
                              colorPalette = c("bluered", "spectral1", "spectral2", "heat"), 
                              pointSize=1, 
                              removeOutlier = TRUE){
@@ -133,14 +134,26 @@ cytof_wrap_colorPlot <- function(data, xlab, ylab, markers, scaleMarker = FALSE,
      )
      zlength <- nrow(data)
      grid_row_num <- round(sqrt(length(markers)))
-     gp <- ggplot(data, aes_string(x = xlab, y = ylab, colour = ev)) + 
-         facet_wrap(~markers, nrow = grid_row_num, scales = "fixed") +
-         scale_colour_gradientn(name = ev, colours = myPalette(zlength)) +
-         geom_point(size = pointSize) + theme_bw() + coord_fixed() +
-         theme(legend.position = "right") + xlab(xlab) + ylab(ylab) + ggtitle(title) +
-         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
-         theme(axis.text=element_text(size=8), axis.title=element_text(size=12,face="bold"))
-     
+
+     if(!is.null(xlim)){
+	     gp <- ggplot(data, aes_string(x = xlab, y = ylab, colour = ev)) + 
+	         facet_wrap(~markers, nrow = grid_row_num, scales = "fixed") +
+	         scale_colour_gradientn(name = ev, colours = myPalette(zlength)) +
+	         geom_point(size = pointSize) + theme_bw() + coord_fixed() +
+                 xlim(xlim) +
+                 ylim(ylim) +
+	         theme(legend.position = "right") + xlab(xlab) + ylab(ylab) + ggtitle(title) +
+	         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+	         theme(axis.text=element_text(size=8), axis.title=element_text(size=12,face="bold"))
+     }else{
+	     gp <- ggplot(data, aes_string(x = xlab, y = ylab, colour = ev)) + 
+	         facet_wrap(~markers, nrow = grid_row_num, scales = "fixed") +
+	         scale_colour_gradientn(name = ev, colours = myPalette(zlength)) +
+	         geom_point(size = pointSize) + theme_bw() + coord_fixed() +
+	         theme(legend.position = "right") + xlab(xlab) + ylab(ylab) + ggtitle(title) +
+	         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+	         theme(axis.text=element_text(size=8), axis.title=element_text(size=12,face="bold"))
+     }     
      return(gp)
 }
 
@@ -243,7 +256,20 @@ config<-read.ini(configFile)
 autogating=config$clustering$GATING
 if(transformMethod == '-'){transformMethod = config$clustering$TRANSFORM}
 if(mergeMethod == '-'){mergeMethod = config$clustering$MERGE}
-if(fixedNum == '-'){fixedNum = config$clustering$DOWNSAMPLE}
+if(fixedNum == '-'){
+	if(exists(config$clustering$DOWNSAMPLE)){
+		fixedNum = config$clustering$DOWNSAMPLE
+	}else{
+		fixedNum = 10000
+	}
+}
+if(displayAll == '-'){
+	if(exists(config$clustering$DISPLAY_ALL)){
+		displayAll = config$clustering$DISPLAY_ALL
+	}else{
+		displayAll = "no"
+	}
+}
 flowsom_num = 15
 perplexity = 30
 theta = 0.5
@@ -343,16 +369,36 @@ allDimReducedList <- lapply(alldimReductionMethods,
 			     max_iter = as.numeric(max_iter))
 names(allDimReducedList) <- alldimReductionMethods
 
+
 ## cluster results, a list
+seed=100
 cluster_res <- lapply(clusterMethods, cytof_cluster, 
                           ydata = allDimReducedList[[dimReductionMethod]], 
                           xdata = exprs_data[, markersUserName],
-                          FlowSOM_k = as.numeric(flowsom_num))
+                          FlowSOM_k = as.numeric(flowsom_num),
+                          flowSeed = seed)
 names(cluster_res) <- clusterMethods
 
 
+
+## select the markers to display in the plots
+displayMarkers <- vector()
+if(displayAll == 'yes'){
+	exclude <- grep("FSC|SSC|viability", colnames(exprs_data), ignore.case = TRUE)
+	displayMarkers <- setdiff(colnames(exprs_data), colnames(exprs_data)[exclude])
+}else{
+	displayMarkers = markersUserName
+}
+
+
 ## wrap the results
-analysis_results <- list(expressionData = exprs_data,
+message("Stashing sample names...")
+names <- sub("^.+/", "", unique(sub(".fcs$", "", files)))
+samples <- as.list(NULL)
+for(i in seq_along(names)){
+	samples[[i]] <- names[i]
+}
+analysis_results <- list(expressionData = exprs_data[,displayMarkers],
                              dimReductionMethod = dimReductionMethod,
                              visualizationMethods = alldimReductionMethods,
                              dimReducedRes = allDimReducedList,
@@ -360,7 +406,8 @@ analysis_results <- list(expressionData = exprs_data,
                              projectName = projectName,
                              rawFCSdir = inputfiles,
                              resultDir = outputdir,
-			     dimRedMarkers = markersUserName)
+			     dimRedMarkers = markersUserName,
+			     sampleNames = samples)
         
 ## save the results
 cytof_writeResults(analysis_results = analysis_results,
@@ -396,11 +443,11 @@ for(i in 1:length(visualizationData)){
 		
 		## Level plots
 		pdf(paste0(outputdir,"/",projectName, "_", methodi, "_level_plot.pdf"))
-		gp<-cytof_wrap_colorPlot(data=data_all, xlab=paste0(methodi,".", methodi,"_1"), ylab=paste0(methodi,".", methodi, "_2"), markers=markersUserName, colorPalette = c("spectral1"), pointSize=0.1)
+		gp<-cytof_wrap_colorPlot(data=data_all,xlab=paste0(methodi,".", methodi,"_1"), ylab=paste0(methodi,".", methodi, "_2"), markers=displayMarkers, colorPalette = c("spectral1"), pointSize=0.1)
 		print(gp)
 		dev.off()
 
-		## if multiple files, do level plots per file and tredo he cluster grid plot to correct label size
+		## if multiple files, do level plots per file and redo he cluster grid plot to correct label size
 		if (ifMultiFCS) {
  			if(!is.null(clusterData) && length(clusterData) > 0){
 				for(j in 1:length(clusterData)){
@@ -434,8 +481,17 @@ for(i in 1:length(visualizationData)){
 							samplename=X[[d]]$sample[1]
 							data_all_sample <- subset(data_all, rownames(data_all) %in% rownames(X[[d]]))
 
+							#- so that all the plots have the same x and y scales
+							xlab=paste0(methodi,".", methodi,"_1")
+							ylab=paste0(methodi,".", methodi,"_2")
+							
+							range.x<-max(data_all[xlab])-min(data_all[xlab])
+							range.y<-max(data_all[ylab])-min(data_all[ylab])
+							xlim=c(min(data_all[xlab]), max(data_all[xlab]))
+							ylim=c(min(data_all[ylab]), max(data_all[ylab]))
+
 							pdf(paste0(outputdir,"/",projectName, "_", methodi,  "_", samplename,  "_sample_level_plot.pdf"))
-							gp<-cytof_wrap_colorPlot(data=data_all_sample, xlab=paste0(methodi,".", methodi,"_1"), ylab=paste0(methodi,".", methodi,"_2"), markers= markersUserName, colorPalette = c("spectral1"), pointSize=0.1)
+							gp<-cytof_wrap_colorPlot(data=data_all_sample, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, markers=displayMarkers, colorPalette = c("spectral1"), pointSize=0.1)
 							print(gp)
 							dev.off()		
                       	    			}
@@ -456,10 +512,10 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 		dataj <- clusterData[[j]]
 		if(!is.null(dataj)){
                     
-			exprs_cluster_sample <- data.frame(exprs, cluster = dataj, check.names = FALSE)
+			exprs_cluster_sample <- data.frame(exprs[, displayMarkers], cluster = dataj, check.names = FALSE)
 		
 			## cluster median 
-			cluster_median <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "median")
+			cluster_median <- cytof_clusterStat(data=exprs_cluster_sample, cluster = "cluster", statMethod = "median")
 
 
 			## Heatmap scaled
@@ -475,7 +531,7 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 
 			## cluster percentage
 			if (ifMultiFCS) {
-				cluster_percentage <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "percentage")
+				cluster_percentage <- cytof_clusterStat(data=exprs_cluster_sample, cluster = "cluster", statMethod = "percentage")
 				pdf(paste0(outputdir,"/",projectName, "_",methodj, "_cluster_percentage_heatmap_scaled.pdf"))
 				cytof_heatmap(cluster_percentage,scaleMethod="column", paste(projectName, methodj, "cluster\ncell percentage (scaled)", sep = " "))
 				dev.off()

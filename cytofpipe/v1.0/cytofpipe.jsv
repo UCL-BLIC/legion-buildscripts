@@ -60,6 +60,7 @@ sub parse_clustering {
 	my $configfile='';
 	my $flow='0';
 	my $cytof='0';
+	my $displayall='';
 	my $all='';
 	my $downsample='';
 	GetOptionsFromArray (
@@ -70,6 +71,7 @@ sub parse_clustering {
 	    "config=s"   => \$configfile,
 	    "flow"   => \$flow,
 	    "cytof"   => \$cytof,
+	    "displayAll"   => \$displayall,
 	    "all"   => \$all,
 	    "downsample=i"   => \$downsample,
 	    "<>"   => \&print_usage_clustering_with_error,
@@ -96,9 +98,9 @@ sub parse_clustering {
 		jsv_reject("Can't find markers file <$markersfile>\n");
 		return;
 	}
-	if(($flow + $cytof > 1) || ($flow eq '1' && $configfile ne '') || ($cytof eq '1' && $configfile ne '')){
+	if($flow eq '1' && $cytof eq '1') {
 		print_usage_clustering();
-		jsv_reject("These three parameters [--flow, --cytof, --conf CONFIGFILE] can not be used jointly, please choose one of them (or none for default options)\n");
+		jsv_reject("These two parameters [--flow, --cytof] can not be used jointly, please choose one of them (or none for default options)\n");
 		return;
 	}
 	if($downsample ne ''){
@@ -328,19 +330,21 @@ sub print_usage_clustering {
 	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
 	my $usage11="";
 	my $usage12="Options:";
-	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below) [DEFAULT]\n";
+	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below)\n";
 	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
 	my $usage15="\t				(transformation = cytofAsinh)\n";
 	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
 	my $usage17="\t				each FCS file to the specified number of events \n";
 	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
-	my $usage19="";
+	my $usage19="\t--displayAll				Display all markers in output files\n";
+	my $usage20="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
 	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);
 
 }
 
@@ -360,19 +364,21 @@ sub print_usage_clustering_with_error {
 	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
 	my $usage11="";
 	my $usage12="Options:";
-	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below) [DEFAULT]\n";
+	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below)\n";
 	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
 	my $usage15="\t				(transformation = cytofAsinh)\n";
 	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
 	my $usage17="\t				each FCS file to the specified number of events \n";
 	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
-	my $usage19="";
+	my $usage19="\t--displayAll				Display all markers in output files\n";
+       	my $usage20="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
 	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);
 
 	jsv_reject("ERROR: Invalid or missing argument in --clustering mode\n");
 	return;
@@ -413,6 +419,9 @@ sub print_usage_clustering_config {
 	my $usage28="\tPCA = yes|no\n";
 	my $usage29="\tISOMAP = yes|no\n";
 	my $usage30="";
+	my $usage31="\t#- Other:";
+	my $usage32="\tDISPLAY_ALL = yes|no\n";
+	my $usage33="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
@@ -422,6 +431,7 @@ sub print_usage_clustering_config {
 	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
 	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
 	jsv_log_info($usage28);	jsv_log_info($usage29);jsv_log_info($usage30);
+	jsv_log_info($usage31);	jsv_log_info($usage32);jsv_log_info($usage33);
 
 }
 
@@ -690,6 +700,14 @@ sub check_config_clustering {
 			if($max_iter !~/^\d+$/ || $max_iter < 100 || $max_iter > 5000){
 				print_usage_clustering_config();
 				jsv_reject("\"$max_iter\" is not a valid MAX_ITER option in <$config>. Please correct the config file and choose a value between 100 and 5000");
+				return;
+			}
+		}
+		if($line=~/^DISPLAY_ALL\s*\=\s*(.*)\s*$/){
+			my $display=$1;
+			if($display !~/^yes$/i && $display !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$display\" is not a valid DISPLAY_ALL option in <$config>. Please correct the config file and choose if you want to display all the markers in the output files \(\"YES or NO\"\)");
 				return;
 			}
 		}
