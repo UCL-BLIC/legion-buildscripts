@@ -294,9 +294,9 @@ DISPLAY_ALL = yes|no
 <li>**summary_clustering.pdf**: This is a PDF with a summary of the analysis. It describes what files, markers and config options were used, and shows the main plots from the analysis (gates, cluster plots, marker level plots, heatmaps…).</li>
 
 <li>**cytofpipe.RData**: The object resulting from the cytofkit analysis. i.e., a file that was saved and that can be used for loading to the cytofkit shiny APP to further exploration of the results.</li>
-</ul>
 
 <li>**log_R.txt**: This is just the log file from the R script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error. </li>
+</ul>
 
 
 <br />
@@ -487,11 +487,11 @@ HLA-DR
 <li>**featurePlots-{thresholds}.pdf**: Shows the the location and relatedness of identified stratifying clusters in the clustering hierarchy. There will be a separate plot for each tested feature.</li>
 <li>**ModelErrorRate.pdf**: Used to determine the accuracy of the constructed model. For predictive models only (PAMR and GLMNET). </li>
 </ul>
-</ul>
 
 <li>**summary_citrus.pdf**: This is a PDF with a summary of the analysis. It describes what files, markers and config options were used, as well as the MarkerPlotsAll plot.</li>
 
 <li>**log_R.txt**: This is just the log file from the R script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error.</li>
+</ul>
 
 <br />
 
@@ -511,7 +511,8 @@ _________________
 <ul>
 <li>Changed command line usage</li>
 <li>Added --flow, --cytof, --all, --downsample, --displayAll options</li>
-<li>By default outputfiles display only clustering Markers (use --displayAll to override)
+<li>By default, outputfiles display only clustering Markers (use --displayAll to override)
+<li>MArker level plots per sample are shown on the same scale on the x- and y-axis</li>
 <li>Fixed bug with mergeMethod=fixed from previous cytofkit version (https://github.com/JinmiaoChenLab/cytofkit/issues/12) </li>
 <li>Versions: cytofkit 1.10.0, scaffold 1.0, citrus 0.08</li>
 </ul>
