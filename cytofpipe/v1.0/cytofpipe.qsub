@@ -11,14 +11,13 @@
 # =========================================================================================
 
 
-
 #$ -S /bin/bash
 #$ -l h_rt=12:00:00
-#$ -l mem=50G
+#$ -l mem=30G
 #$ -l tmpfs=100G
 #$ -cwd
 #$ -N cytofpipe
-#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v1.0/cytofpipe.jsv
+#$ -jsv /home/regmond/Scratch/cytof/cytofpipe/v1.0/cytofpipe.jsv
 
 set -o pipefail
 
@@ -27,10 +26,10 @@ module unload mpi
 module load pandoc/1.19.2.1
 module load r/recommended
 
-module load blic-modules
-module load cytofpipe/v0.3
+module load personal-modules
+module load cytofpipe/v1.0
 
-CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v1.0"
+CYTOFPIPE_HOME="/home/regmond/Scratch/cytof/cytofpipe/v1.0"
 
 configfile="${CYTOFPIPE_HOME}/clustering_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
@@ -44,6 +43,7 @@ merge="-";
 downsample="-";
 asinh="-";
 displayAll="-";
+medians="-";
 
 FILE=${PWD}/${JOB_ID}.txt
 
@@ -183,6 +183,10 @@ case "$command" in
                     ;;
                 cond)
                     conditions="${!OPTIND}";
+		    OPTIND=$(( $OPTIND + 1 ))
+                    ;;
+                medians)
+                    medians="${!OPTIND}";
 		    OPTIND=$(( $OPTIND + 1 ))
                     ;;
                 *)
@@ -381,10 +385,10 @@ function run_scaffold {
 	run "rm -rf ${PWD}/${outputfiles}/summary_scaffold.Rmd"
 	
 
-#	if [ -e "$PWD/${JOB_ID}.txt" ]
-#	  then
-#	      run "rm $PWD/${JOB_ID}.txt"
-#	fi
+	if [ -e "$PWD/${JOB_ID}.txt" ]
+	  then
+	      run "rm $PWD/${JOB_ID}.txt"
+	fi
 }
 
 function run_citrus {
@@ -462,6 +466,7 @@ CONDITIONS = ${PWD}/${conditions}
 ASINH = $asinh
 MERGE = $merge
 DOWNSAMPLE = $downsample
+MEDIANS = ${PWD}/${medians}
 ARGS = ${arguments[*]}
 EOM
 

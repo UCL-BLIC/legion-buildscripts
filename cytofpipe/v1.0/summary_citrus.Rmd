@@ -82,21 +82,113 @@ if(length(levels(labels)) > 2){
 cat("Model types: ")
 modelTypes
 
+medians=args$paramscitrus$MEDIANS
+if(medians == "-"){
+	cat("Feature type: abundances")
+}else{
+	cat("Feature type: medians")
+	cat("Median markers: ")
+	medianmarkers <- as.character(read.table(medians, header = FALSE)[,1])
+	medianmarkers
+}	
+
 <<fixedparameters>>
 
 cat(paste0("Family: ",family))
 cat(paste0("Min. cluster size percent: ",minimumClusterSizePercent))
 cat(paste0("nFolds: ",nFolds))
-cat(paste0("Feature type: ",featureType))
 
 ```
 
+
 \newpage
 
-```{r markerPlots, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
+# Results
+
+```{r model, fig.align='center',echo=FALSE, message=FALSE,warning=FALSE,results="asis"}
+
 
 outputdir=args$paramscitrus$OUTPUTFILE
+
+for (i in 1:length(modelTypes)){
+	if(modelTypes[i] == "sam"){
+		if(medians == "-"){
+			if(file.exists(paste0(outputdir,"/sam_results/featurePlots_fdr_0.05.pdf"))){
+	        	        cat("  \n**SAM featurePlot_p0.05**  \n")
+	        	        cat(paste0("![SAM featurePlot_0.05]( ",outputdir,"/sam_results/featurePlots_fdr_0.05.pdf)"))
+			}else{
+				cat("  \n**No Results**  \n")
+			}
+			cat("\\newpage")
+		}
+	}else if(modelTypes[i] == "pamr"){
+		if(medians == "-"){
+			if(file.exists(paste0(outputdir,"/pamr_results/ModelErrorRate.pdf"))){
+		                cat("  \n**PAMR Model Error Rate**  \n")
+				cat(paste0("![PAMR ModelErrorRate]( ",outputdir,"/pamr_results/ModelErrorRate.pdf)"))
+				cat("\\newpage")
+		                cat("  \n**PAMR featurePlot_cv.min**  \n")
+				cat(paste0("![PAMR featurePlot_cv.min]( ",outputdir,"/pamr_results/featurePlots_cv.min.pdf)"))
+				cat("\\newpage")
+		                cat("  \n**PAMR featurePlot_cv.1se**  \n")
+				cat(paste0("![PAMR featurePlot_cv.1se]( ",outputdir,"/pamr_results/featurePlots_cv.1se.pdf)"))
+				cat("\\newpage")
+		                cat("  \n**PAMR featurePlot_cv.fdr.constrained**  \n")
+				if(file.exists(paste0(outputdir,"/pamr_results/featurePlots_cv.fdr.constrained.pdf"))){
+		        	        cat(paste0("![PAMR featurePlot_cv.fdr.constrained]( ",outputdir,"/pamr_results/featurePlots_cv.fdr.constrained.pdf)"))
+				}else{
+					cat("  \n**No results**  \n")
+				}
+	
+			}else{
+				cat("  \n**No PAMR predictive model found**  \n")
+			}
+			cat("\\newpage")
+		}else{
+			if(file.exists(paste0(outputdir,"/pamr_results/ModelErrorRate.pdf"))){
+		                cat("  \n**PAMR Model Error Rate**  \n")
+				cat(paste0("![PAMR ModelErrorRate]( ",outputdir,"/pamr_results/ModelErrorRate.pdf)"))
+				cat("\\newpage")
+			}else{
+				cat("  \n**No PAMR predictive model found**  \n")
+			}
+			cat("\\newpage")
+		}
+	}else if(modelTypes[i] == "glmnet"){
+		if(medians == "-"){
+			if(file.exists(paste0(outputdir,"/glmnet_results/ModelErrorRate.pdf"))){
+		                cat("  \n**glmnet Model Error Rate**  \n")
+		                cat(paste0("![glmnet ModelErrorRate]( ",outputdir,"/glmnet_results/ModelErrorRate.pdf)"))
+				cat("\\newpage")
+		                cat("  \n**glmnet featurePlot_cv.min**  \n")
+				cat(paste0("![glmnet featurePlot_cv.min]( ",outputdir,"/glmnet_results/featurePlots_cv.min.pdf)"))
+				cat("\\newpage")
+		                cat("  \n**glmnet featurePlot_cv.1se**  \n")
+		                cat(paste0("![glmnet featurePlot_cv.1se]( ",outputdir,"/glmnet_results/featurePlots_cv.1se.pdf)"))
+			}else{
+				cat("  \n**No glmnet predictive model found**  \n")
+			}
+        	}else{
+			if(file.exists(paste0(outputdir,"/glmnet_results/ModelErrorRate.pdf"))){
+		                cat("  \n**glmnet Model Error Rate**  \n")
+		                cat(paste0("![glmnet ModelErrorRate]( ",outputdir,"/glmnet_results/ModelErrorRate.pdf)"))
+				cat("\\newpage")
+			}else{
+				cat("  \n**No glmnet predictive model found**  \n")
+			}
+		}
+	}
+	cat("\\newpage")
+}
+```
+
+
+\newpage
+
+
+```{r markerPlots, fig.align='center', echo=F,results='asis', message=FALSE,warning=FALSE}
 
 cat(paste0("![Marker plots](",outputdir,"/markerPlotsAll.pdf)"))
 
 ```
+

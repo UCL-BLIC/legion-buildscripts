@@ -406,16 +406,22 @@ Cytofpipe **--citrus** can be used to identify cell populations associated with 
 <br />
 
 After indicating which samples belong to each condition, expression data are transformed (using the arcsin hyperbolic transform) and scaled, and cell populations are indentified in every sample using hierarchical clustering based on 
-selected markers. Abundance of each cell population in each sample is calculated, and these are used to identify the cell populations that are likely to be predictive (pamr, glmnet) or correlated (sam) with the experimental/clinical 
-endpoint. Briefly, predictive models identify subsets of cluster properties that are the best predictors of the experimental endpoint. Correlative models detect subsets of cluster properties that are correlated with the experimental 
-endpoint but that are not necessarily accurate predictors of an experimental outcome. Among the predictive models, 'pamr' can be used with 2 or more groups, whereas 'glmnet' can only deal with 2 groups or continuous endpoint  measures. 
+selected markers. Sample features are calculated (either abundance of cell populations in each sample [default], or median expression of specific markers in a cluster), and these are used 
+to identify the features (cell populations or markers) that are likely to be predictive (pamr, glmnet) or correlated (sam) with the experimental/clinical 
+endpoint. Briefly, predictive models identify the fewest number of markers needed to predict the experimental endpoint. Correlative models detect all the markers that are correlated with the experimental endpoint but that are not necessarily accurate predictors of an experimental outcome. Among the predictive models, 'pamr' can be used with 2 or more groups, whereas 'glmnet' can only deal with 2 groups or continuous endpoint measures. 
 
 
 - *Note 1*: Citrus requires 8 or more samples in each experimental group. Running Citrus with fewer than 8 samples per group will likely produce spurious results.
 - *Note 2*: To ensure that each sample is equally represented in the clustering, by default Citrus selects an equal number of events from each sample (10,000) that are combined and clustered together. This can be changed with the **--all** and **--downsample NUM** arguments.
-- *Note 3*: By default, clusters (cell populations) of size lower than 5% of the total number of clustered events will be ignored. If you wish to change the minimum cluster size threshold please contact me. 
-- *Note 4*: Parameters must be measured on the same channels in each file, the same parameters must be measured in all FCS files (no extras or missing parameters in any FCS file) and measured parameters and channels must appear in the same order in each FCS file.
-- *Note 5*: Cytofpipe v1.0 runs citrus_0.08
+- *Note 3*: By default, cytofpipe --citrus runs in "abundances" mode. You can change to "medians" mode using the **--medians FILE** parameter by supplying a list of amrkers used for median 
+calculation. *Markers that were selected for clustering should not be selected again for statistics (for example, you might want to use surface markers for clustering and phospho-specific 
+signal for analysis).*
+- *Note 4*: By default, clusters (cell populations) of size lower than 5% of the total number of clustered events will be ignored. If you wish to change the minimum cluster size threshold 
+please contact me. 
+- *Note 5*: Parameters must be measured on the same channels in each file, the same parameters must be measured in all FCS files (no extras or missing parameters in any FCS file) and measured 
+parameters and channels must appear in the same order in each FCS file.
+- *Note 6*: Due to the stochastic nature of the citrus algorithm, is recommended to run (repeat) the analysis at least 3 times to make sure the results are not false positives.
+- *Note 7*: Cytofpipe v1.0 runs citrus_0.08
 
 Cytofpipe assumes that the data have been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. For flow cytometry data, raw FCS file data must be compensated. Compensation matrices stored in FCS files will not be applied when running Cytofpipe in --citrus mode.
 
@@ -463,6 +469,15 @@ HLA-DR
 
 <ul>
 
+<li>**-medians FILE**: A text file with the names of the markers that will be used as features, one per line. For example:
+```
+p-NFκB
+p-S6
+p-PI3K
+p-STAT5
+```
+</li>
+
 <li>**--flow**, **--cytof**: Shorcut to let cytofpipe know if the user is analyzing flow or cytof data, without having to provide a config file. If **--flow** is selected, arcsin hyperbolic transformation will be used with asinh_cofactor = 150. If **--cytof** is selected, arcsin hyperbolic transformation will be used with asinh_cofactor = 5. **--flow** and **--cytof** cannot be used at the same time </li>
 
 <li>**--all**, **--downsample NUM**: Shorcut to let cytofpipe know if we want to use all the events/downsample the data, without having to provide a config file. **--all** and **--downsample NUM** cannot be used at the same time. </li>
@@ -488,7 +503,11 @@ HLA-DR
 <li>**ModelErrorRate.pdf**: Used to determine the accuracy of the constructed model. For predictive models only (PAMR and GLMNET). </li>
 </ul>
 
+<li>**exportedClusters**: Folder that contains data (FCS files) exported from each cluster, useful for further analysis on the clusters of interest.</li>
+
 <li>**summary_citrus.pdf**: This is a PDF with a summary of the analysis. It describes what files, markers and config options were used, as well as the MarkerPlotsAll plot.</li>
+
+<li>**cytofpipe_citrusClustering.rData**: Saved version of the clustered data that was computed during the citrus analysis, which can be loaded in R for further exploration of the results.</li>
 
 <li>**log_R.txt**: This is just the log file from the R script, just so that the user can see what R commands were run when doing the analysis. It will help me figure out what the problem is if the job finishes with an error.</li>
 </ul>
@@ -512,8 +531,9 @@ _________________
 <li>Changed command line usage</li>
 <li>Added --flow, --cytof, --all, --downsample, --displayAll options</li>
 <li>By default, outputfiles display only clustering Markers (use --displayAll to override)
-<li>MArker level plots per sample are shown on the same scale on the x- and y-axis</li>
+<li>Marker level plots per sample are shown on the same scale on the x- and y-axis</li>
 <li>Fixed bug with mergeMethod=fixed from previous cytofkit version (https://github.com/JinmiaoChenLab/cytofkit/issues/12) </li>
+<li>More --citrus functionalities exposed ('medians' mode, clusters exported as new FCS files)  </li>
 <li>Versions: cytofkit 1.10.0, scaffold 1.0, citrus 0.08</li>
 </ul>
 <li><b>v0.3</b>
