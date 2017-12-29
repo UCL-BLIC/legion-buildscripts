@@ -414,8 +414,8 @@ endpoint. Briefly, predictive models identify the fewest number of markers neede
 - *Note 1*: Citrus requires 8 or more samples in each experimental group. Running Citrus with fewer than 8 samples per group will likely produce spurious results.
 - *Note 2*: To ensure that each sample is equally represented in the clustering, by default Citrus selects an equal number of events from each sample (10,000) that are combined and clustered together. This can be changed with the **--all** and **--downsample NUM** arguments.
 - *Note 3*: By default, cytofpipe --citrus runs in "abundances" mode. You can change to "medians" mode using the **--medians FILE** parameter by supplying a list of amrkers used for median 
-calculation. *Markers that were selected for clustering should not be selected again for statistics (for example, you might want to use surface markers for clustering and phospho-specific 
-signal for analysis).*
+calculation. *Markers that were selected for clustering should not be selected again for statistics (for example, you might want to use surface markers for clustering and 
+functional markers for median level expression calculation).*
 - *Note 4*: By default, clusters (cell populations) of size lower than 5% of the total number of clustered events will be ignored. If you wish to change the minimum cluster size threshold 
 please contact me. 
 - *Note 5*: Parameters must be measured on the same channels in each file, the same parameters must be measured in all FCS files (no extras or missing parameters in any FCS file) and measured 
