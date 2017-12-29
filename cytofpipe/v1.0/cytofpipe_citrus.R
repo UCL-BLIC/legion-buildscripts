@@ -105,9 +105,12 @@ if(mergeMethod == '-'){
 ## @knitr medians
 
 mediansmarkersName<-vector()
-if(medians == '-'){
+paste0("medians1: ", basename(medians))
+if(basename(medians) == '-'){
+paste0("medians2: ", medians)
 	featureType=c("abundances")
 }else{
+paste0("medians3: ", medians)
 	featureType=c("medians")
 
 	mediansmarkers <- as.character(read.table(medians, header = FALSE)[,1])
