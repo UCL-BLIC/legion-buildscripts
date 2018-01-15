@@ -257,17 +257,17 @@ autogating=config$clustering$GATING
 if(transformMethod == '-'){transformMethod = config$clustering$TRANSFORM}
 if(mergeMethod == '-'){mergeMethod = config$clustering$MERGE}
 if(fixedNum == '-'){
-	if(exists(config$clustering$DOWNSAMPLE)){
-		fixedNum = config$clustering$DOWNSAMPLE
-	}else{
+	if(is.null(config$clustering$DOWNSAMPLE)){
 		fixedNum = 10000
+	}else{
+		fixedNum = config$clustering$DOWNSAMPLE
 	}
 }
 if(displayAll == '-'){
-	if(exists(config$clustering$DISPLAY_ALL)){
-		displayAll = config$clustering$DISPLAY_ALL
-	}else{
+	if(is.null(config$clustering$DISPLAY_ALL)){
 		displayAll = "no"
+	}else{
+		displayAll = config$clustering$DISPLAY_ALL
 	}
 }
 flowsom_num = 15
@@ -540,6 +540,18 @@ if(!is.null(clusterData) && length(clusterData) > 0){
 		}
 	}
 }
+
+
+paste0("files: ", files)
+paste0("transformMethod: ", transformMethod)
+paste0("markersUserName: ", markersUserName)
+paste0("displayMarkers: ", displayMarkers)
+paste0("mergeMethod: ", mergeMethod)
+paste0("fixedNum: ", as.numeric(fixedNum))
+paste0("perplexity: ", as.numeric(perplexity))
+paste0("theta: ", as.numeric(theta))
+paste0("max_iter: ", as.numeric(max_iter))
+
 
 sessionInfo()
 
