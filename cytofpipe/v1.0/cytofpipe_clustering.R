@@ -257,17 +257,17 @@ autogating=config$clustering$GATING
 if(transformMethod == '-'){transformMethod = config$clustering$TRANSFORM}
 if(mergeMethod == '-'){mergeMethod = config$clustering$MERGE}
 if(fixedNum == '-'){
-	if(is.null(config$clustering$DOWNSAMPLE)){
-		fixedNum = 10000
-	}else{
+	if(!is.null(config$clustering$DOWNSAMPLE)){
 		fixedNum = config$clustering$DOWNSAMPLE
+	}else{
+		fixedNum = 10000
 	}
 }
 if(displayAll == '-'){
-	if(is.null(config$clustering$DISPLAY_ALL)){
-		displayAll = "no"
-	}else{
+	if(!is.null(config$clustering$DISPLAY_ALL)){
 		displayAll = config$clustering$DISPLAY_ALL
+	}else{
+		displayAll = "no"
 	}
 }
 flowsom_num = 15
