@@ -83,7 +83,7 @@ cat("Model types: ")
 modelTypes
 
 medians=args$paramscitrus$MEDIANS
-if(medians == "-"){
+if(basename(medians) == "-"){
 	cat("Feature type: abundances")
 }else{
 	cat("Feature type: medians")
