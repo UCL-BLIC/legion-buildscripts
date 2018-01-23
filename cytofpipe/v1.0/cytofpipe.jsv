@@ -36,7 +36,7 @@ jsv_on_verify(sub {
 	    "scaffold" => \&parse_scaffold,
 	    "citrus" => \&parse_citrus,
 	    "<>"   => \&print_usage,
-	);
+	) or die "\n";
 
 	jsv_reject("THIS SHOULD NEVER HAPPEN.. :?\n");
 	return;
@@ -75,7 +75,7 @@ sub parse_clustering {
 	    "all"   => \$all,
 	    "downsample=i"   => \$downsample,
 	    "<>"   => \&print_usage_clustering_with_error,
-	);
+	) or die "\n";
 
 
         if ($inputdir eq '' || $outputdir eq '' || $markersfile eq ''){
@@ -156,7 +156,7 @@ sub parse_scaffold {
 	    "all"   => \$all,
 	    "downsample=i"   => \$downsample,
 	    "<>"   => \&print_usage_scaffold_with_error,
-	);
+	) or die "\n";
 
 	if ($inputdir eq '' || $outputdir eq '' || $markersfile eq '' || $reference eq '') {
 		print_usage_scaffold();
@@ -240,10 +240,10 @@ sub parse_citrus {
 	    "downsample=i"   => \$downsample,
 	    "medians=s" => \$medians,
 	    "<>"   => \&print_usage_citrus_with_error,
-	);
+	) or die "\n";
 
 	if ($inputdir eq '' || $outputdir eq '' || $markersfile eq '' || $conditions eq '') {
-		print_usage_scaffold();
+		print_usage_citrus();
 		jsv_reject("Please check that you are providing a inputdir (-i), outputdir (-o), markersfile (-m) and conditions file (--cond)\n");
 		return;
 	}		
@@ -299,22 +299,22 @@ sub parse_citrus {
 
 
 sub print_usage {
+
 	my $usage0="";
-	my $usage1="-------------------------------------------";
-	my $usage2 = "Cytofpipe v1.0\n";
-	my $usage3 = "USAGE: cytofpipe <command> [options]\n";
-	my $usage4="-------------------------------------------";
-	my $usage5="Commands:";
-	my $usage6="";
-	my $usage7="\t--clustering	Performs preprocessing of data and clustering/visualization (based on cytofkit) \n";
-	my $usage8="\t--scaffold		Constructs scaffold maps (based on Scaffold)\n";
-	my $usage9="\t--citrus		Performs citrus analysis (based on citrus)\n";
-	my $usage10="";
+        my $usage1="Program: Cytofpipe";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe <command> [options]";
+        my $usage6="";
+        my $usage7="Commands: --clustering  Performs preprocessing of data and clustering/visualization (based on cytofkit)";
+        my $usage8="          --scaffold    Constructs scaffold maps (based on Scaffold)";
+        my $usage9="          --citrus      Performs citrus analysis (based on citrus)";
+        my $usage10="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);
-
 
 	jsv_reject("Please select one of the available commands\n");
 	return;
@@ -326,68 +326,50 @@ sub print_usage {
 sub print_usage_clustering {
 
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
-	my $usage3 = "\t\t\t--clustering";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="\t-i DIR		Input directory with the FCS files\n";
-	my $usage9="\t-o DIR		Output directory where results will be generated\n";
-	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage11="";
-	my $usage12="Options:";
-	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below)\n";
-	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage15="\t				(transformation = cytofAsinh)\n";
-	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
-	my $usage17="\t				each FCS file to the specified number of events \n";
-	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
-	my $usage19="\t--displayAll				Display all markers in output files\n";
-	my $usage20="";
-
+        my $usage1="Program: Cytofpipe --clustering";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR    Input directory with the FCS files";
+        my $usage8="          -o DIR    Output directory where results will be generated";
+        my $usage9="          -m FILE   File with markers that will be selected for clustering";
+        my $usage10="Options: --config FILE                     Configuration file to customize the analysis";
+        my $usage11="         --flow | --cyto           Flow cytometry data (transformation = autoLgcl) or Cytof data (transformation = cytofAsinh) [--cytof]";
+        my $usage12="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="         --displayAll                      Display all markers in output files [NULL]";
+        my $usage14="";
+    
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
 
 }
 
 sub print_usage_clustering_with_error {
 
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
-	my $usage3 = "\t\t\t--clustering";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="\t-i DIR		Input directory with the FCS files\n";
-	my $usage9="\t-o DIR		Output directory where results will be generated\n";
-	my $usage10="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage11="";
-	my $usage12="Options:";
-	my $usage13="\t--config FILE				Configuration file to customize the analysis (see below)\n";
-	my $usage14="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage15="\t				(transformation = cytofAsinh)\n";
-	my $usage16="\t--all | --downsample NUM		Use all events in the analysis or downsample\n";
-	my $usage17="\t				each FCS file to the specified number of events \n";
-	my $usage18="\t				(with no replacement for sample with events < NUM)\n";
-	my $usage19="\t--displayAll				Display all markers in output files\n";
-       	my $usage20="";
+        my $usage1="Program: Cytofpipe --clustering";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR    Input directory with the FCS files";
+        my $usage8="          -o DIR    Output directory where results will be generated";
+        my $usage9="          -m FILE   File with markers that will be selected for clustering";
+        my $usage10="Options: --config FILE                     Configuration file to customize the analysis";
+        my $usage11="         --flow | --cyto           Flow cytometry data (transformation = autoLgcl) or Cytof data (transformation = cytofAsinh) [--cytof]";
+        my $usage12="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="         --displayAll                      Display all markers in output files [NULL]";
+        my $usage14="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
 
 	jsv_reject("ERROR: Invalid or missing argument in --clustering mode\n");
 	return;
@@ -397,40 +379,41 @@ sub print_usage_clustering_with_error {
 sub print_usage_clustering_config {
 
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t  **   Cytofpipe v1.0   **";
-	my $usage3 = "\t\t\t --clustering";
-	my $usage4="------------------------------------------------------------------------------------";
-
-	my $usage5="CONFIG file format";
-	my $usage6="";
-	my $usage7="\t[ clustering ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
+        my $usage1="Program: Cytofpipe --clustering";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+	my $usage5="------------------";
+	my $usage6="CONFIG file format";
+	my $usage7="------------------";
 	my $usage8="";
-	my $usage9="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
+	my $usage9="\t[ clustering ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
 	my $usage10="";
-	my $usage11="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
-	my $usage12="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
-	my $usage13="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
-	my $usage14="";
-	my $usage15="\t#- DimRed method (tSNE) parameters:";
-	my $usage16="\tPERPLEXITY = 30\n";
-	my $usage17="\tTHETA = 0.5\n";
-	my $usage18="\tMAX_ITER = 1000\n";
-	my $usage19="";
-	my $usage20="\t#- Clustering methods:";
-	my $usage21="\tPHENOGRAPH = yes|no\n";
-	my $usage22="\tCLUSTERX = yes|no\n";
-	my $usage23="\tDENSVM = yes|no\n";
-	my $usage24="\tFLOWSOM = yes|no\n";
-	my $usage25="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
-	my $usage26="";
-	my $usage27="\t#- Additional visualization methods:";
-	my $usage28="\tPCA = yes|no\n";
-	my $usage29="\tISOMAP = yes|no\n";
-	my $usage30="";
-	my $usage31="\t#- Other:";
-	my $usage32="\tDISPLAY_ALL = yes|no\n";
-	my $usage33="";
+	my $usage11="\tGATING = yes|no  		#-- MANDATORY FIELD:\n";
+	my $usage12="";
+	my $usage13="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
+	my $usage14="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
+	my $usage15="\tDOWNSAMPLE = number between 500 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
+	my $usage16="";
+	my $usage17="\t#- DimRed method (tSNE) parameters:";
+	my $usage18="\tPERPLEXITY = 30\n";
+	my $usage19="\tTHETA = 0.5\n";
+	my $usage20="\tMAX_ITER = 1000\n";
+	my $usage21="";
+	my $usage22="\t#- Clustering methods:";
+	my $usage23="\tPHENOGRAPH = yes|no\n";
+	my $usage24="\tCLUSTERX = yes|no\n";
+	my $usage25="\tDENSVM = yes|no\n";
+	my $usage26="\tFLOWSOM = yes|no\n";
+	my $usage27="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage28="";
+	my $usage29="\t#- Additional visualization methods:";
+	my $usage30="\tPCA = yes|no\n";
+	my $usage31="\tISOMAP = yes|no\n";
+	my $usage32="";
+	my $usage33="\t#- Other:";
+	my $usage34="\tDISPLAY_ALL = yes|no\n";
+	my $usage35="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
@@ -439,150 +422,112 @@ sub print_usage_clustering_config {
 	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
 	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
 	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
-	jsv_log_info($usage28);	jsv_log_info($usage29);jsv_log_info($usage30);
-	jsv_log_info($usage31);	jsv_log_info($usage32);jsv_log_info($usage33);
+	jsv_log_info($usage28);	jsv_log_info($usage29);jsv_log_info($usage30);jsv_log_info($usage31);
+	jsv_log_info($usage32);jsv_log_info($usage33);jsv_log_info($usage34);jsv_log_info($usage35);
 
 }
 
 
 sub print_usage_scaffold {
+
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t **  Cytofpipe v1.0  **";
-	my $usage3 = "\t\t\t--scaffold";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="";
-	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
-	my $usage10="\t-o DIR		Output directory where results will be generated\n";
-	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage12="\t--ref FILE	Reference FCS file (should be inside the Input directory)\n";
-	my $usage13="";
-	my $usage14="Options:";
-	my $usage15="";
-	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage17="\t				(transformation = cytofAsinh)\n";
-	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
-	my $usage19="\t					each FCS file to the specified number of events \n";
-	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
-	my $usage21="";
+        my $usage1="Program: Cytofpipe --scaffold";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR            Input directory with the FCS files and the /gated subfolder with manually gated landmark populations";
+        my $usage8="          --ref FILE        Name of the reference FCS file (which should be inside the Input directory)";
+        my $usage9="          -o DIR            Output directory where results will be generated";
+        my $usage10="          -m FILE          File with markers that will be selected for clustering";
+        my $usage11="Options: --flow | --cyto           Flow cytometry data (arcsinh transformation using asinh_cofactor = 150) or Cytof data (asinh_cofactor = 5) [--cytof]";
+        my $usage12="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="";
+
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);jsv_log_info($usage21);
+	jsv_log_info($usage12);jsv_log_info($usage13);
 
 }
 
 sub print_usage_scaffold_with_error {
 
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t **  Cytofpipe v1.0  **";
-	my $usage3 = "\t\t\t--scaffold";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="";
-	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
-	my $usage10="\t-o DIR		Output directory where results will be generated\n";
-	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage12="\t--ref FILE	Reference FCS file (should be inside the Input directory)\n";
-	my $usage13="";
-	my $usage14="Options:";
-	my $usage15="";
-	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage17="\t				(transformation = cytofAsinh)\n";
-	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
-	my $usage19="\t					each FCS file to the specified number of events \n";
-	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
-	my $usage21="";
+        my $usage1="Program: Cytofpipe --scaffold";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --scaffold -i DIR -o DIR -m FILE --ref FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR            Input directory with the FCS files and the /gated subfolder with manually gated landmark populations";
+        my $usage8="          --ref FILE        Name of the reference FCS file (which should be inside the Input directory)";
+        my $usage9="          -o DIR            Output directory where results will be generated";
+        my $usage10="          -m FILE          File with markers that will be selected for clustering";
+        my $usage11="Options: --flow | --cyto           Flow cytometry data (arcsinh transformation using asinh_cofactor = 150) or Cytof data (asinh_cofactor = 5) [--cytof]";
+        my $usage12="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);jsv_log_info($usage21);
+	jsv_log_info($usage12);jsv_log_info($usage13);
 
 	jsv_reject("ERROR: Invalid or missing argument in --scaffold mode\n");
 	return;
 }
 
 sub print_usage_citrus {
+
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t  **  Cytofpipe v1.0 **";
-	my $usage3 = "\t\t\t--citrus";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="";
-	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
-	my $usage10="\t-o DIR		Output directory where results will be generated\n";
-	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage12="\t--cond FILE	File indicating which samples belong to each condition\n";
-	my $usage13="";
-	my $usage14="Options:";
-	my $usage15="";
-	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage17="\t				(transformation = cytofAsinh)\n";
-	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
-	my $usage19="\t					each FCS file to the specified number of events \n";
-	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
-	my $usage21="\t--medians FILE	Use medians of markers in this file as statistic choice instead of cluster abundance. \n";
-	my $usage22="";
+        my $usage1="Program: Cytofpipe --citrus";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR            Input directory with the FCS files";
+        my $usage8="          --cond FILE       File indicating which samples belong to each condition";
+        my $usage9="          -o DIR            Output directory where results will be generated";
+        my $usage10="          -m FILE          File with markers that will be selected for clustering";
+        my $usage11="Options: --medians FILE            Use medians of markers in this file as statistic choice instead of cluster abundance";
+        my $usage12="         --flow | --cyto           Flow cytometry data (arcsinh transformation using asinh_cofactor = 150) or Cytof data (asinh_cofactor = 5) [--cytof]";
+        my $usage13="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage14="";
+
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);jsv_log_info($usage21);jsv_log_info($usage22);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
 
 }
+
+
 sub print_usage_citrus_with_error {
 
 	my $usage0="";
-	my $usage1="------------------------------------------------------------------------------------";
-	my $usage2 = "\t\t  **  Cytofpipe v1.0 **";
-	my $usage3 = "\t\t\t--citrus";
-	my $usage4="------------------------------------------------------------------------------------";
-	
-	my $usage5="Usage: cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options] ";
-	my $usage6="";
-	my $usage7="Required:";
-	my $usage8="";
-	my $usage9="\t-i DIR		Input directory with the FCS files and the /gated subfolder with manually gated landmark populations\n";
-	my $usage10="\t-o DIR		Output directory where results will be generated\n";
-	my $usage11="\t-m FILE		File with markers that will be selected for clustering\n";
-	my $usage12="\t--cond FILE	File indicating which samples belong to each condition\n";
-	my $usage13="";
-	my $usage14="Options:";
-	my $usage15="";
-	my $usage16="\t--flow | --cytof		Flow cytometry data (transformation = autoLgcl) or Cytof data\n";
-	my $usage17="\t				(transformation = cytofAsinh)\n";
-	my $usage18="\t--all | --downsample NUM	Use all events in the analysis or downsample\n";
-	my $usage19="\t					each FCS file to the specified number of events \n";
-	my $usage20="\t					(with no replacement for sample with events < NUM)\n";
-	my $usage21="\t--medians FILE	Use medians of markers in this file as statistic choice instead of cluster abundance. \n";
-	my $usage22="";
+        my $usage1="Program: Cytofpipe --citrus";
+        my $usage2 = "Version: 1.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe --citrus -i DIR -o DIR -m FILE --cond FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR            Input directory with the FCS files";
+        my $usage8="          --cond FILE       File indicating which samples belong to each condition";
+        my $usage9="          -o DIR            Output directory where results will be generated";
+        my $usage10="          -m FILE          File with markers that will be selected for clustering";
+        my $usage11="Options: --medians FILE            Use medians of markers in this file as statistic choice instead of cluster abundance";
+        my $usage12="         --flow | --cyto           Flow cytometry data (arcsinh transformation using asinh_cofactor = 150) or Cytof data (asinh_cofactor = 5) [--cytof]";
+        my $usage13="         --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage14="";
 
 	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
 	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
 	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
-	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
-	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
-	jsv_log_info($usage20);jsv_log_info($usage21);jsv_log_info($usage22);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
 
 	jsv_reject("ERROR: Invalid or missing argument in --citrus mode\n");
 	return;
