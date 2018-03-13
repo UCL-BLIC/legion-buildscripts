@@ -1,0 +1,114 @@
+#!/usr/bin/bash -i
+
+###############################################
+# Installing OMA standalone
+#
+# by Javier Herrero, 2016 
+#
+
+APPNAME=${APPNAME:-clusterflow}
+VERSION=${VERSION:-0.5}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-d38a7ee9f7be1f19eca41c0971be6f3b}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-https://github.com/ewels/clusterflow/archive/v${VERSION}.tar.gz}
+
+set -e
+
+module load perl/5.22.0
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+mkdir -p $INSTALL_PREFIX
+
+cd $INSTALL_PREFIX
+
+wget -N $SRC_ARCHIVE
+
+MD5SUM=`md5sum v${VERSION}.tar.gz | awk '{print $1}'`
+
+if [ "$MD5SUM" == "$MD5" ]
+then
+    rm -rf ${VERSION}
+    tar -zxf v${VERSION}.tar.gz
+    mv ClusterFlow-${VERSION} ${VERSION}
+    cd ${VERSION}
+    cp clusterflow.config.example clusterflow.config
+
+    sed -e 's/@max_time.*/@max_time\t48:00:00/' -i clusterflow.config
+    sed -e 's/\/\* @cluster_environment.*/@cluster_environment\tGRIDEngine/' -i clusterflow.config
+    sed -e 's/\/\* @custom_job_submit_command.*/@custom_job_submit_command echo "{{command}}" | qsub -b n -cwd -V -S \/bin\/bash -pe smp {{cores}} {{qname}} -l h_rt={{time}} -l mem={{mem}} -o {{outfn}} -j y -N {{job_id}} {{notifications}}/' -i clusterflow.config
+    sed -e 's/\/\* @environment_module_alias <requested> <replacement> \*\//\/\* @environment_module_alias <requested> <replacement> \*\/\n@environment_module_alias cutadapt python3\/recommended/' -i clusterflow.config
+
+    sed -e 's/2-00:00:00/48:00:00/' -i cf
+    sed -e "s/'12:00'/'0:12:00'/" -i cf
+    
+    cat > source/CF/Helpers.pm.patch <<EOF
+678,679d677
+<     my \$days = int(\$minutes / (24 * 60));
+<     \$minutes -= \$days * 24 * 60;
+688,694c686
+<     if(\$days > 0){
+<         return "\$days-\$hours:\$minutes";
+<     } elsif(\$hours > 0){
+<         return "\$hours:\$minutes:00";
+<     } else {
+<         return "\$minutes";
+<     }
+---
+>     return "\$hours:\$minutes:00";
+EOF
+
+    patch source/CF/Helpers.pm < source/CF/Helpers.pm.patch
+
+    cat > cf.patch <<EOF
+742c742,744
+< unless(\$cl_dryrun){
+---
+> if(\$cl_dryrun){
+>     *SUBMIT = *STDOUT;
+> } else {
+EOF
+
+    patch cf < cf.patch
+
+    if [[ -e /scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa ]]
+    then
+        perl -le 'print join("\t", "\@reference", "fasta", "GRCh38", "/scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/", "Human", "GRCh38")' >> genomes.d/GRCh38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/BWAIndex/genome.fa ]]
+    then
+        perl -le 'print join("\t", "\@reference", "bwa", "GRCh38", "/scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/BWAIndex/genome.fa", "Human", "GRCh38")' >> genomes.d/GRCh38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.fa ]]
+    then
+        perl -le 'print join("\t", "\@reference", "bowtie2", "GRCh38", "/scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome", "Human", "GRCh38")' >> genomes.d/GRCh38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Annotation/Archives/archive-2015-08-11-09-31-31/Genes.gencode/genes.gtf ]]
+    then
+        perl -le 'print join("\t", "\@reference", "gtf", "GRCh38", "/scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Annotation/Archives/archive-2015-08-11-09-31-31/Genes.gencode/genes.gtf", "Human", "GRCh38")' >> genomes.d/GRCh38.config
+    fi
+    
+    if [[ -e /scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/WholeGenomeFasta/genome.fa ]]
+    then
+        perl -le 'print join("\t", "\@reference", "fasta", "GRCm38", "/scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/WholeGenomeFasta/", "Mouse", "GRCm38")' >> genomes.d/GRCm38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/BWAIndex/version0.6.0/genome.fa.bwt ]]
+    then
+        perl -le 'print join("\t", "\@reference", "bwa", "GRCm38", "/scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/BWAIndex/version0.6.0/genome.fa", "Mouse", "GRCm38")' >> genomes.d/GRCm38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/Bowtie2Index/genome.1.bt2 ]]
+    then
+        perl -le 'print join("\t", "\@reference", "bowtie2", "GRCm38", "/scratch/scratch/regmr01/Mus_musculus/NCBI/GRCm38/Sequence/Bowtie2Index/genome", "Mouse", "GRCm38")' >> genomes.d/GRCm38.config
+    fi
+    if [[ -e /scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Annotation/Archives/archive-2015-08-11-09-31-31/Genes.gencode/genes.gtf ]]
+    then
+        perl -le 'print join("\t", "\@reference", "gtf", "GRCm38", "/scratch/scratch/regmr01/Homo_sapiens/NCBI/GRCh38/Annotation/Archives/archive-2015-08-11-09-31-31/Genes.gencode/genes.gtf", "Mouse", "GRCm38")' >> genomes.d/GRCm38.config
+    fi
+    
+else
+    echo "Hash mismatch."
+    echo "Expected: $MD5"
+    echo "Got: $MD5SUM"
+    exit
+fi
