@@ -370,13 +370,23 @@ if(autogating == 'yes'){
 ## @knitr cytofkit
 
 
-
-#- cytof_exprsMerge calls cytof_exprsExtract, which excludes Time and Event channels from the expression matrix, and excludes FSC/SSC from transformation
-#- By default has sampleSeed = 123
+#- Set seeds
 sampleSeed=123
 if(randomSampleSeed == 'yes'){
 	sampleSeed=sample(1:1000000,1)
 }
+tsneSeed=42
+if(randomTsneSeed == 'yes'){
+	tsneSeed=sample(1:1000000,1)
+}
+flowSeed=100
+if(randomFlowSeed == 'yes'){
+        flowSeed=sample(1:1000000,1)
+}
+
+
+#- cytof_exprsMerge calls cytof_exprsExtract, which excludes Time and Event channels from the expression matrix, and excludes FSC/SSC from transformation
+#- By default has sampleSeed = 123
 exprs_data <- cytof_exprsMerge(fcsFiles = files, comp = FALSE, verbose = FALSE, 
                                    transformMethod = transformMethod, sampleSeed = sampleSeed,
                                    mergeMethod = mergeMethod, fixedNum = as.numeric(fixedNum))
@@ -389,10 +399,6 @@ for(i in 1:length(colnames(exprs_data))){
 
 ## dimension reduced data, a list
 #- By default has tsneSeed = 42
-tsneSeed=42
-if(randomTsneSeed == 'yes'){
-	tsneSeed=sample(1:1000000,1)
-}
 alldimReductionMethods <- unique(c(visualizationMethods, dimReductionMethod))
 allDimReducedList <- lapply(alldimReductionMethods, 
                              cytof_dimReduction, data = exprs_data, 
@@ -406,10 +412,6 @@ names(allDimReducedList) <- alldimReductionMethods
 
 ## cluster results, a list
 #- by default has flowSeed = NULL, I was using flowSeed=100 in v1.0 as that's what they used when they changed the code to make FlowSOM reproducible
-flowSeed=100
-if(randomFlowSeed == 'yes'){
-        flowSeed=sample(1:1000000,1)
-}
 cluster_res <- lapply(clusterMethods, cytof_cluster, 
                           ydata = allDimReducedList[[dimReductionMethod]], 
                           xdata = exprs_data[, markersUserName],
