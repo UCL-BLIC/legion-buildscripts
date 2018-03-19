@@ -7,13 +7,13 @@ output:
 
 
 <center> 
-# Cytofpipe v1.0 
+# Cytofpipe v1.1 
 _________________
 </center>
 
 This pipeline was developed to by Lucia Conde at the BLIC - UCL Cancer Institute, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and 
-mass cytometry data in the UCL cluster __Legion__. Currently, Cytofpipe v1.0 can be used to run standard cytometry data analysis for subset identification, for comparison of groups of samples, and to construct scaffold maps 
-for visualizing complex relationships between samples. The methods underneath Cytofpipe v1.0 are based on publicly available R packages for flow/cytof data analysis
+mass cytometry data in the UCL cluster __Legion__. Currently, Cytofpipe v1.1 can be used to run standard cytometry data analysis for subset identification, for comparison of groups of samples, and to construct scaffold maps 
+for visualizing complex relationships between samples. The methods underneath Cytofpipe v1.1 are based on publicly available R packages for flow/cytof data analysis
 
 - Cytofpipe **--clustering** is based mainly on cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html), which is used for preprocessing/clustering, and openCyto (https://www.bioconductor.org/packages/release/bioc/html/openCyto.html), for basic automated gating. 
 
@@ -112,7 +112,7 @@ When you submit the job, before it actually runs, there is a script that checks 
 
 ```
 ------------------------------------------------------------------
-		 ** Cytofpipe v1.0 **
+		 ** Cytofpipe v1.1 **
 			--clustering
 ------------------------------------------------------------------
 Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options]
@@ -341,7 +341,7 @@ low weight are filtered out and the graph is then laid out (shaped) using a Forc
 position of the landmark nodes stay constant, providing a visual reference that allows the comparison of the different datasets.
 
 - *Note 1*: Because the clustering is very computationally intensive, by default cytofpipe downsamples the original FCS files to 10,000 events (with NO replacement if the total number of cell in the file is less than 10,000), and then **all the clustering and construction of maps are done on these downsampled files** to be able to run the jobs in a timely fashion. This can be changed with the **--all** and **--downsample NUM** arguments.
-- *Note 2*: Cytofpipe v1.0 is running scaffold_0.1
+- *Note 2*: Cytofpipe v1.1 is running scaffold_0.1
  
 Cytofpipe assumes that the FCS data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_negevents were removed before analysis. With regards to compensation, please note that the software will try to apply a compensation matrix if one is found in the FCS file. So if the data in the file is already compensated, it will be erroneously compensated again. If your data needs compensation make sure that the FCS file has a spillover matrix embedded and the data is uncompensated.
 
@@ -442,7 +442,7 @@ please contact me.
 - *Note 5*: Parameters must be measured on the same channels in each file, the same parameters must be measured in all FCS files (no extras or missing parameters in any FCS file) and measured 
 parameters and channels must appear in the same order in each FCS file.
 - *Note 6*: Due to the stochastic nature of the citrus algorithm, is recommended to run (repeat) the analysis at least 3 times to make sure the results are not false positives.
-- *Note 7*: Cytofpipe v1.0 runs citrus_0.08
+- *Note 7*: Cytofpipe v1.1 runs citrus_0.08
 
 Cytofpipe assumes that the data have been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. For flow cytometry data, raw FCS file data must be compensated. Compensation matrices stored in FCS files will not be applied when running Cytofpipe in --citrus mode.
 
