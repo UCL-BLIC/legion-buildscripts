@@ -1,0 +1,39 @@
+DPT                     Diffusion Pseudo Time
+DPT matrix methods      DPT Matrix methods
+DPT methods             DPT methods
+DiffusionMap accessors
+                        DiffusionMap accession methods
+DiffusionMap class      Create a diffusion map of cells
+DiffusionMap methods    DiffusionMap methods
+ExpressionSet helpers   Convert object to ExpressionSet or read it from
+                        a file
+Gene Relevance          Gene relevances for entire data set
+Gene Relevance methods
+                        Gene Relevance methods
+Gene Relevance plotting
+                        Plot gene relevance or gradient map
+Sigmas class            Sigmas Object
+coercions               Coercion methods
+colorlegend             Color legend
+cube_helix              Sequential color palette using the cube helix
+                        system
+destiny                 Create and plot diffusion maps
+destiny generics        destiny generics
+dm_predict              Predict new data points using an existing
+                        DiffusionMap. The resulting matrix can be used
+                        in the plot method for the DiffusionMap
+eig_decomp              Fast eigen decomposition using ARPACK
+extractions             Extraction methods
+find_dm_k               Find a suitable k
+find_sigmas             Calculate the average dimensionality for m
+                        different gaussian kernel widths (sigma).
+find_tips               Find tips in a DiffusionMap object
+guo                     Guo at al. mouse embryonic stem cell qPCR data
+knn                     kNN search
+l_which                 Logical which
+plot.DPT                Plot DPT
+plot.DiffusionMap       3D or 2D plot of diffusion map
+plot.Sigmas             Plot Sigmas object
+projection_dist         Projection distance
+random_root             Find a random root cell index
+updateObject-method     Update old destiny objects to a newer version.

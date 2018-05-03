@@ -11,9 +11,9 @@ output:
 _________________
 </center>
 
-This pipeline was developed to by Lucia Conde at the BLIC - UCL Cancer Institute, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and 
-mass cytometry data in the UCL cluster __Legion__. Currently, Cytofpipe v1.2 can be used to run standard cytometry data analysis for subset identification, for comparison of groups of samples, and to construct 
-scaffold maps 
+This pipeline was developed to by Lucia Conde at the BLIC - UCL Cancer Institute, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and mass cytometry data in the UCL cluster __Legion__. Any UCL researcher can access the pipeline via legion. Researchers from other institutions can download the stand-alone version of Cytofpipe and run it directly in their personal computers. An external script developed by Heng Li (https://github.com/lh3/asub) is also provided so that users can easily submit Cytofpipe to their cluster queue system (LSF, SGE/UGE, SLURM) if desired.
+
+Cytofpipe v1.2 can be used 1) to run standard cytometry data analysis for subset identification, 2) for comparison of groups of samples, and 3) to construct scaffold maps 
 for visualizing complex relationships between samples. The methods underneath Cytofpipe v1.2 are based on publicly available R packages for flow/cytof data analysis
 
 - Cytofpipe **--clustering** is based mainly on cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html), which is used for preprocessing/clustering, and openCyto (https://www.bioconductor.org/packages/release/bioc/html/openCyto.html), for basic automated gating. 
@@ -26,7 +26,7 @@ for visualizing complex relationships between samples. The methods underneath Cy
 <br />
 
 <div align=center>
-# How to run the cytofpipe pipeline
+# How to run Cytofpipe v1.2
 </div>
 
 <br>
@@ -34,30 +34,28 @@ for visualizing complex relationships between samples. The methods underneath Cy
 ##  {.tabset}
 
 
-### 1. Connect to legion, bring inputfiles
+### 1. Using the UCL cluster
 
 <br />
 
-You will need to connect to legion (apply for an account here: https://wiki.rc.ucl.ac.uk/wiki/Account_Services), and transfer there a folder with the input FCS files, a file with the list of markers (which will be 
-the ones used for clustering), a file listing which samples belong to each condition/group (for citrus), and optionally a config file (at the moment only for cytofpipe --clustering).
+**1.- Connect to legion and bring inputfiles:**
+
+You will need to connect to legion (apply for an account here: https://wiki.rc.ucl.ac.uk/wiki/Account_Services), and transfer there the inputfiles. for example if you are doing clustering, that would be a folder with the input FCS files, a file with the list of clustering markers and optionally a config file.
 
 To connect to legion, you can use Putty if you have Windows (check this UCL link: https://wiki.rc.ucl.ac.uk/wiki/Accessing_RC_Systems) or use SSH from your Mac terminal:
 
 `$ ssh UCL_ID@legion.rc.ucl.ac.uk`
 
-To transfer the files to legion, you can either use SCP from your laptop, for example:
+To transfer the files to legion, you can either use SCP from your laptop:
 
-`$ scp -r FILES UCL_ID@legion.rc.ucl.ac.uk:/home/user/Scratch/my_cytof_analysis/.`
+`$ scp -r FILES UCL_ID@legion.rc.ucl.ac.uk:/home/user/Scratch/cytof_data/.`
 
 or if you have a FTP transfer program (for example cyberduck: http://download.cnet.com/Cyberduck/3000-2160_4-10246246.html or WinSCP: https://winscp.net/eng/download.php) you can also transfer the files from/to legion simply 
 by dragging them from one window to 
 another.
 
-<br />
 
-### 2. Load modules
-
-<br />
+**2. Load modules:**
 
 Once you are in legion, you will need to load the modules necessary for the pipeline to work.
 
@@ -65,31 +63,27 @@ Once you are in legion, you will need to load the modules necessary for the pipe
 
 `$ module load cytofpipe/v1.2`
 
-<br />
 
-### 3. Run pipeline
+**3.- Submit the job:**
 
-<br />
-
-Let’s say you have a folder called my_cytof_analyses in your home in legion that contains a directory with the FCS files, a file that contains the markers that you want to use for clustering, a file listing which samples belong to 
-each condition, and perhaps a config file, for example:
+Let’s say you have a folder called 'cytof_data' in your home in legion that contains a directory with the FCS files, a file that contains the markers that you want to use for clustering, a file listing which samples belong toeach condition, and perhaps a config file, for example:
 
 ```
-/home/user/Scratch/my_cytof_analyses/
-/home/user/Scratch/my_cytof_analyses/inputfiles/
-/home/user/Scratch/my_cytof_analyses/inputfiles/file1.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/file2.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/file3.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType1.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType2.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType3.fcs
-/home/user/Scratch/my_cytof_analyses/inputfiles/gated/file1_cellType4.fcs
-/home/user/Scratch/my_cytof_analyses/markers.txt
-/home/user/Scratch/my_cytof_analyses/conditions.txt
-/home/user/Scratch/my_cytof_analyses/config.txt
+/home/user/Scratch/cytof_data/
+/home/user/Scratch/cytof_data/inputfiles/
+/home/user/Scratch/cytof_data/inputfiles/file1.fcs
+/home/user/Scratch/cytof_data/inputfiles/file2.fcs
+/home/user/Scratch/cytof_data/inputfiles/file3.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType1.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType2.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType3.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType4.fcs
+/home/user/Scratch/cytof_data/markers.txt
+/home/user/Scratch/cytof_data/conditions.txt
+/home/user/Scratch/cytof_data/config.txt
 ```
 
-To run the pipeline in "clustering" mode with default parameters, just go to the my_cytof_analyses folder and run:
+To run the pipeline in "clustering" mode with default parameters, just go to the 'cytof_data' folder and run:
 
 `$ cytofpipe --clustering -i inputfiles -o results -m markers.txt`
 
@@ -103,54 +97,41 @@ Finally, to run the pipeline in "citrus" mode with default parameters:
 
 `$ cytofpipe --citrus -i inputfiles --cond conditions.txt -o results -m markers.txt`
 
-<br />
 
-### 4. Errors before running
+**4.- Errors before running**
 
-<br />
-
-When you submit the job, before it actually runs, there is a script that checks that everything is in order. For example, that the inputfiles folder exists, that there is not a results folder already there (so that nothing is overwritten), that if there is a config.txt file, it has the appropriate format, etc... Only if everything looks fine, the job will be submitted. Otherwise, an error message will appear that will tell you that there is a problem. For example:
+When you submit the job, before it actually runs, there is a JSV script that checks that everything is in order. For example, that the inputfiles folder exists, that there is not a results folder already there (so that nothing is overwritten), that if a config.txt file is inputed it has the appropriate format, etc... Only if everything looks fine, the job will be submitted. Otherwise, an error message will appear that will tell you that there is a problem. For example:
 
 ```
-------------------------------------------------------------------
-		 ** Cytofpipe v1.2 **
-			--clustering
-------------------------------------------------------------------
-Usage: cytofpipe --clustering -i DIR -o DIR -m FILE [options]
+Program: Cytofpipe --clustering
+Version: 1.2
+Contact: Lucia Conde <l.conde\@ucl.ac.uk>
 
-Required:
-	-i DIR		Input directory with the FCS files
-	-o DIR		Output directory where results will be generated
-	-m FILE		File with markers that will be selected for clustering
+Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
 
-Options:
-	--config FILE       Configuration file to customize the analysis (see below) 
-	--flow | --cytof      Flow cytometry data (transformation = autoLgcl)
-	                    or Cytof data (transformation = cytofAsinh)
-	--all | --downsample NUM    Use all events in the analysis or downsample
-	                    each FCS file to the specified number of events
-	                    (with no replacement for sample with events < NUM)
-	--displayAll       	Display all markers in output files
-	--groups FILE       	File listing the group each sample belongs to
-	--randomSampleSeed      Use a random sampling seed instead of default seed
-				used for reproducible expression matrix merging
-	--randomTsneSeed        Use a random tSNE seed instead of default seed 
-				used for reproducible tSNE results
-	--randomFlowSeed	Use a random flowSOM seed instead of default seed
-				used for reproducible flowSOM results
+Required: -i DIR       Input directory with the FCS files
+          -o DIR       Output directory where results will be generated
+          -m FILE      File with markers that will be selected for clustering
+Options: --config FILE            Configuration file to customize the analysis
+         --flow|--cyto            Use autoLgcl (flow) or cytofAsinh (cytof) transformation [--cytof]
+         --all|--downsample NUM   Use all events or downsample each FCS to NUM [--downsample 10000]
+         --displayAll             Display all markers in output files [NULL]
+         --groups FILE       	File listing the group each sample belongs to
+	       --randomSampleSeed      Use a random sampling seed instead of default seed used for
+                                reproducible expression matrix merging
+         --randomTsneSeed        Use a random tSNE seed instead of default seed used for
+                                  reproducible tSNE results
+         --randomFlowSeed	Use a random flowSOM seed instead of default seed used for
+                            reproducible flowSOM results
 
 Unable to run job: Please check that you are providing a inputdir (-i), outputdir (-o) and markersfile (-m)
 Exiting.
 
 ```
 
-<br />
+**5.- Check job is running**
 
-### 5. Check job is running
-
-<br />
-
-If there were no errors found, the job will be submitted to the queue through a qsub system. To check that the job is queued or running, use qstat:
+If no errors were found, the job will be submitted to the queue through a qsub system. To check that the job is queued or running, use qstat:
 
 `$ qstat`
 
@@ -166,6 +147,197 @@ In the above example I have one job (with ID 2739095) that is already running (s
 If you submit a job, and later on it does not show when you do qstat, that means that it finished.  You should then be able to see a new folder that has the results of the analysis.
 
 <br />
+
+### 2. Using a machine (mac, linux) without queue system
+
+<br />
+
+**1.- Installation**
+
+Download cytofpipe from https://github.com/UCL-BLIC/cytofpipe/archive/v1.2.tar.gz and uncompress it using tar:
+
+`$ tar -xvf cytofpipe_1.2.tar.gz`
+
+That will create a 'cytofpipe_1.1' masters folder that contains the code almost ready to use. You will just need to tell cytofpipe where you have downloaded the code. For that, open the cytofpipe_1.2/cytofpipe.pl perl script and change the variable CYTOFPIPE_HOME so that it points to the master folder:
+
+```
+$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.2"
+```
+
+
+**2.- Dependencies**
+
+You will need to have R installed and in your path (https://www.r-project.org/), as well as Pandoc (https://pandoc.org/). Pandoc is simply used to generate a summary PDF after each run. If you don't have pandoc installed is not a big issue: the summary PDF will not be generated and you will see an error in the terminal regarding this, but cytofpipe will run anyway and you should be able to see all the other output files. 
+
+Cytofpipe depends on several R packages, mainly:
+<ul><li> cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html)</li>
+<li>scaffold (https://github.com/nolanlab/scaffold)</li>
+<li>citrus (https://github.com/nolanlab/citrus)</li></ul>
+
+as well as other not related to flow/cytof data analysis (ini, hash, ...). Perhaps you have already installed some of these R packages locally in your system. However, it is possible that the Cytofpipe version that you have downloaded might only work with a specific version of these packages (for example, Cytofpipe_v1.2 works fine with cytofkit_1.10, but not with cytofpipe_1.6, or potentially with newer cytofkit versions). This is because when a new version of'cytofkit' is released, if it has gone through substantial changes to the code, the code of Cytofpipe needs to be changed accordingly. Therefore, to avoid issues with version clashes we provide a folder Rlib that contains the necessary R packages to run Cytofpipe and we have checked that the versions are compatible. You don't need to do anything about this, every time that Cytofpipe is launched it will assign the R_LIBS environment variable to that Rlib folder.
+
+**3.- Submit the job:**
+
+Let’s say you have a folder called 'cytof_data' that contains a directory with the FCS files, a file that contains the markers that you want to use for clustering, a file listing which samples belong to each condition, and perhaps a config file, for example:
+
+```
+/home/user/Scratch/cytof_data/
+/home/user/Scratch/cytof_data/inputfiles/
+/home/user/Scratch/cytof_data/inputfiles/file1.fcs
+/home/user/Scratch/cytof_data/inputfiles/file2.fcs
+/home/user/Scratch/cytof_data/inputfiles/file3.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType1.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType2.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType3.fcs
+/home/user/Scratch/cytof_data/inputfiles/gated/file1_cellType4.fcs
+/home/user/Scratch/cytof_data/markers.txt
+/home/user/Scratch/cytof_data/conditions.txt
+/home/user/Scratch/cytof_data/config.txt
+```
+
+To run the pipeline in "clustering" mode with default parameters, just run the "cytofpipe.pl" perl script located in the masters cytofpipe_v1.2 folder:
+
+`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt`
+
+That will crate a new folder called “results” that will contain all the results of the analysis.
+
+Similarly, to run the pipeline in "scaffold" mode with default parameters:
+
+`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --scaffold -i inputfiles --ref file1.fcs -o results -m markers.txt`
+
+Finally, to run the pipeline in "citrus" mode with default parameters:
+
+`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --citrus -i inputfiles --cond conditions.txt -o results -m markers.txt`
+
+Cytofpipe will first check that everything is in order. For example, that the inputfiles folder exists, that there is not a results folder already there (so that nothing is overwritten), that if a config.txt file is inputed it has the appropriate format, etc... Only if everything looks fine, the job will be submitted. Otherwise, an error message will appear that will tell you that there is a problem. For example:
+
+```
+Program: Cytofpipe --clustering
+Version: 1.2
+Contact: Lucia Conde <l.conde\@ucl.ac.uk>
+
+Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
+
+Required: -i DIR       Input directory with the FCS files
+          -o DIR       Output directory where results will be generated
+          -m FILE      File with markers that will be selected for clustering
+Options: --config FILE            Configuration file to customize the analysis
+         --flow|--cyto            Use autoLgcl (flow) or cytofAsinh (cytof) transformation [--cytof]
+         --all|--downsample NUM   Use all events or downsample each FCS to NUM [--downsample 10000]
+         --displayAll             Display all markers in output files [NULL]
+         --groups FILE       	File listing the group each sample belongs to
+         --randomSampleSeed      Use a random sampling seed instead of default seed used for
+                                reproducible expression matrix merging
+         --randomTsneSeed        Use a random tSNE seed instead of default seed used for
+                                reproducible tSNE results
+         --randomFlowSeed	Use a random flowSOM seed instead of default seed used for
+                            reproducible flowSOM results
+
+Unable to run job: Please check that you are providing a inputdir (-i), outputdir (-o) and markersfile (-m)
+Exiting.
+
+```
+<br>
+
+### 3. Using a cluster with queue system
+
+<br />
+
+**1.- asub:**
+
+While we have a Cytofpipe version that runs in the UCL cluster using its queue system, we don't provide a version that will take advantage of the queue system in other clusters outside UCL. However, this is easily accomplished by using the 'asub' script developed by Heng Li at the Braod Institute (https://github.com/lh3/asub), and that we provide in the Cytofpipe_v1.2 masters folder for convenience.
+
+The only difference in running the script directly or via asub, is that if you use asub, the command line needs to be written into a file, and then that file is called with asub. For example, to submit a job directly you would do:
+
+`$ /path/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt`
+
+The same job submited via asub would require you to write the above line into a file, and then call asub on the file:
+
+`$ echo "/path/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt" > cmd.txt`
+
+`$ /path/asub cmd.txt`
+
+Every time you run a jub via asub, asub will generate two folders and a file with names that start with 'asub_XXXXX', where XXXXX is a random number. These are just STDOUT and STDERR folders that can give clues if something went wrong with the job, but that can be ignored otherwise.
+
+
+<br>
+The advantage of using asub is that it makes possible to run Cytofpipe in the user's cluster regardless of their platform and queuing systems (LSF, GSE, SLURM). Additionally, it facilitates the submission of array jobs. For example, if you want to run several Cytofpipe jobs in parallel you could write a cmd.txt file that contains all your jobs, one per line, and all these jobs will be submitted as an array job and will be run in parallel. For example if you want to run a --clustering job using different configurations, you cna write a cmd.txt file like this:
+
+```
+/path/cytofpipe.pl --clustering -i inputfiles -o results_A -m markers.txt --config config_A.txt
+/path/cytofpipe.pl --clustering -i inputfiles -o results_B -m markers.txt --config config_B.txt
+/path/cytofpipe.pl --clustering -i inputfiles -o results_C -m markers.txt --config config_C.txt
+```
+
+and then run it like this:
+
+`$ /path/asub cmd.txt`
+
+Additionally, the user can specify different directrices for the queue scheduler via asub. For example, to run the above job but requesting 6 hours of running time and 10Gb of RMA per job, you would do:
+
+`$ /path/asub -M 10 -W 2:0:0 cmd.txt`
+
+All the asub options can be found in Heng Li's github page (https://github.com/lh3/asub) or by running asub without arguments:
+
+`$ /path/asub`
+
+<br>
+
+**2.- Check submission**
+
+Sometimes, particularly when the user requests a lot of time, memory, nodes, or simply when the cluster is busy, the job might be queued for a long time before ir runs. And one frustrating thing is to find out that, after being in queue for perhaps hours, the job finally starts running but immediately stops because one of the arguments given by the user was invalid, or because one if the input files was mispelled. 
+
+To avoid this, cytofpipe also contains a script in the masters folder called "check_submission.pl", that do some checkings of the arguments passed to cytofpipe.pl. In reality, this script is just an almost identical copy of cytofpipe.pl, which checks that everything is in order before doing any analysis. To use it, first change the variable CYTOFPIPE_HOME so that it points to the master folder:
+
+```
+$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.2"
+```
+
+and then simply run it with the same arguments that you want to pass to cytofpipe.pl.
+
+For example, if your cmd.txt file is 
+```
+/path/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt
+```
+you can check that the job will run fine when submitted via asub if you first type:
+
+`$ /path/checkSubmission.pl --clustering -i inputfiles -o results -m markers.txt`
+
+checkSubmission.pl will check that you indeed have a folder called 'inputfiles' and a filed called 'markers.txt', that there is not a folder called 'results' already there (so that nothing is overwritten), or if you also use a config file, it will check that it has the appropiate format. If everything seems correct, you will see a "No issues detected" message, otherwise an error message will appear that will tell you that there is a problem. For example:
+
+```
+Program: Cytofpipe --clustering
+Version: 1.2
+Contact: Lucia Conde <l.conde\@ucl.ac.uk>
+
+Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
+
+Required: -i DIR       Input directory with the FCS files
+          -o DIR       Output directory where results will be generated
+          -m FILE      File with markers that will be selected for clustering
+Options: --config FILE            Configuration file to customize the analysis
+         --flow|--cyto            Use autoLgcl (flow) or cytofAsinh (cytof) transformation [--cytof]
+         --all|--downsample NUM   Use all events or downsample each FCS to NUM [--downsample 10000]
+         --displayAll             Display all markers in output files [NULL]
+         --groups FILE       	File listing the group each sample belongs to
+         --randomSampleSeed      Use a random sampling seed instead of default seed used for
+                                reproducible expression matrix merging
+         --randomTsneSeed        Use a random tSNE seed instead of default seed used for
+                                reproducible tSNE results
+         --randomFlowSeed	Use a random flowSOM seed instead of default seed used for
+                            reproducible flowSOM results
+
+ERROR: Can't find markers file <markers.tx>
+
+```
+
+However, please note that checkSubmission.pl will only do some inital basic checking. It will check that all the arguments given to Cytofpipe are valid, but **will not examine throughly every single aspect that could go wrong with your job**. For example, it will not check whether the markers listed in the markers file indeed exist in the FCS files, or if the FCS files are corrupted. 
+
+In any case, to avoid finding out about a mispelled markers filename after being waiting in queue for hours, we recommend that you use checkSubmission.pl in your command line before submitting it with asub (if you don't use asub, this is not necessary, because cytofpipe.pl will do the checkings anyway as soon as you submit it)
+
+
+<br>
+
 
 ##  {.tabset}
 
@@ -293,7 +465,6 @@ Patient6_Ref.fcs	Control
 Patient7_Ref.fcs	Control
 Patient8_Ref.fcs	Control
 ```
-
 <li>**--randomSampleSeed**: Force cytofpipe to use a random seed for expression matrix merging. I.e., if the user is downsampling the data, a different set of random cells will be picked up in each run, as opposed to 
 the default cytofpipe configuration which uses a seed to ensure reproducibility of the expression matrix. **--randomSampleSeed** will override the RANDOM_SAMPLE_SEED option of the config file if a config file is 
 supplied too.</li>
@@ -322,6 +493,8 @@ file is supplied too.</li>
 <li>**cytofpipe_tsne_level_plot.pdf**: Marker level plot (shows the expression level of markers on the tSNE data in one plot)</li>
 
 <li>**Marker_level_plots_by_sample**: Marker level plots separated by FCS file</li>
+
+<li>**Marker_level_plots_by_group**: Marker level plots separated by groups (if --groups was used)</li>
 
 <li>**cytofpipe_tsne_dimension_reduced_data.csv**: tSNE data (tSNE1 and tSNE2 values per event)</li>
 
@@ -507,7 +680,7 @@ HLA-DR
 
 <li>**-medians FILE**: A text file with the names of the markers that will be used as features, one per line. For example:
 ```
-p-NFκB
+p-NFkB
 p-S6
 p-PI3K
 p-STAT5

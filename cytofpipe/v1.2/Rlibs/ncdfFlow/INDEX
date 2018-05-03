@@ -1,0 +1,49 @@
+Subset,ncdfFlowSet,filterResultList-method
+                        subset a ncdfFlowSet by filter
+[,ncdfFlowSet,ANY-method
+                        subsetting by sampleNames,channels(not for
+                        events) methods
+[[,ncdfFlowSet,ANY-method
+                        extract a 'flowFrame' object from 'ncdfFlowSet'
+as.flowSet              convert from a 'ncdfFlowSet' to a 'flowSet'
+clone.ncdfFlowSet       Clone a ncdfFlowSet
+densityplot,formula,ncdfFlowSet-method
+                        flowViz plot methods.
+filter,ncdfFlowList,filter-method
+                        Accessors compatible with those for 'flowSet'
+getFileName             get the cdf file name associated with
+                        ncdfFlowSet object
+getIndices,ncdfFlowSet,character-method
+                        'getIndices' extracts the event indices of one
+                        or multiple samples from ncdfFlowSet
+lapply,ncdfFlowList-method
+                        lapply method for ncdfFlowList
+ncdfFlow                ncdfFlow: A package that provides CDF storage
+                        based flow cytometry data analysis.
+ncdfFlowList-class      a class that stores multiple ncdfFlowSet
+                        objects
+ncdfFlowSet,flowSet-method
+                        create ncdfFlowSet from flowSet
+ncdfFlowSet-class       a class for storing flow cytometry raw data in
+                        HDF5 format
+ncfsApply,ncdfFlowSet-method
+                        apply method for ncdfFlowSet (for internal use)
+rbind2,ncdfFlowList,ANY-method
+                        combine multiple ncdfFlowSet objects into one
+read.ncdfFlowSet        create ncdfFlowSet from FCS files
+replacement method for ncdfFlowSet
+                        write the flow data from a 'flowFrame' to
+                        'ncdfFlowSet' flowFrame can have less channels
+                        than ncdfFlowSet,which is used for partial
+                        updating(useful for 'normalization')
+save_ncfs               save/load a ncdfFlowSet object to/from disk.
+split,ncdfFlowList,factor-method
+                        split a 'ncdfFlowSet' object.
+subset.ncdfFlowSet      subset the ncdfFlowSet/ncdfFlowList based on
+                        'pData'
+unlink,ncdfFlowSet-method
+                        delete the cdf file associated with the
+                        ncdfFlowSet object ncdfFlowSet object is
+                        unrecoverable after cdf is deleted. So this
+                        method is usually called when ncdfFlowSet
+                        object is no longer in need.
