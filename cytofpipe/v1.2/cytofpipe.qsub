@@ -29,7 +29,7 @@ module load r/recommended
 module load blic-modules
 module load cytofpipe/v1.2
 
-CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v1.1"
+CYTOFPIPE_HOME="/shared/ucl/depts/cancer/apps/cytofpipe/v1.2"
 
 configfile="${CYTOFPIPE_HOME}/clustering_config.txt"
 gatingtemplate="${CYTOFPIPE_HOME}/gating_template_transform.csv"
