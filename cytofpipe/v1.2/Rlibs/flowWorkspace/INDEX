@@ -1,0 +1,170 @@
+GatingHierarchy-class   Class GatingHierarchy
+GatingSet,character,character-method
+                        constructors for GatingSet
+GatingSet-class         Class '"GatingSet"'
+GatingSetList-class     Class '"GatingSetList"'
+add,GatingSet,list-method
+                        Create a GatingSet and add/remove the flowCore
+                        gate(or population) to/from a
+                        GatingHierarchy/GatingSet.
+asinh_Gml2              inverse hyperbolic sine transform function
+                        generator (GatingML 2.0 version)
+asinhtGml2_trans        Inverse hyperbolic sine transformation.
+booleanFilter-class     A class describing logical operation (& or |)
+                        of the reference populations
+checkRedundantNodes     try to determine the redundant terminal(or
+                        leaf) nodes that can be removed
+clone                   clone a GatingSet
+compensate,GatingSet,ANY-method
+                        compensate the flow data asssociated with the
+                        GatingSet
+dropRedundantChannels   Remove the channels from flow data that are not
+                        used by gates
+dropRedundantNodes      Remove the terminal leaf nodes that make the
+                        gating trees to be different from one another.
+estimateLogicle.GatingHierarchy
+                        Compute logicle transformation from the
+                        flowData associated with a GatingHierarchy
+filterObject,rectangleGate-method
+                        convert flowCore filter to a list It convert
+                        the flowCore gate to a list whose structure can
+                        be understood by underlying c++ data structure.
+flowData,GatingSet-method
+                        Fetch or replace the flowData object associated
+                        with a GatingSet .
+flowJo.fasinh           inverse hyperbolic sine transform function
+flowJoTrans             construct the flowJo-type biexponentioal
+                        transformation function
+flowJoWorkspace-class   An R representation of a flowJo workspace.
+flowJo_biexp_trans      flowJo biexponential transformation.
+flowJo_fasinh_trans     flowJo inverse hyperbolic sine transformation.
+flowWorkspace-package   Import and replicate flowJo workspaces and
+                        gating schemes using flowCore.
+flowWorkspace.par.init
+                        workspace version is parsed from xml node
+                        '/Workspace/version' in flowJo workspace and
+                        matched with this list to dispatch to the one
+                        of the three workspace parsers
+flowWorkspace.par.set   flowWorkspace.par.set sets a set of parameters
+                        in the flowWorkspace package namespace.
+flow_breaks             Generate the breaks that makes sense for flow
+                        data visualization
+flow_trans              helper function to generate a trans objects
+                        Used by other specific trans constructor
+getCompensationMatrices,GatingHierarchy-method
+                        Retrieve the compensation matrices from a
+                        GatingHierarchy
+getData,GatingHierarchy,missing-method
+                        get gated flow data from a
+                        GatingHierarchy/GatingSet/GatingSetList
+getFJWSubsetIndices     Fetch the indices for a subset of samples in a
+                        flowJo workspace, based on a keyword value pair
+getGate,GatingHierarchy,character-method
+                        Return the flowCore gate definition associated
+                        with a node in a GatingHierarchy/GatingSet.
+getIndiceMat            Return the single-cell matrix of 1/0
+                        dichotomized expression
+getIndices,GatingHierarchy,character-method
+                        Get the membership indices for each event with
+                        respect to a particular gate in a
+                        GatingHierarchy
+getIndices,GatingSet,name-method
+                        routine to return the indices by specify
+                        boolean combination of reference nodes:
+getKeywords,flowJoWorkspace,character-method
+                        Get Keywords
+getLoglevel             get/set the log level
+getMergedStats          Get Cell Population Statistics and Sample
+                        Metadata
+getNodes,GatingSet-method
+                        Get the names of all nodes from a gating
+                        hierarchy.
+getParent,GatingSet,character-method
+                        Return the name of the parent population or a
+                        list of child populations of the current
+                        population in the GatingHierarchy
+getProp,GatingHierarchy,character-method
+                        Return a table of population statistics for all
+                        populations in a GatingHierarchy/GatingSet or
+                        the population proportions or the total number
+                        of events of a node (population) in a
+                        GatingHierarchy
+getSampleGroups,flowJoWorkspace-method
+                        Get a table of sample groups from a flowJo
+                        workspace
+getSamples,flowJoWorkspace-method
+                        Get a list of samples from a flowJo workspace
+getSingleCellExpression,GatingSetList,character-method
+                        Return the cell events data that express in any
+                        of the single populations defined in 'y'
+getTransformations,GatingHierarchy-method
+                        Return a list of transformations or a
+                        transformation in a GatingHierarchy
+groupByChannels         split GatingSets into groups based on their
+                        flow channels
+groupByTree             split GatingSets into groups based on their
+                        gating schemes Be careful that the splitted
+                        resluts still points to the original data set!!
+insertGate              insert a dummy gate to the GatingSet
+isNcdf                  determine the flow data associated with a
+                        Gating Hiearchy is based on 'ncdfFlowSet' or
+                        'flowSet'
+keyword,GatingHierarchy,character-method
+                        Retrieve a specific keyword for a specific
+                        sample in a 'GatingHierarchy' or or set of
+                        samples in a 'GatingSet' or 'GatingSetList'
+lapply,GatingSet-method
+                        apply 'FUN' to each sample (i.e.
+                        'GatingHierarchy')
+length,GatingSet-method
+                        Methods to get the length of a GatingSet
+logicleGml2_trans       GatingML2 version of logicle transformation.
+logicle_trans           logicle transformation.
+markernames,GatingHierarchy-method
+                        Get/set the column(channel) or marker names
+mkformula               make a formula from a character vector
+moveNode                move a node along with all of its descendant
+                        nodes to the given ancester
+ncFlowSet               Fetch the flowData object associated with a
+                        GatingSet .
+openWorkspace,character-method
+                        Open/Close a flowJo workspace
+pData,GatingHierarchy-method
+                        read/set pData of flow data associated with
+                        'GatingSet' or 'GatingSetList'
+parseWorkspace,flowJoWorkspace-method
+                        Parse a flowJo Workspace
+plot,GatingSet,missing-method
+                        plot a gating tree
+plotGate                Plot gates and associated cell population
+                        contained in a 'GatingHierarchy' or 'GatingSet'
+plotPopCV,GatingHierarchy-method
+                        Plot the coefficient of variation between xml
+                        and openCyto population statistics for each
+                        population in a gating hierarchy.
+prettyAxis              Determine tick mark locations and labels for a
+                        given channel axis
+recompute,GatingSet-method
+                        Compute the cell events by the gates stored
+                        within the gating tree
+sampleNames,GatingHierarchy-method
+                        Get/update sample names in a GatingSet
+save_gs                 save/load a GatingSet/GatingSetList to/from
+                        disk.
+set.count.xml           save the event counts parsed from xml into c++
+                        tree structure
+setGate,GatingHierarchy,character,filter-method
+                        update the gate
+setNode,GatingHierarchy,character,character-method
+                        Update the name of one node in a gating
+                        hierarchy/GatingSet.
+standardize-GatingSet   The tools to standardize the tree structures
+                        and channel names.
+subset.GatingSet        subset the GatingSet/GatingSetList based on
+                        'pData'
+transform,GatingSet-method
+                        tranform the flow data asssociated with the
+                        GatingSet
+transformerList         Constructor for transformerList object
+updateChannels          Update the channel information of a GatingSet
+                        (c++ part)

@@ -1,0 +1,9 @@
+flowUtils-package       Utilities for flow cytometry data
+read.gatingML           Function to parse a Gating-ML XML file into
+                        objects in the R environment
+testGatingMLCompliance
+                        Function to perform all the Gating-ML
+                        compliance tests
+write.gatingML          Function to write a Gating-ML XML file based on
+                        gating and transformation objects stored in an
+                        R environment.

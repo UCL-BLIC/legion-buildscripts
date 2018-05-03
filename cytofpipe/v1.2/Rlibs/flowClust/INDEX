@@ -1,0 +1,50 @@
+Map,flowClust-method    Cluster Assignment Based on Clustering Results
+SimulateMixture         Random Generation from a t Mixture Model with
+                        Box-Cox Transformation
+Subset,flowClust-method
+                        Subsetting Data Based on Clustering Results
+box                     Box-Cox Transformation
+criterion               Various Functions for Retrieving Information
+                        from Clustering Results
+dmvt                    Density of the Multivariate t Distribution with
+                        Box-Cox Tranformation
+dmvtmix                 Density of the Multivariate t Mixture
+                        Distribution with Box-Cox Tranformation
+flowClust-class         Robust Model-based Clustering for Flow
+                        Cytometry
+flowClust-package       Clustering for Flow Cytometry
+flowClust.den           generate the curve that reflects the tmixture
+                        fitting outcome
+flowClust2Prior         Generate a prior specification based on a
+                        flowClust model This function generates a prior
+                        specification based on a flowClust fit object
+                        It can be passed to a second round of
+                        flowClust() with usePrior="yes" The prior could
+                        be estimated from a single sample, for example,
+                        and then used to speed up the convergence for
+                        other samples.
+flowDens-class          Grid of Density Values for the Fitted t Mixture
+                        Model with Box-Cox Transformation
+hist.flowClust          1-D Density Plot (Histogram) of Clustering
+                        Results
+mkPrior                 Generate a flowClust prior specification
+peakMatch               Function to match peaks across samples
+plot,flowClust-method   Scatterplot of Clustering Results
+plot,flowDens-method    Contour or Image Plot of Clustering Results
+plot,flowFrame,tmixFilterResult-method
+                        Scatterplot / 1-D Density Plot of Filtering
+                        (Clustering) Results
+plotPrior               Plots a flowClust prior over some data.
+rbox                    Reverse Box-Cox Transformation
+rituximab               The Rituximab Dataset
+ruleOutliers,flowClust-method
+                        Showing or Modifying the Rule used to Identify
+                        Outliers
+show,flowClust-method   Show Method for flowClust / tmixFilterResult
+                        Object
+split,flowClust-method
+                        Splitting Data Based on Clustering Results
+summary,flowClust-method
+                        Summary Method for flowClust Object
+tmixFilter-class        Creating Filters and Filtering Flow Cytometry
+                        Data

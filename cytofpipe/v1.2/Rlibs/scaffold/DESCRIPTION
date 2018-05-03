@@ -1,0 +1,24 @@
+Package: scaffold
+Title: SCAFFoLD
+Description: "Visualize and compare flow cytometry data"
+Version: 0.1
+Authors@R: "Pier Federico Gherardini <federico.gherardini@gmail.com> [aut, cre]"
+Depends: 
+License: GPL-2
+LinkingTo: Rcpp
+Imports: Rcpp, cluster, flowCore, ggplot2, igraph, plyr, reshape,
+        shiny, grDevices, parallel
+LazyData: true
+Author: "Pier Federico Gherardini" [aut, cre]
+Maintainer: "Pier Federico Gherardini" <federico.gherardini@gmail.com>
+Built: R 3.4.0; x86_64-pc-linux-gnu; 2017-12-19 19:22:22 UTC; unix
+RemoteType: github
+RemoteHost: https://api.github.com
+RemoteRepo: scaffold
+RemoteUsername: nolanlab
+RemoteRef: master
+RemoteSha: e715f3ba0f1bdddab07be822686df87ec7c650f1
+GithubRepo: scaffold
+GithubUsername: nolanlab
+GithubRef: master
+GithubSHA1: e715f3ba0f1bdddab07be822686df87ec7c650f1

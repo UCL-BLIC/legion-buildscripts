@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>R: Clustering for Flow Cytometry</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+<h1> Clustering for Flow Cytometry
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]" />
+</h1>
+<hr/>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]" /></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]" /></a>
+</div><h2>Documentation for package &lsquo;flowClust&rsquo; version 3.16.0</h2>
+
+<ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation.</a></li>
+<li><a href="../NEWS">Package NEWS</a>.</li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="flowClust-package.html">flowClust-package</a></td>
+<td>Clustering for Flow Cytometry</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">%in%-method</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="box.html">box</a></td>
+<td>Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">criterion</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">criterion-method</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">criterion&lt;-</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">criterion&lt;--method</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="density.html">density-method</a></td>
+<td>Grid of Density Values for the Fitted t Mixture Model with Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="density.html">density.flowClust</a></td>
+<td>Grid of Density Values for the Fitted t Mixture Model with Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="dmvt.html">dmvt</a></td>
+<td>Density of the Multivariate t Distribution with Box-Cox Tranformation</td></tr>
+<tr><td style="width: 25%;"><a href="dmvtmix.html">dmvtmix</a></td>
+<td>Density of the Multivariate t Mixture Distribution with Box-Cox Tranformation</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust.html">flowClust</a></td>
+<td>Robust Model-based Clustering for Flow Cytometry</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust.html">flowClust-class</a></td>
+<td>Robust Model-based Clustering for Flow Cytometry</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust.den.html">flowClust.den</a></td>
+<td>generate the curve that reflects the tmixture fitting outcome</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust2Prior.html">flowClust2Prior</a></td>
+<td>Generate a prior specification based on a flowClust model This function generates a prior specification based on a flowClust fit object It can be passed to a second round of flowClust() with usePrior="yes" The prior could be estimated from a single sample, for example, and then used to speed up the convergence for other samples.</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust.html">flowClustList-class</a></td>
+<td>Robust Model-based Clustering for Flow Cytometry</td></tr>
+<tr><td style="width: 25%;"><a href="density.html">flowDens-class</a></td>
+<td>Grid of Density Values for the Fitted t Mixture Model with Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="flowClust.html">fowClust</a></td>
+<td>Robust Model-based Clustering for Flow Cytometry</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">getEstimates</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="hist.html">hist.flowClust</a></td>
+<td>1-D Density Plot (Histogram) of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="hist.html">hist.flowClustList</a></td>
+<td>1-D Density Plot (Histogram) of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">importance</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">length-method</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="Map.html">Map</a></td>
+<td>Cluster Assignment Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Map.html">Map-method</a></td>
+<td>Cluster Assignment Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Map.html">Map.flowClust</a></td>
+<td>Cluster Assignment Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="mkPrior.html">mkPrior</a></td>
+<td>Generate a flowClust prior specification</td></tr>
+<tr><td style="width: 25%;"><a href="mkPrior.html">mkPrior-method</a></td>
+<td>Generate a flowClust prior specification</td></tr>
+<tr><td style="width: 25%;"><a href="peakMatch.html">peakMatch</a></td>
+<td>Function to match peaks across samples</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowClust.html">plot</a></td>
+<td>Scatterplot of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowClust.html">plot-method</a></td>
+<td>Scatterplot of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowCore.html">plot-method</a></td>
+<td>Scatterplot / 1-D Density Plot of Filtering (Clustering) Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowDens.html">plot-method</a></td>
+<td>Contour or Image Plot of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowDens.html">plot.flowDens</a></td>
+<td>Contour or Image Plot of Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowCore.html">plot.flowFrame</a></td>
+<td>Scatterplot / 1-D Density Plot of Filtering (Clustering) Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowCore.html">plot.flowFrame.tmixFilterResult</a></td>
+<td>Scatterplot / 1-D Density Plot of Filtering (Clustering) Results</td></tr>
+<tr><td style="width: 25%;"><a href="plot.flowCore.html">plot.tmixFilterResult</a></td>
+<td>Scatterplot / 1-D Density Plot of Filtering (Clustering) Results</td></tr>
+<tr><td style="width: 25%;"><a href="plotPrior.html">plotPrior</a></td>
+<td>Plots a flowClust prior over some data.</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">posterior</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="rbox.html">rbox</a></td>
+<td>Reverse Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="rituximab.html">rituximab</a></td>
+<td>The Rituximab Dataset</td></tr>
+<tr><td style="width: 25%;"><a href="ruleOutliers.html">ruleOutliers</a></td>
+<td>Showing or Modifying the Rule used to Identify Outliers</td></tr>
+<tr><td style="width: 25%;"><a href="ruleOutliers.html">ruleOutliers-method</a></td>
+<td>Showing or Modifying the Rule used to Identify Outliers</td></tr>
+<tr><td style="width: 25%;"><a href="ruleOutliers.html">ruleOutliers.flowClust</a></td>
+<td>Showing or Modifying the Rule used to Identify Outliers</td></tr>
+<tr><td style="width: 25%;"><a href="ruleOutliers.html">ruleOutliers&lt;-</a></td>
+<td>Showing or Modifying the Rule used to Identify Outliers</td></tr>
+<tr><td style="width: 25%;"><a href="ruleOutliers.html">ruleOutliers&lt;--method</a></td>
+<td>Showing or Modifying the Rule used to Identify Outliers</td></tr>
+<tr><td style="width: 25%;"><a href="show.flowClust.html">show-method</a></td>
+<td>Show Method for flowClust / tmixFilterResult Object</td></tr>
+<tr><td style="width: 25%;"><a href="show.flowClust.html">show.flowClust</a></td>
+<td>Show Method for flowClust / tmixFilterResult Object</td></tr>
+<tr><td style="width: 25%;"><a href="show.flowClust.html">show.tmixFilterResult</a></td>
+<td>Show Method for flowClust / tmixFilterResult Object</td></tr>
+<tr><td style="width: 25%;"><a href="SimulateMixture.html">SimulateMixture</a></td>
+<td>Random Generation from a t Mixture Model with Box-Cox Transformation</td></tr>
+<tr><td style="width: 25%;"><a href="split.html">split</a></td>
+<td>Splitting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="split.html">split-method</a></td>
+<td>Splitting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="split.html">split.flowClust</a></td>
+<td>Splitting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="split.html">split.flowFrame</a></td>
+<td>Splitting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="split.html">split.tmixFilterResult</a></td>
+<td>Splitting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset-method</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset.flowClust</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset.flowFrame</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset.flowFrame.tmixFilterResult</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="Subset.html">Subset.tmixFilterResult</a></td>
+<td>Subsetting Data Based on Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">summarizeFilter-method</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="summary.html">summary</a></td>
+<td>Summary Method for flowClust Object</td></tr>
+<tr><td style="width: 25%;"><a href="summary.html">summary-method</a></td>
+<td>Summary Method for flowClust Object</td></tr>
+<tr><td style="width: 25%;"><a href="summary.html">summary.flowClust</a></td>
+<td>Summary Method for flowClust Object</td></tr>
+<tr><td style="width: 25%;"><a href="summary.html">summary.tmixFilterResult</a></td>
+<td>Summary Method for flowClust Object</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">tmixFilter</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">tmixFilter-class</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">tmixFilterResult-class</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">tmixFilterResultList</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">tmixFilterResultList-class</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="miscellaneous.html">uncertainty</a></td>
+<td>Various Functions for Retrieving Information from Clustering Results</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">[-method</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+<tr><td style="width: 25%;"><a href="tmixFilter.html">[[-method</a></td>
+<td>Creating Filters and Filtering Flow Cytometry Data</td></tr>
+</table>
+</body></html>

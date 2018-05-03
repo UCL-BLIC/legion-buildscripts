@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>R: Infrastructure for representing and interacting with the gated
+cytometry</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+<h1> Infrastructure for representing and interacting with the gated
+cytometry
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]" />
+</h1>
+<hr/>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]" /></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]" /></a>
+</div><h2>Documentation for package &lsquo;flowWorkspace&rsquo; version 3.26.2</h2>
+
+<ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation.</a></li>
+<li><a href="../NEWS">Package NEWS</a>.</li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<p style="text-align: center;">
+<a href="# "> </a>
+<a href="#A">A</a>
+<a href="#B">B</a>
+<a href="#C">C</a>
+<a href="#D">D</a>
+<a href="#E">E</a>
+<a href="#F">F</a>
+<a href="#G">G</a>
+<a href="#I">I</a>
+<a href="#K">K</a>
+<a href="#L">L</a>
+<a href="#M">M</a>
+<a href="#N">N</a>
+<a href="#O">O</a>
+<a href="#P">P</a>
+<a href="#R">R</a>
+<a href="#S">S</a>
+<a href="#T">T</a>
+<a href="#U">U</a>
+<a href="#misc">misc</a>
+</p>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="flowWorkspace-package.html">flowWorkspace-package</a></td>
+<td>Import and replicate flowJo workspaces and gating schemes using flowCore.</td></tr>
+</table>
+
+<h2><a name="A">-- A --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="add.html">add</a></td>
+<td>Create a GatingSet and add/remove the flowCore gate(or population) to/from a GatingHierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="add.html">add-method</a></td>
+<td>Create a GatingSet and add/remove the flowCore gate(or population) to/from a GatingHierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="asinhtGml2_trans.html">asinhtGml2_trans</a></td>
+<td>Inverse hyperbolic sine transformation.</td></tr>
+<tr><td style="width: 25%;"><a href="asinh_Gml2.html">asinh_Gml2</a></td>
+<td>inverse hyperbolic sine transform function generator (GatingML 2.0 version)</td></tr>
+</table>
+
+<h2><a name="B">-- B --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="booleanFilter-class.html">booleanFilter</a></td>
+<td>A class describing logical operation (&amp; or |) of the reference populations</td></tr>
+<tr><td style="width: 25%;"><a href="booleanFilter-class.html">booleanFilter-class</a></td>
+<td>A class describing logical operation (&amp; or |) of the reference populations</td></tr>
+</table>
+
+<h2><a name="C">-- C --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="booleanFilter-class.html">char2booleanFilter</a></td>
+<td>A class describing logical operation (&amp; or |) of the reference populations</td></tr>
+<tr><td style="width: 25%;"><a href="checkRedundantNodes.html">checkRedundantNodes</a></td>
+<td>try to determine the redundant terminal(or leaf) nodes that can be removed</td></tr>
+<tr><td style="width: 25%;"><a href="clone.html">clone</a></td>
+<td>clone a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="clone.html">clone-method</a></td>
+<td>clone a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="clone.html">clone-methods</a></td>
+<td>clone a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="openWorkspace.html">closeWorkspace</a></td>
+<td>Open/Close a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="openWorkspace.html">closeWorkspace-method</a></td>
+<td>Open/Close a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="markernames.html">colnames-method</a></td>
+<td>Get/set the column(channel) or marker names</td></tr>
+<tr><td style="width: 25%;"><a href="markernames.html">colnames&lt;--method</a></td>
+<td>Get/set the column(channel) or marker names</td></tr>
+<tr><td style="width: 25%;"><a href="compensate.html">compensate-method</a></td>
+<td>compensate the flow data asssociated with the GatingSet</td></tr>
+</table>
+
+<h2><a name="D">-- D --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="dropRedundantChannels.html">dropRedundantChannels</a></td>
+<td>Remove the channels from flow data that are not used by gates</td></tr>
+<tr><td style="width: 25%;"><a href="dropRedundantNodes.html">dropRedundantNodes</a></td>
+<td>Remove the terminal leaf nodes that make the gating trees to be different from one another.</td></tr>
+</table>
+
+<h2><a name="E">-- E --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="estimateLogicle.GatingHierarchy.html">estimateLogicle.GatingHierarchy</a></td>
+<td>Compute logicle transformation from the flowData associated with a GatingHierarchy</td></tr>
+</table>
+
+<h2><a name="F">-- F --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="filterObject.html">filterObject</a></td>
+<td>convert flowCore filter to a list It convert the flowCore gate to a list whose structure can be understood by underlying c++ data structure.</td></tr>
+<tr><td style="width: 25%;"><a href="filterObject.html">filterObject-method</a></td>
+<td>convert flowCore filter to a list It convert the flowCore gate to a list whose structure can be understood by underlying c++ data structure.</td></tr>
+<tr><td style="width: 25%;"><a href="flowData.html">flowData</a></td>
+<td>Fetch or replace the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="flowData.html">flowData-method</a></td>
+<td>Fetch or replace the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="flowData.html">flowData&lt;-</a></td>
+<td>Fetch or replace the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="flowData.html">flowData&lt;--method</a></td>
+<td>Fetch or replace the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="flowJo.fasinh.html">flowJo.fasinh</a></td>
+<td>inverse hyperbolic sine transform function</td></tr>
+<tr><td style="width: 25%;"><a href="flowJo.fasinh.html">flowJo.fsinh</a></td>
+<td>inverse hyperbolic sine transform function</td></tr>
+<tr><td style="width: 25%;"><a href="flowJoTrans.html">flowJoTrans</a></td>
+<td>construct the flowJo-type biexponentioal transformation function</td></tr>
+<tr><td style="width: 25%;"><a href="flowJoWorkspace-class.html">flowJoWorkspace-class</a></td>
+<td>An R representation of a flowJo workspace.</td></tr>
+<tr><td style="width: 25%;"><a href="flowJo_biexp_trans.html">flowJo_biexp_trans</a></td>
+<td>flowJo biexponential transformation.</td></tr>
+<tr><td style="width: 25%;"><a href="flowJo_fasinh_trans.html">flowJo_fasinh_trans</a></td>
+<td>flowJo inverse hyperbolic sine transformation.</td></tr>
+<tr><td style="width: 25%;"><a href="flowWorkspace-package.html">flowWorkspace</a></td>
+<td>Import and replicate flowJo workspaces and gating schemes using flowCore.</td></tr>
+<tr><td style="width: 25%;"><a href="flowWorkspace.par.get.html">flowWorkspace.par.get</a></td>
+<td>flowWorkspace.par.set sets a set of parameters in the flowWorkspace package namespace.</td></tr>
+<tr><td style="width: 25%;"><a href="flowWorkspace.par.init.html">flowWorkspace.par.init</a></td>
+<td>workspace version is parsed from xml node '/Workspace/version' in flowJo workspace and matched with this list to dispatch to the one of the three workspace parsers</td></tr>
+<tr><td style="width: 25%;"><a href="flowWorkspace.par.get.html">flowWorkspace.par.set</a></td>
+<td>flowWorkspace.par.set sets a set of parameters in the flowWorkspace package namespace.</td></tr>
+<tr><td style="width: 25%;"><a href="flow_breaks.html">flow_breaks</a></td>
+<td>Generate the breaks that makes sense for flow data visualization</td></tr>
+<tr><td style="width: 25%;"><a href="flow_trans.html">flow_trans</a></td>
+<td>helper function to generate a trans objects Used by other specific trans constructor</td></tr>
+</table>
+
+<h2><a name="G">-- G --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="GatingHierarchy-class.html">GatingHierarchy-class</a></td>
+<td>Class GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSet-methods.html">GatingSet</a></td>
+<td>constructors for GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSet-class.html">GatingSet-class</a></td>
+<td>Class '"GatingSet"'</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSet-methods.html">GatingSet-method</a></td>
+<td>constructors for GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSetList-class.html">GatingSetList</a></td>
+<td>Class '"GatingSetList"'</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSetList-class.html">GatingSetList-class</a></td>
+<td>Class '"GatingSetList"'</td></tr>
+<tr><td style="width: 25%;"><a href="getParent.html">getChildren</a></td>
+<td>Return the name of the parent population or a list of child populations of the current population in the GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getParent.html">getChildren-method</a></td>
+<td>Return the name of the parent population or a list of child populations of the current population in the GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getCompensationMatrices.html">getCompensationMatrices</a></td>
+<td>Retrieve the compensation matrices from a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getCompensationMatrices.html">getCompensationMatrices-method</a></td>
+<td>Retrieve the compensation matrices from a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getData-methods.html">getData</a></td>
+<td>get gated flow data from a GatingHierarchy/GatingSet/GatingSetList</td></tr>
+<tr><td style="width: 25%;"><a href="getData-methods.html">getData-method</a></td>
+<td>get gated flow data from a GatingHierarchy/GatingSet/GatingSetList</td></tr>
+<tr><td style="width: 25%;"><a href="getFJWSubsetIndices.html">getFJWSubsetIndices</a></td>
+<td>Fetch the indices for a subset of samples in a flowJo workspace, based on a keyword value pair</td></tr>
+<tr><td style="width: 25%;"><a href="getGate.html">getGate</a></td>
+<td>Return the flowCore gate definition associated with a node in a GatingHierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="getGate.html">getGate-method</a></td>
+<td>Return the flowCore gate definition associated with a node in a GatingHierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="getIndiceMat.html">getIndiceMat</a></td>
+<td>Return the single-cell matrix of 1/0 dichotomized expression</td></tr>
+<tr><td style="width: 25%;"><a href="getIndices.html">getIndices</a></td>
+<td>Get the membership indices for each event with respect to a particular gate in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getIndices-GatingSet-name-method.html">getIndices-method</a></td>
+<td>routine to return the indices by specify boolean combination of reference nodes:</td></tr>
+<tr><td style="width: 25%;"><a href="getIndices.html">getIndices-method</a></td>
+<td>Get the membership indices for each event with respect to a particular gate in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getKeywords.html">getKeywords</a></td>
+<td>Get Keywords</td></tr>
+<tr><td style="width: 25%;"><a href="getKeywords.html">getKeywords-method</a></td>
+<td>Get Keywords</td></tr>
+<tr><td style="width: 25%;"><a href="loglevel.html">getLoglevel</a></td>
+<td>get/set the log level</td></tr>
+<tr><td style="width: 25%;"><a href="getMergedStats.html">getMergedStats</a></td>
+<td>Get Cell Population Statistics and Sample Metadata</td></tr>
+<tr><td style="width: 25%;"><a href="getNodes.html">getNodes</a></td>
+<td>Get the names of all nodes from a gating hierarchy.</td></tr>
+<tr><td style="width: 25%;"><a href="getNodes.html">getNodes-method</a></td>
+<td>Get the names of all nodes from a gating hierarchy.</td></tr>
+<tr><td style="width: 25%;"><a href="getParent.html">getParent</a></td>
+<td>Return the name of the parent population or a list of child populations of the current population in the GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getParent.html">getParent-method</a></td>
+<td>Return the name of the parent population or a list of child populations of the current population in the GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getPopStats</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getPopStats-method</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getProp</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getProp-method</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getSampleGroups.html">getSampleGroups</a></td>
+<td>Get a table of sample groups from a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="getSampleGroups.html">getSampleGroups-method</a></td>
+<td>Get a table of sample groups from a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="getSamples.html">getSamples</a></td>
+<td>Get a list of samples from a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="getSamples.html">getSamples-method</a></td>
+<td>Get a list of samples from a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="getSingleCellExpression.html">getSingleCellExpression</a></td>
+<td>Return the cell events data that express in any of the single populations defined in 'y'</td></tr>
+<tr><td style="width: 25%;"><a href="getSingleCellExpression.html">getSingleCellExpression-method</a></td>
+<td>Return the cell events data that express in any of the single populations defined in 'y'</td></tr>
+<tr><td style="width: 25%;"><a href="getSingleCellExpression.html">getSingleCellExpressionByGate</a></td>
+<td>Return the cell events data that express in any of the single populations defined in 'y'</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getTotal</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getPopStats.html">getTotal-method</a></td>
+<td>Return a table of population statistics for all populations in a GatingHierarchy/GatingSet or the population proportions or the total number of events of a node (population) in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getTransformations.html">getTransformations</a></td>
+<td>Return a list of transformations or a transformation in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="getTransformations.html">getTransformations-method</a></td>
+<td>Return a list of transformations or a transformation in a GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="groupByChannels.html">groupByChannels</a></td>
+<td>split GatingSets into groups based on their flow channels</td></tr>
+<tr><td style="width: 25%;"><a href="groupByTree.html">groupByTree</a></td>
+<td>split GatingSets into groups based on their gating schemes Be careful that the splitted resluts still points to the original data set!!</td></tr>
+</table>
+
+<h2><a name="I">-- I --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="insertGate.html">insertGate</a></td>
+<td>insert a dummy gate to the GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="isNcdf.html">isNcdf</a></td>
+<td>determine the flow data associated with a Gating Hiearchy is based on 'ncdfFlowSet' or 'flowSet'</td></tr>
+</table>
+
+<h2><a name="K">-- K --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="keyword.html">keyword</a></td>
+<td>Retrieve a specific keyword for a specific sample in a 'GatingHierarchy' or or set of samples in a 'GatingSet' or 'GatingSetList'</td></tr>
+<tr><td style="width: 25%;"><a href="keyword.html">keyword-method</a></td>
+<td>Retrieve a specific keyword for a specific sample in a 'GatingHierarchy' or or set of samples in a 'GatingSet' or 'GatingSetList'</td></tr>
+</table>
+
+<h2><a name="L">-- L --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="lapply-methods.html">lapply-method</a></td>
+<td>apply 'FUN' to each sample (i.e. 'GatingHierarchy')</td></tr>
+<tr><td style="width: 25%;"><a href="length.html">length</a></td>
+<td>Methods to get the length of a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="length.html">length-method</a></td>
+<td>Methods to get the length of a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="save_gs.html">load_gs</a></td>
+<td>save/load a GatingSet/GatingSetList to/from disk.</td></tr>
+<tr><td style="width: 25%;"><a href="save_gs.html">load_gslist</a></td>
+<td>save/load a GatingSet/GatingSetList to/from disk.</td></tr>
+<tr><td style="width: 25%;"><a href="logicleGml2_trans.html">logicleGml2_trans</a></td>
+<td>GatingML2 version of logicle transformation.</td></tr>
+<tr><td style="width: 25%;"><a href="logicle_trans.html">logicle_trans</a></td>
+<td>logicle transformation.</td></tr>
+</table>
+
+<h2><a name="M">-- M --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="markernames.html">markernames-method</a></td>
+<td>Get/set the column(channel) or marker names</td></tr>
+<tr><td style="width: 25%;"><a href="markernames.html">markernames&lt;--method</a></td>
+<td>Get/set the column(channel) or marker names</td></tr>
+<tr><td style="width: 25%;"><a href="standardize-GatingSet.html">merge-GatingSet</a></td>
+<td>The tools to standardize the tree structures and channel names.</td></tr>
+<tr><td style="width: 25%;"><a href="mkformula.html">mkformula</a></td>
+<td>make a formula from a character vector</td></tr>
+<tr><td style="width: 25%;"><a href="moveNode.html">moveNode</a></td>
+<td>move a node along with all of its descendant nodes to the given ancester</td></tr>
+</table>
+
+<h2><a name="N">-- N --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="ncFlowSet-methods.html">ncFlowSet</a></td>
+<td>Fetch the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="ncFlowSet-methods.html">ncFlowSet-method</a></td>
+<td>Fetch the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="ncFlowSet-methods.html">ncFlowSet&lt;-</a></td>
+<td>Fetch the flowData object associated with a GatingSet .</td></tr>
+<tr><td style="width: 25%;"><a href="ncFlowSet-methods.html">ncFlowSet&lt;--method</a></td>
+<td>Fetch the flowData object associated with a GatingSet .</td></tr>
+</table>
+
+<h2><a name="O">-- O --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="openWorkspace.html">openWorkspace</a></td>
+<td>Open/Close a flowJo workspace</td></tr>
+<tr><td style="width: 25%;"><a href="openWorkspace.html">openWorkspace-method</a></td>
+<td>Open/Close a flowJo workspace</td></tr>
+</table>
+
+<h2><a name="P">-- P --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="parseWorkspace.html">parseWorkspace</a></td>
+<td>Parse a flowJo Workspace</td></tr>
+<tr><td style="width: 25%;"><a href="parseWorkspace.html">parseWorkspace-method</a></td>
+<td>Parse a flowJo Workspace</td></tr>
+<tr><td style="width: 25%;"><a href="pData-methods.html">pData</a></td>
+<td>read/set pData of flow data associated with 'GatingSet' or 'GatingSetList'</td></tr>
+<tr><td style="width: 25%;"><a href="pData-methods.html">pData-method</a></td>
+<td>read/set pData of flow data associated with 'GatingSet' or 'GatingSetList'</td></tr>
+<tr><td style="width: 25%;"><a href="pData-methods.html">pData&lt;-</a></td>
+<td>read/set pData of flow data associated with 'GatingSet' or 'GatingSetList'</td></tr>
+<tr><td style="width: 25%;"><a href="pData-methods.html">pData&lt;--method</a></td>
+<td>read/set pData of flow data associated with 'GatingSet' or 'GatingSetList'</td></tr>
+<tr><td style="width: 25%;"><a href="plot-methods.html">plot</a></td>
+<td>plot a gating tree</td></tr>
+<tr><td style="width: 25%;"><a href="plot-methods.html">plot-method</a></td>
+<td>plot a gating tree</td></tr>
+<tr><td style="width: 25%;"><a href="plotGate-methods.html">plotGate</a></td>
+<td>Plot gates and associated cell population contained in a 'GatingHierarchy' or 'GatingSet'</td></tr>
+<tr><td style="width: 25%;"><a href="plotGate-methods.html">plotGate-method</a></td>
+<td>Plot gates and associated cell population contained in a 'GatingHierarchy' or 'GatingSet'</td></tr>
+<tr><td style="width: 25%;"><a href="plotGate-methods.html">plotGate-methods</a></td>
+<td>Plot gates and associated cell population contained in a 'GatingHierarchy' or 'GatingSet'</td></tr>
+<tr><td style="width: 25%;"><a href="plotPopCV.html">plotPopCV</a></td>
+<td>Plot the coefficient of variation between xml and openCyto population statistics for each population in a gating hierarchy.</td></tr>
+<tr><td style="width: 25%;"><a href="plotPopCV.html">plotPopCV-method</a></td>
+<td>Plot the coefficient of variation between xml and openCyto population statistics for each population in a gating hierarchy.</td></tr>
+<tr><td style="width: 25%;"><a href="prettyAxis.html">prettyAxis</a></td>
+<td>Determine tick mark locations and labels for a given channel axis</td></tr>
+</table>
+
+<h2><a name="R">-- R --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="GatingSetList-class.html">rbind2-method</a></td>
+<td>Class '"GatingSetList"'</td></tr>
+<tr><td style="width: 25%;"><a href="recompute.html">recompute</a></td>
+<td>Compute the cell events by the gates stored within the gating tree</td></tr>
+<tr><td style="width: 25%;"><a href="recompute.html">recompute-method</a></td>
+<td>Compute the cell events by the gates stored within the gating tree</td></tr>
+<tr><td style="width: 25%;"><a href="add.html">Rm</a></td>
+<td>Create a GatingSet and add/remove the flowCore gate(or population) to/from a GatingHierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="add.html">Rm-method</a></td>
+<td>Create a GatingSet and add/remove the flowCore gate(or population) to/from a GatingHierarchy/GatingSet.</td></tr>
+</table>
+
+<h2><a name="S">-- S --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="sampleNames.html">sampleNames</a></td>
+<td>Get/update sample names in a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="sampleNames.html">sampleNames-method</a></td>
+<td>Get/update sample names in a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="sampleNames.html">sampleNames&lt;-</a></td>
+<td>Get/update sample names in a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="sampleNames.html">sampleNames&lt;--method</a></td>
+<td>Get/update sample names in a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="save_gs.html">save_gs</a></td>
+<td>save/load a GatingSet/GatingSetList to/from disk.</td></tr>
+<tr><td style="width: 25%;"><a href="save_gs.html">save_gslist</a></td>
+<td>save/load a GatingSet/GatingSetList to/from disk.</td></tr>
+<tr><td style="width: 25%;"><a href="set.count.xml.html">set.count.xml</a></td>
+<td>save the event counts parsed from xml into c++ tree structure</td></tr>
+<tr><td style="width: 25%;"><a href="setGate.html">setGate</a></td>
+<td>update the gate</td></tr>
+<tr><td style="width: 25%;"><a href="setGate.html">setGate-method</a></td>
+<td>update the gate</td></tr>
+<tr><td style="width: 25%;"><a href="loglevel.html">setLoglevel</a></td>
+<td>get/set the log level</td></tr>
+<tr><td style="width: 25%;"><a href="setNode-methods.html">setNode</a></td>
+<td>Update the name of one node in a gating hierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="setNode-methods.html">setNode-method</a></td>
+<td>Update the name of one node in a gating hierarchy/GatingSet.</td></tr>
+<tr><td style="width: 25%;"><a href="GatingHierarchy-class.html">show-method</a></td>
+<td>Class GatingHierarchy</td></tr>
+<tr><td style="width: 25%;"><a href="booleanFilter-class.html">show-method</a></td>
+<td>A class describing logical operation (&amp; or |) of the reference populations</td></tr>
+<tr><td style="width: 25%;"><a href="flowJoWorkspace-class.html">show-method</a></td>
+<td>An R representation of a flowJo workspace.</td></tr>
+<tr><td style="width: 25%;"><a href="length.html">show-method</a></td>
+<td>Methods to get the length of a GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="standardize-GatingSet.html">standardize-GatingSet</a></td>
+<td>The tools to standardize the tree structures and channel names.</td></tr>
+<tr><td style="width: 25%;"><a href="subset.html">subset.GatingSet</a></td>
+<td>subset the GatingSet/GatingSetList based on 'pData'</td></tr>
+</table>
+
+<h2><a name="T">-- T --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="transform.html">transform-method</a></td>
+<td>tranform the flow data asssociated with the GatingSet</td></tr>
+<tr><td style="width: 25%;"><a href="transformerList.html">transformerList</a></td>
+<td>Constructor for transformerList object</td></tr>
+</table>
+
+<h2><a name="U">-- U --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="updateChannels.html">updateChannels</a></td>
+<td>Update the channel information of a GatingSet (c++ part)</td></tr>
+</table>
+
+<h2><a name="misc">-- misc --</a></h2>
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="GatingSet-class.html">[-method</a></td>
+<td>Class '"GatingSet"'</td></tr>
+<tr><td style="width: 25%;"><a href="GatingSet-class.html">[[-method</a></td>
+<td>Class '"GatingSet"'</td></tr>
+</table>
+</body></html>
