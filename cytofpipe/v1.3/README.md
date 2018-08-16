@@ -7,14 +7,14 @@ output:
 
 
 <center> 
-# Cytofpipe v1.2 
+# Cytofpipe v1.3 
 _________________
 </center>
 
 This pipeline was developed to by Lucia Conde at the BLIC - UCL Cancer Institute, in collaboration with Jake Henry from the Immune Regulation and Tumour Immunotherapy Research Group, for the automatic analysis of flow and mass cytometry data in the UCL cluster __Legion__. Any UCL researcher can access the pipeline via legion. Researchers from other institutions can download the stand-alone version of Cytofpipe and run it directly in their personal computers. An external script developed by Heng Li (https://github.com/lh3/asub) is also provided so that users can easily submit Cytofpipe to their cluster queue system (LSF, SGE/UGE, SLURM) if desired.
 
-Cytofpipe v1.2 can be used 1) to run standard cytometry data analysis for subset identification, 2) for comparison of groups of samples, and 3) to construct scaffold maps 
-for visualizing complex relationships between samples. The methods underneath Cytofpipe v1.2 are based on publicly available R packages for flow/cytof data analysis
+Cytofpipe v1.3 can be used 1) to run standard cytometry data analysis for subset identification, 2) for comparison of groups of samples, and 3) to construct scaffold maps 
+for visualizing complex relationships between samples. The methods underneath Cytofpipe v1.3 are based on publicly available R packages for flow/cytof data analysis
 
 - Cytofpipe **--clustering** is based mainly on cytofkit (https://bioconductor.org/packages/release/bioc/html/cytofkit.html), which is used for preprocessing/clustering, and openCyto (https://www.bioconductor.org/packages/release/bioc/html/openCyto.html), for basic automated gating. 
 
@@ -26,7 +26,7 @@ for visualizing complex relationships between samples. The methods underneath Cy
 <br />
 
 <div align=center>
-# How to run Cytofpipe v1.2
+# How to run Cytofpipe v1.3
 </div>
 
 <br>
@@ -61,7 +61,7 @@ Once you are in legion, you will need to load the modules necessary for the pipe
 
 `$ module load blic-modules`
 
-`$ module load cytofpipe/v1.2`
+`$ module load cytofpipe/v1.3`
 
 
 **3.- Submit the job:**
@@ -104,7 +104,7 @@ When you submit the job, before it actually runs, there is a JSV script that che
 
 ```
 Program: Cytofpipe --clustering
-Version: 1.2
+Version: 1.3
 Contact: Lucia Conde <l.conde\@ucl.ac.uk>
 
 Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
@@ -154,14 +154,14 @@ If you submit a job, and later on it does not show when you do qstat, that means
 
 **1.- Installation**
 
-Download cytofpipe from https://github.com/UCL-BLIC/cytofpipe/archive/v1.2.tar.gz and uncompress it using tar:
+Download cytofpipe from https://github.com/UCL-BLIC/cytofpipe/archive/v1.3.tar.gz and uncompress it using tar:
 
-`$ tar -xvf cytofpipe_1.2.tar.gz`
+`$ tar -xvf cytofpipe_1.3.tar.gz`
 
-That will create a 'cytofpipe_1.1' masters folder that contains the code almost ready to use. You will just need to tell cytofpipe where you have downloaded the code. For that, open the cytofpipe_1.2/cytofpipe.pl perl script and change the variable CYTOFPIPE_HOME so that it points to the master folder:
+That will create a 'cytofpipe_1.1' masters folder that contains the code almost ready to use. You will just need to tell cytofpipe where you have downloaded the code. For that, open the cytofpipe_1.3/cytofpipe.pl perl script and change the variable CYTOFPIPE_HOME so that it points to the master folder:
 
 ```
-$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.2"
+$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.3"
 ```
 
 
@@ -174,7 +174,7 @@ Cytofpipe depends on several R packages, mainly:
 <li>scaffold (https://github.com/nolanlab/scaffold)</li>
 <li>citrus (https://github.com/nolanlab/citrus)</li></ul>
 
-as well as other not related to flow/cytof data analysis (ini, hash, ...). Perhaps you have already installed some of these R packages locally in your system. However, it is possible that the Cytofpipe version that you have downloaded might only work with a specific version of these packages (for example, Cytofpipe_v1.2 works fine with cytofkit_1.10, but not with cytofpipe_1.6, or potentially with newer cytofkit versions). This is because when a new version of'cytofkit' is released, if it has gone through substantial changes to the code, the code of Cytofpipe needs to be changed accordingly. Therefore, to avoid issues with version clashes we provide a folder Rlib that contains the necessary R packages to run Cytofpipe and we have checked that the versions are compatible. You don't need to do anything about this, every time that Cytofpipe is launched it will assign the R_LIBS environment variable to that Rlib folder.
+as well as other not related to flow/cytof data analysis (ini, hash, ...). Perhaps you have already installed some of these R packages locally in your system. However, it is possible that the Cytofpipe version that you have downloaded might only work with a specific version of these packages (for example, Cytofpipe_v1.3 works fine with cytofkit_1.10, but not with cytofpipe_1.6, or potentially with newer cytofkit versions). This is because when a new version of'cytofkit' is released, if it has gone through substantial changes to the code, the code of Cytofpipe needs to be changed accordingly. Therefore, to avoid issues with version clashes we provide a folder Rlib that contains the necessary R packages to run Cytofpipe and we have checked that the versions are compatible. You don't need to do anything about this, every time that Cytofpipe is launched it will assign the R_LIBS environment variable to that Rlib folder.
 
 **3.- Submit the job:**
 
@@ -195,25 +195,25 @@ Let’s say you have a folder called 'cytof_data' that contains a directory with
 /home/user/Scratch/cytof_data/config.txt
 ```
 
-To run the pipeline in "clustering" mode with default parameters, just run the "cytofpipe.pl" perl script located in the masters cytofpipe_v1.2 folder:
+To run the pipeline in "clustering" mode with default parameters, just run the "cytofpipe.pl" perl script located in the masters cytofpipe_v1.3 folder:
 
-`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt`
+`$ /path/to/cytofpipe_v1.3/cytofpipe.pl --clustering -i inputfiles -o results -m markers.txt`
 
 That will crate a new folder called “results” that will contain all the results of the analysis.
 
 Similarly, to run the pipeline in "scaffold" mode with default parameters:
 
-`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --scaffold -i inputfiles --ref file1.fcs -o results -m markers.txt`
+`$ /path/to/cytofpipe_v1.3/cytofpipe.pl --scaffold -i inputfiles --ref file1.fcs -o results -m markers.txt`
 
 Finally, to run the pipeline in "citrus" mode with default parameters:
 
-`$ /path/to/cytofpipe_v1.2/cytofpipe.pl --citrus -i inputfiles --cond conditions.txt -o results -m markers.txt`
+`$ /path/to/cytofpipe_v1.3/cytofpipe.pl --citrus -i inputfiles --cond conditions.txt -o results -m markers.txt`
 
 Cytofpipe will first check that everything is in order. For example, that the inputfiles folder exists, that there is not a results folder already there (so that nothing is overwritten), that if a config.txt file is inputed it has the appropriate format, etc... Only if everything looks fine, the job will be submitted. Otherwise, an error message will appear that will tell you that there is a problem. For example:
 
 ```
 Program: Cytofpipe --clustering
-Version: 1.2
+Version: 1.3
 Contact: Lucia Conde <l.conde\@ucl.ac.uk>
 
 Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
@@ -245,7 +245,7 @@ Exiting.
 
 **1.- asub:**
 
-While we have a Cytofpipe version that runs in the UCL cluster using its queue system, we don't provide a version that will take advantage of the queue system in other clusters outside UCL. However, this is easily accomplished by using the 'asub' script developed by Heng Li at the Braod Institute (https://github.com/lh3/asub), and that we provide in the Cytofpipe_v1.2 masters folder for convenience.
+While we have a Cytofpipe version that runs in the UCL cluster using its queue system, we don't provide a version that will take advantage of the queue system in other clusters outside UCL. However, this is easily accomplished by using the 'asub' script developed by Heng Li at the Braod Institute (https://github.com/lh3/asub), and that we provide in the Cytofpipe_v1.3 masters folder for convenience.
 
 The only difference in running the script directly or via asub, is that if you use asub, the command line needs to be written into a file, and then that file is called with asub. For example, to submit a job directly you would do:
 
@@ -290,7 +290,7 @@ Sometimes, particularly when the user requests a lot of time, memory, nodes, or 
 To avoid this, cytofpipe also contains a script in the masters folder called "check_submission.pl", that do some checkings of the arguments passed to cytofpipe.pl. In reality, this script is just an almost identical copy of cytofpipe.pl, which checks that everything is in order before doing any analysis. To use it, first change the variable CYTOFPIPE_HOME so that it points to the master folder:
 
 ```
-$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.2"
+$ENV{CYTOFPIPE_HOME}="/path/where/your/have/cytofpipe_1.3"
 ```
 
 and then simply run it with the same arguments that you want to pass to cytofpipe.pl.
@@ -307,7 +307,7 @@ checkSubmission.pl will check that you indeed have a folder called 'inputfiles' 
 
 ```
 Program: Cytofpipe --clustering
-Version: 1.2
+Version: 1.3
 Contact: Lucia Conde <l.conde\@ucl.ac.uk>
 
 Usage:   cytofpipe --clustering -i DIR -o DIR -m FILE [options]
@@ -342,7 +342,7 @@ In any case, to avoid finding out about a mispelled markers filename after being
 ##  {.tabset}
 
 <div align=center>
-# Cytofpipe v1.2 commands
+# Cytofpipe v1.3 commands
 </div>
 
 <br>
@@ -366,7 +366,7 @@ First, FCS files will be merged, expression data for selected markers will be tr
 
 - *Note 1*: The markers uploaded by the user should be the ones provided in the “Description” filed of the FCS. This will usually be a longer format (141Pr_CD38) in cytof data and a shorter format (CD38) in Flow data. However, the shorter version can be used when uploading cytod data.
 - *Note 2*: Markers uploaded by the user are used for clustering and dimensional reduction, and by default they are the only ones displayed in the results (heatmaps, etc..). Using the **--displayAll** option will override this and all the markers (with exception of Time, Event, viability and FSC/SSC channels) will be included in the output plots and files. All markers are transformed to the user's specifications with exception of FSC/SSC that are linearly transformed. 
-- *Note 3*: Cytofpipe v1.2 runs cytofkit_1_10_0
+- *Note 3*: Cytofpipe v1.3 runs cytofkit_1_10_0
 <br />
 
 Cytofpipe assumes that the data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. 
@@ -529,7 +529,7 @@ low weight are filtered out and the graph is then laid out (shaped) using a Forc
 position of the landmark nodes stay constant, providing a visual reference that allows the comparison of the different datasets.
 
 - *Note 1*: Because the clustering is very computationally intensive, by default cytofpipe downsamples the original FCS files to 10,000 events (with NO replacement if the total number of cell in the file is less than 10,000), and then **all the clustering and construction of maps are done on these downsampled files** to be able to run the jobs in a timely fashion. This can be changed with the **--all** and **--downsample NUM** arguments.
-- *Note 2*: Cytofpipe v1.2 is running scaffold_0.1
+- *Note 2*: Cytofpipe v1.3 is running scaffold_0.1
  
 Cytofpipe assumes that the FCS data has been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_negevents were removed before analysis. With regards to compensation, please note that the software will try to apply a compensation matrix if one is found in the FCS file. So if the data in the file is already compensated, it will be erroneously compensated again. If your data needs compensation make sure that the FCS file has a spillover matrix embedded and the data is uncompensated.
 
@@ -630,7 +630,7 @@ please contact me.
 - *Note 5*: Parameters must be measured on the same channels in each file, the same parameters must be measured in all FCS files (no extras or missing parameters in any FCS file) and measured 
 parameters and channels must appear in the same order in each FCS file.
 - *Note 6*: Due to the stochastic nature of the citrus algorithm, is recommended to run (repeat) the analysis at least 3 times to make sure the results are not false positives.
-- *Note 7*: Cytofpipe v1.2 runs citrus_0.08
+- *Note 7*: Cytofpipe v1.3 runs citrus_0.08
 
 Cytofpipe assumes that the data have been properly preprocessed beforehand, i.e., that  normalisation, debarcoding and compensation (if flow) were done properly, and that all the debris, doublets, and live_neg events were removed before analysis. For flow cytometry data, raw FCS file data must be compensated. Compensation matrices stored in FCS files will not be applied when running Cytofpipe in --citrus mode.
 
@@ -735,6 +735,12 @@ _________________
 
 
 <ul>
+<li><b>v1.3</b>
+<ul>
+<li>Added --array option for compatibility with cytofpipe_array (NOTE: this option is not documented nor shown in the usage as it is not meant to be run in a normal cytofpipe run)</li>
+<li>Changed interanl parameters related to JOB_ID, JOB_NAME, SGE_TASK_ID for compatibility with cytofpipe_array</li>
+<li>Versions: cytofkit 1.10.0, scaffold 1.0, citrus 0.08</li>
+</ul>
 <li><b>v1.2</b>
 <ul>
 <li>Added --groups option to generate cluster percentage plots and marker level plots for groups of samples</li>
@@ -784,6 +790,6 @@ _________________
 
 
 Email me <a href="mailto:l.conde@ucl.ac.uk?">here</a>.
-<br>Last modified May 2018.
+<br>Last modified Aug 2018.
 
 <br />
