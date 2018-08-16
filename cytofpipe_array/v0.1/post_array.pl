@@ -8,6 +8,9 @@ my $rand_id=$ENV{RAND_ID};
 my $out=$ENV{OUT};
 my $iter=$ENV{ITER};
 
+#my $cytofpipe_array_home=$ENV{CYTOFPIPE_ARRAY_HOME};
+my $cytofpipe_array_home=$ARGV[0];
+
 system("mkdir $ENV{PWD}/${out}_array_files");
 
 my %clusteringmethod=();
@@ -33,7 +36,7 @@ for (my $i=2; $i<=$iter; $i++){
 my @clust=keys(%clusteringmethod);
 my $clust=join(",",@clust);
 
-system("OUT=$ENV{PWD}/$out ITER=$iter CLUST=$clust R CMD BATCH merge_files.R");
+system("OUT=$ENV{PWD}/$out ITER=$iter CLUST=$clust R CMD BATCH ${cytofpipe_array_home}/merge_files.R");
 system("rm -rf merge_files.Rout");
 system("rm -rf $ENV{PWD}/*${rand_id}*");
 

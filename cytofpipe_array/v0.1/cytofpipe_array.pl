@@ -142,7 +142,7 @@ for (my $iter_i=2;$iter_i<=$iter;$iter_i++){
 	$ARGV[($index_out+1)]=$outputdir."_".$iter_i;
 	print OUTF "$ENV{CYTOFPIPE_HOME}/cytofpipe.qsub --clustering "."@ARGV"." --array\n";
 }
-print OUTF "$ENV{CYTOFPIPE_ARRAY_HOME}/post_array.pl\n";
+print OUTF "$ENV{CYTOFPIPE_ARRAY_HOME}/post_array.pl $ENV{CYTOFPIPE_ARRAY_HOME}\n";
 close(OUTF);
 
 my $post_iter=$iter+1;
