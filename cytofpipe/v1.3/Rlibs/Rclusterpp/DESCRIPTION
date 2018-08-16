@@ -1,0 +1,33 @@
+Package: Rclusterpp
+Type: Package
+Title: Linkable C++ Clustering
+Version: 0.2.4
+Date: 2016-05-29
+Authors@R: c(person("Michael Linderman",role="aut",email="michael.d.linderman@gmail.com"),
+	     person("Robert Bruggner",role="cre",email="rbruggner@gmail.com"),
+	     person("Zach Bjornson",role="ctb",email="bjornson@stanford.edu"))
+Description: Provide flexible native clustering routines that can be
+        linked against in downstream packages.
+License: MIT + file LICENSE
+LazyData: yes
+Depends: R (>= 2.12.0), Rcpp (>= 0.10.4)
+LinkingTo: Rcpp, RcppEigen
+Suggests: RUnit, rbenchmark, fastcluster, inline
+URL: https://github.com/nolanlab/Rclusterpp
+BugReports: https://github.com/nolanlab/Rclusterpp/issues
+NeedsCompilation: yes
+Author: Michael Linderman [aut],
+  Robert Bruggner [cre],
+  Zach Bjornson [ctb]
+Maintainer: Robert Bruggner <rbruggner@gmail.com>
+Built: R 3.4.0; x86_64-pc-linux-gnu; 2017-12-19 19:24:59 UTC; unix
+RemoteType: github
+RemoteHost: https://api.github.com
+RemoteRepo: Rclusterpp
+RemoteUsername: nolanlab
+RemoteRef: master
+RemoteSha: 740cb0b95e1bf79644efb500b32d84c35193f6c6
+GithubRepo: Rclusterpp
+GithubUsername: nolanlab
+GithubRef: master
+GithubSHA1: 740cb0b95e1bf79644efb500b32d84c35193f6c6

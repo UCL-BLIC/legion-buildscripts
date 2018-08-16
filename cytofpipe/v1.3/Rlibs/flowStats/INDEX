@@ -1,0 +1,45 @@
+BackGating              Sample backgating results
+ITN                     Sample flow cytometry data
+autoGate                Automated gating of single populations in 2D
+binByRef                Bin a test data set using bins previously
+                        created by probability binning a control
+                        dataset
+calcPBChiSquare         Probability binning metirc for comparing the
+                        probability binned datasets
+calcPearsonChi          Pearsons chi-square statistic for comparing the
+                        probability binned datasets
+curv1Filter-class       Class "curv1Filter"
+curv2Filter-class       Class "curv2Filter"
+curvPeaks               Parse curv1Filter output
+density1d               Find most likely separation between positive
+                        and negative populations in 1D
+flowStats-package       Statistical methods for flow cytometry data
+                        analysis
+gate_singlet            Creates a singlet polygon gate using the
+                        prediction bands from a robust linear model
+gaussNorm               Per-channel normalization based on landmark
+                        registration
+gpaSet                  Multi-dimensional normalization of flow
+                        cytometry data
+iProcrustes             Procrustes analysis. Using singular value
+                        decomposition (SVD) to determine a linear
+                        transformation to align the points in X to the
+                        points in a reference matrix Y.
+idFeaturesByBackgating
+                        (Internal use only) Identify features of flow
+                        cytometry data using backgating
+landmarkMatrix          Compute and cluster high density regions in 1D
+lymphFilter-class       Automated gating of elliptical cell populations
+                        in 2D.
+normQA                  Normalization quality assessment
+normalize-methods       normalize a GatingSet imported with
+                        flowWorkspace, using sequential normalization
+                        on the manual gates in the GatingHierarchy.
+plotBins                Plots the probability bins overlaid with
+                        flowFrame data
+proBin                  Probability binning - a metric for evaluating
+                        multivariate differences
+quadrantGate            Automated quad gating
+rangeGate               Find most likely separation between positive
+                        and negative populations in 1D
+warpSet                 Normalization based on landmark registration

@@ -1,0 +1,80 @@
+import(flowCore)
+import(flowViz)
+import(flowWorkspace)
+
+
+importClassesFrom(methods, character, list, numeric)
+
+importMethodsFrom(Biobase, channel)
+
+importMethodsFrom(BiocGenerics, cbind, colnames, lapply, mapply, order,
+                  paste, pmax, pmin, rbind, rownames, sapply, setdiff,
+                  table, unique)
+
+
+
+importFrom(Biobase, listLen)
+
+importFrom(KernSmooth, bkde2D)
+
+importFrom(MASS, huber, hubers, rlm, cov.rob)
+
+importFrom(ks, binning)
+
+importFrom(fda, Data2fd, create.bspline.basis, eval.fd, fdPar,fd,int2Lfd,vec2Lfd,norder,
+           landmarkreg)
+
+
+importFrom(grDevices, chull, col2rgb, contourLines, dev.cur, dev.off,
+           png, rainbow, rgb, x11)
+
+importFrom(graphics, abline, legend, lines, par, points, polygon,
+           rect, text)
+
+importFrom(lattice, make.groups, panel.abline, panel.number,
+           panel.points, panel.polygon, panel.segments,
+           panel.stripplot, panel.text, stripplot, trellis.focus,
+           trellis.par.get, trellis.unfocus, which.packet)
+
+importFrom(methods,  as, is, new, selectMethod)
+
+
+
+importFrom(stats, anova, approxfun, as.formula, as.hclust, chisq.test,
+           density, dnorm, fitted, formula, kmeans, mad, median,
+           na.omit, optimize, qnorm, quantile, resid, sd, var, dist)
+
+importFrom(utils, capture.output)
+
+export("lymphGate",
+       "curv1Filter",
+       "curv2Filter",
+       "oneDGate",
+       "quadrantGate",
+       "rangeGate",
+       "rangeFilter",
+       "warpSet",
+#       "warpSetGS",
+#	"warpSetNCDF",
+#	"warpSetNCDFLowMem",
+	"proBin",
+       "binByRef",
+       "gaussNorm",
+       "plotBins",
+       "calcPearsonChi",
+       "calcPBChiSquare",
+       "gpaSet",
+       "iProcrustes",
+       "normQA",
+       "singletGate",
+       "gate_singlet"
+       )
+
+exportClasses("lymphFilter","rangeFilter","curv1Filter", 
+              "curv2Filter")
+
+exportMethods("normalize")
+
+
+exportMethods("%in%")
+

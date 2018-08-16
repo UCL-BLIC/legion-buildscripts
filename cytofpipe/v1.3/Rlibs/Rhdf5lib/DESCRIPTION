@@ -1,0 +1,18 @@
+Package: Rhdf5lib
+Type: Package
+Title: hdf5 library as an R package
+Version: 1.0.0
+Author: Mike Smith
+Maintainer: Mike Smith <grimbough@gmail.com>
+Description: Provides C and C++ hdf5 libraries.
+License: Artistic-2.0
+LazyLoad: true
+VignetteBuilder: knitr
+Suggests: BiocStyle, knitr, rmarkdown
+BugReports: https://github.com/grimbough/Rhdf5lib
+SystemRequirements: GNU make
+biocViews: Infrastructure
+RoxygenNote: 6.0.1
+NeedsCompilation: yes
+Packaged: 2017-10-31 01:28:43 UTC; biocbuild
+Built: R 3.4.0; x86_64-pc-linux-gnu; 2017-12-19 19:07:58 UTC; unix

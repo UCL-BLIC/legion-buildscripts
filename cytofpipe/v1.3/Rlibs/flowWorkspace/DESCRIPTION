@@ -1,0 +1,37 @@
+Package: flowWorkspace
+Type: Package
+Title: Infrastructure for representing and interacting with the gated
+        cytometry
+Version: 3.26.2
+Date: 2011-06-10
+Author: Greg Finak, Mike Jiang
+Maintainer: Greg Finak <gfinak@fhcrc.org>,Mike Jiang <wjiang2@fhcrc.org>
+Description: This package is designed to facilitate comparison of automated
+    gating methods against manual gating done in flowJo. This package allows
+    you to import basic flowJo workspaces into BioConductor and replicate the
+    gating from flowJo using the flowCore functionality. Gating hierarchies,
+    groups of samples, compensation, and transformation are performed so that
+    the output matches the flowJo analysis.
+License: Artistic-2.0
+LazyLoad: yes
+Imports: Biobase, BiocGenerics, graph, graphics, grDevices, lattice,
+        methods, stats, stats4, utils, RBGL, XML, tools, gridExtra,
+        Rgraphviz, data.table, dplyr, latticeExtra, Rcpp, RColorBrewer,
+        stringr, scales, flowViz
+Collate: 'AllGenerics.R' 'AllClasses.R' 'GatingHierarchy_Methods.R'
+        'GatingSet_Methods.R' 'GatingSetList_Methods.R' 'RcppExports.R'
+        'filterObject_Methods.R' 'add_Methods.R'
+        'flowJoWorkspace_Methods.R' 'flow_trans.R'
+        'getSingleCellExpression.R' 'merge_GatingSet.R' 'moveNode.R'
+        'setGate_Methods.R' 'utils.R' 'zzz.R'
+Depends: R (>= 2.16.0),flowCore(>= 1.39.9),ncdfFlow(>= 2.19.5)
+biocViews: FlowCytometry, DataImport, Preprocessing, DataRepresentation
+Suggests: testthat, flowWorkspaceData, RSVGTipsDevice, knitr, ggcyto,
+        parallel
+LinkingTo: Rcpp, BH(>= 1.62.0-1), RProtoBufLib, cytolib(>= 0.99.6)
+VignetteBuilder: knitr
+SystemRequirements: xml2, GNU make, C++11
+RoxygenNote: 6.0.1
+NeedsCompilation: yes
+Packaged: 2017-11-09 23:55:41 UTC; biocbuild
+Built: R 3.4.0; x86_64-pc-linux-gnu; 2017-12-19 19:15:45 UTC; unix

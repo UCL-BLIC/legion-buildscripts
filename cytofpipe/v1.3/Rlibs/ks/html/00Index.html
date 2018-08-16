@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>R: Kernel Smoothing</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+<h1> Kernel Smoothing
+<img class="toplogo" src="../../../doc/html/Rlogo.svg" alt="[R logo]" />
+</h1>
+<hr/>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]" /></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]" /></a>
+</div><h2>Documentation for package &lsquo;ks&rsquo; version 1.10.7</h2>
+
+<ul><li><a href="../DESCRIPTION">DESCRIPTION file</a>.</li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation.</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table width="100%">
+<tr><td style="width: 25%;"><a href="ise.mixt.html">amise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="binning.html">binning</a></td>
+<td>Linear binning for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">compare</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">compare.kda.cv</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">compare.kda.diag.cv</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="contour.html">contourLevels</a></td>
+<td>Contours functions</td></tr>
+<tr><td style="width: 25%;"><a href="contour.html">contourLevels.kda</a></td>
+<td>Contours functions</td></tr>
+<tr><td style="width: 25%;"><a href="contour.html">contourLevels.kde</a></td>
+<td>Contours functions</td></tr>
+<tr><td style="width: 25%;"><a href="contour.html">contourSizes</a></td>
+<td>Contours functions</td></tr>
+<tr><td style="width: 25%;"><a href="kde.1d.html">dkde</a></td>
+<td>Functions for univariate kernel density estimates</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">dmvnorm.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">dmvt.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">dnorm.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">Hamise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">hamise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">Hamise.mixt.diag</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="Hbcv.html">Hbcv</a></td>
+<td>Biased cross-validation (BCV) bandwidth matrix selector for bivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="Hbcv.html">Hbcv.diag</a></td>
+<td>Biased cross-validation (BCV) bandwidth matrix selector for bivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">Hkda</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">hkda</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">Hkda.diag</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">Hlscv</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">hlscv</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">Hlscv.diag</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">Hmise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">hmise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">Hmise.mixt.diag</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="Hns.html">Hns</a></td>
+<td>Normal scale bandwidth</td></tr>
+<tr><td style="width: 25%;"><a href="Hns.html">hns</a></td>
+<td>Normal scale bandwidth</td></tr>
+<tr><td style="width: 25%;"><a href="Hns.html">Hns.kcde</a></td>
+<td>Normal scale bandwidth</td></tr>
+<tr><td style="width: 25%;"><a href="Hns.html">hns.kcde</a></td>
+<td>Normal scale bandwidth</td></tr>
+<tr><td style="width: 25%;"><a href="Hpi.html">Hpi</a></td>
+<td>Plug-in bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="Hpi.html">hpi</a></td>
+<td>Plug-in bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="Hpi.html">Hpi.diag</a></td>
+<td>Plug-in bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="kcde.html">Hpi.diag.kcde</a></td>
+<td>Kernel cumulative distribution/survival function estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kfe.html">Hpi.diag.kfe</a></td>
+<td>Kernel functional estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kcde.html">Hpi.kcde</a></td>
+<td>Kernel cumulative distribution/survival function estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kcde.html">hpi.kcde</a></td>
+<td>Kernel cumulative distribution/survival function estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kfe.html">Hpi.kfe</a></td>
+<td>Kernel functional estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kfe.html">hpi.kfe</a></td>
+<td>Kernel functional estimate</td></tr>
+<tr><td style="width: 25%;"><a href="Hscv.html">Hscv</a></td>
+<td>Smoothed cross-validation (SCV) bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="Hscv.html">hscv</a></td>
+<td>Smoothed cross-validation (SCV) bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="Hscv.html">Hscv.diag</a></td>
+<td>Smoothed cross-validation (SCV) bandwidth selector</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">Hucv</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">hucv</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="Hlscv.html">Hucv.diag</a></td>
+<td>Least-squares cross-validation (LSCV) bandwidth matrix selector for multivariate data</td></tr>
+<tr><td style="width: 25%;"><a href="vector.html">invvec</a></td>
+<td>Vector and vector half operators</td></tr>
+<tr><td style="width: 25%;"><a href="vector.html">invvech</a></td>
+<td>Vector and vector half operators</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">ise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="kcde.html">kcde</a></td>
+<td>Kernel cumulative distribution/survival function estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kcopula.html">kcopula</a></td>
+<td>Kernel copula (density) estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kcopula.html">kcopula.de</a></td>
+<td>Kernel copula (density) estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">kda</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kdde.html">kdde</a></td>
+<td>Kernel density derivative estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kde.html">kde</a></td>
+<td>Kernel density estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kde.local.test.html">kde.local.test</a></td>
+<td>Kernel density based local two-sample comparison test</td></tr>
+<tr><td style="width: 25%;"><a href="kde.test.html">kde.test</a></td>
+<td>Kernel density based global two-sample comparison test</td></tr>
+<tr><td style="width: 25%;"><a href="kfe.html">kfe</a></td>
+<td>Kernel functional estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kfs.html">kfs</a></td>
+<td>Kernel feature significance</td></tr>
+<tr><td style="width: 25%;"><a href="kms.html">kms</a></td>
+<td>Kernel mean shift clustering.</td></tr>
+<tr><td style="width: 25%;"><a href="kroc.html">kroc</a></td>
+<td>Kernel receiver operating characteristic (ROC) curve</td></tr>
+<tr><td style="width: 25%;"><a href="ks-package.html">ks</a></td>
+<td>ks</td></tr>
+<tr><td style="width: 25%;"><a href="ise.mixt.html">mise.mixt</a></td>
+<td>Squared error bandwidth matrix selectors for normal mixture densities</td></tr>
+<tr><td style="width: 25%;"><a href="kde.1d.html">pkde</a></td>
+<td>Functions for univariate kernel density estimates</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kcde.html">plot.kcde</a></td>
+<td>Plot for kernel cumulative distribution estimate</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kda.html">plot.kda</a></td>
+<td>Plot for kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kdde.html">plot.kdde</a></td>
+<td>Plot for kernel density derivative estimate</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kde.html">plot.kde</a></td>
+<td>Plot for kernel density estimate</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kde.loctest.html">plot.kde.loctest</a></td>
+<td>Plot for kernel local significant difference regions</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kfs.html">plot.kfs</a></td>
+<td>Plot for kernel feature significance</td></tr>
+<tr><td style="width: 25%;"><a href="plot.kroc.html">plot.kroc</a></td>
+<td>Plot for kernel receiver operating characteristic curve (ROC) estimate</td></tr>
+<tr><td style="width: 25%;"><a href="plotmixt.html">plotmixt</a></td>
+<td>Plot for 1- to 3-dimensional normal and t-mixture density functions.</td></tr>
+<tr><td style="width: 25%;"><a href="pre.transform.html">pre.scale</a></td>
+<td>Pre-sphering and pre-scaling</td></tr>
+<tr><td style="width: 25%;"><a href="pre.transform.html">pre.sphere</a></td>
+<td>Pre-sphering and pre-scaling</td></tr>
+<tr><td style="width: 25%;"><a href="kcde.html">predict.kcde</a></td>
+<td>Kernel cumulative distribution/survival function estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kda.html">predict.kda</a></td>
+<td>Kernel discriminant analysis</td></tr>
+<tr><td style="width: 25%;"><a href="kdde.html">predict.kdde</a></td>
+<td>Kernel density derivative estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kde.html">predict.kde</a></td>
+<td>Kernel density estimate</td></tr>
+<tr><td style="width: 25%;"><a href="kroc.html">predict.kroc</a></td>
+<td>Kernel receiver operating characteristic (ROC) curve</td></tr>
+<tr><td style="width: 25%;"><a href="kde.1d.html">qkde</a></td>
+<td>Functions for univariate kernel density estimates</td></tr>
+<tr><td style="width: 25%;"><a href="kde.1d.html">rkde</a></td>
+<td>Functions for univariate kernel density estimates</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">rmvnorm.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">rmvt.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="mixt.html">rnorm.mixt</a></td>
+<td>Normal and t-mixture distributions</td></tr>
+<tr><td style="width: 25%;"><a href="kms.html">summary.kms</a></td>
+<td>Kernel mean shift clustering.</td></tr>
+<tr><td style="width: 25%;"><a href="kroc.html">summary.kroc</a></td>
+<td>Kernel receiver operating characteristic (ROC) curve</td></tr>
+<tr><td style="width: 25%;"><a href="unicef.html">unicef</a></td>
+<td>Unicef child mortality - life expectancy data</td></tr>
+<tr><td style="width: 25%;"><a href="vector.html">vec</a></td>
+<td>Vector and vector half operators</td></tr>
+<tr><td style="width: 25%;"><a href="vector.html">vech</a></td>
+<td>Vector and vector half operators</td></tr>
+</table>
+</body></html>

@@ -1,0 +1,26 @@
+addName-methods         Add gate names to a flowViz plot.
+contour-methods         Contour plots for flow data
+densityplot             One-dimensional density/histogram plots for
+                        flow data
+flowPlot                Standard Plots for Flow Cytometry Data
+flowViz-package         Visualization for flow cytometry
+flowViz.par.get         Query and set session-wide graphical parameter
+                        defaults.
+glines-methods          Drawing filter boundaries
+glpoints-methods        Adding points within a gate to a plot
+glpolygon-methods       Drawing filter regions
+gpoints-methods         Adding points within a gate to a plot
+gpolygon-methods        Drawing filter regions
+levelplot,formula,flowSet-method
+                        Methods implementing Lattice displays for flow
+                        data
+plot                    Very basic plotting of flowFrames
+prepanel.ecdfplot.flowset
+                        Method implementing Lattice ECDF plots for flow
+                        data
+splom                   Method implementing Lattice scatter plot
+                        matrices for flow data.
+timeLinePlot            Plot channel values against time
+xyplot,flowFrame,missing-method
+                        Methods implementing Lattice xyplots for flow
+                        data.

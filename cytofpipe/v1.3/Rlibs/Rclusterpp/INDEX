@@ -1,0 +1,9 @@
+Rclusterpp-package      Linkable C++ clustering
+Rclusterpp.hclust       Hierarchical Clustering
+Rclusterpp.linkageKinds
+                        Linkage and distance kinds available in
+                        Rclusterpp
+Rclusterpp.package.skeleton
+                        Create a skeleton for a new package that
+                        intends to use Rclusterpp
+Rclusterpp.setThreads   Set number of threads used in clustering

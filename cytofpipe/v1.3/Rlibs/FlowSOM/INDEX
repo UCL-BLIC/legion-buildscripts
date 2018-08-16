@@ -1,0 +1,39 @@
+AddFlowFrame            Add a flowFrame to the data variable of the
+                        FlowSOM object
+AggregateFlowFrames     Aggregate multiple fcs files together
+BuildMST                Build Minimal Spanning Tree
+BuildSOM                Build a self-organizing map
+CountGroups             Calculate differences in cell counts between
+                        groups
+Dist.MST                Calculate distance matrix using a minimal
+                        spanning tree neighbourhood
+FMeasure                F measure
+FlowSOM                 Run the FlowSOM algorithm
+FlowSOMSubset           FlowSOM subset
+Initialize              Select k well spread points from X
+MapDataToCodes          Assign nearest node to each datapoint
+MetaClustering          MetaClustering
+NewData                 Map new data to a FlowSOM grid
+PlotCenters             Plot cluster centers on a 2D plot
+PlotClusters2D          Plot nodes on scatter plot
+PlotGroups              Plot differences between groups
+PlotMarker              Plot marker values
+PlotNode                Plot star chart
+PlotNumbers             Plot the index of each node
+PlotPies                Plot comparison with other clustering
+PlotStars               Plot star charts
+PlotVariable            Plot a variable for all nodes
+ProcessGatingML         Process a gatingML file
+Purity                  Calculate mean weighted cluster purity
+QueryStarPlot           Query a certain cell type
+ReadInput               Read fcs-files or flowframes
+SOM                     Build a self-organizing map
+SaveClustersToFCS       Write FlowSOM clustering results to the
+                        original FCS files
+UpdateNodeSize          Update nodesize of FlowSOM object
+computeBackgroundColor
+                        Internal function for computing background
+                        nodes
+metaClustering_consensus
+                        MetaClustering
+plotStarLegend          Plot legend for star plot

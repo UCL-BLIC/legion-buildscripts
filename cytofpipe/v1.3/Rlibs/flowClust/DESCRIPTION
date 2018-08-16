@@ -1,0 +1,27 @@
+Package: flowClust
+Type: Package
+Title: Clustering for Flow Cytometry
+Version: 3.16.0
+Author: Raphael Gottardo <raph@stat.ubc.ca>, Kenneth Lo <c.lo@stat.ubc.ca>, Greg
+    Finak <gfinak@fhcrc.org>
+Maintainer: Greg Finak <gfinak@fhcrc.org>, Mike Jiang <wjiang2@fhcrc.org>
+Depends: R(>= 2.5.0)
+Imports: BiocGenerics, MCMCpack, methods, Biobase, graph, RBGL,
+        ellipse, flowViz, flowCore, clue, mnormt
+Suggests: testthat, flowWorkspace, flowWorkspaceData
+Enhances:
+Description: Robust model-based clustering using a t-mixture model with
+    Box-Cox transformation. Note: users should have GSL installed.
+    Windows users: 'consult the README file available in the inst
+    directory of the source distribution for necessary
+    configuration instructions'.
+Collate: 'SetClasses.R' 'SetMethods.R' 'SimulateMixture.R'
+        'flowClust.R' 'coerce.R' 'flowClust-package.R' 'hist.R'
+        'miscellaneous.R' 'mkPriors.R' 'peakMatch.R' 'plot.R' 'split.R'
+License: Artistic-2.0
+Packaged: 2017-10-30 22:51:23 UTC; biocbuild
+biocViews: Clustering, Visualization, FlowCytometry
+SystemRequirements: GNU make
+RoxygenNote: 5.0.1
+NeedsCompilation: yes
+Built: R 3.4.0; x86_64-pc-linux-gnu; 2017-12-19 19:15:32 UTC; unix
