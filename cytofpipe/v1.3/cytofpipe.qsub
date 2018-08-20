@@ -549,6 +549,7 @@ GROUPS = ${PWD}/${groups}
 RANDOM_SAMPLE_SEED = $randomSampleSeed
 RANDOM_TSNE_SEED = $randomTsneSeed
 RANDOM_FLOW_SEED = $randomFlowSeed
+ARRAY = $array
 ARGS = ${arguments[*]}
 EOM
 
