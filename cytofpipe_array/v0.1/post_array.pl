@@ -8,7 +8,6 @@ my $rand_id=$ENV{RAND_ID};
 my $out=$ENV{OUT};
 my $iter=$ENV{ITER};
 
-#my $cytofpipe_array_home=$ENV{CYTOFPIPE_ARRAY_HOME};
 my $cytofpipe_array_home=$ARGV[0];
 
 system("mkdir $ENV{PWD}/${out}_array_files");

@@ -36,6 +36,7 @@ groupfile = args$paramsclustering$GROUPS
 randomSampleSeed = args$paramsclustering$RANDOM_SAMPLE_SEED
 randomTsneSeed = args$paramsclustering$RANDOM_TSNE_SEED
 randomFlowSeed = args$paramsclustering$RANDOM_FLOW_SEED
+array = args$paramsclustering$ARRAY
 
 
 #---------------------------------------------------------------------------------------------
@@ -209,6 +210,14 @@ cytof_heatmap_LC <- function (data, baseName = "Cluster", scaleMethod = "none", 
 
 #- A function to normalize expression values to a 0-1 range
 range01 <- function(x, ...){(x - min(x, ...)) / (max(x, ...) - min(x, ...))}
+
+#- Leave quietly in --array mode
+stop_quietly <- function() {
+  opt <- options(show.error.messages = FALSE)
+  on.exit(options(opt))
+  stop()
+}
+
 
 
 #-----------------
@@ -453,6 +462,80 @@ for(i in 1:length(colnames(exprs_data))){
 	colnames(exprs_data)[i]<-values(NameDesc2UserName, keys=colnames(exprs_data)[i])
 
  }
+
+
+#- If array mode, just get the median_data and cluster_percentage files and leave quietly
+#- This avaiods going through the tsne step which takes a long time
+#- This is only if clustering is not DensVM or ClusterX, as these need the tSNE data
+
+if(array == 'yes'){
+
+	if(!dir.exists(outputdir)){
+    		dir.create(outputdir)
+	}
+	curwd <- getwd()
+	setwd(outputdir)
+
+	exprs <- exprs_data[, markersUserName]
+	ifMultiFCS <- length(unique(sub("_[0-9]*$", "", row.names(exprs)))) > 1
+	
+	if("DensVM" %in% clusterMethods || "ClusterX" %in% clusterMethods){
+
+		## dimension reduced data, a list
+		#- By default has tsneSeed = 42
+		alldimReductionMethods <- unique(c(visualizationMethods, dimReductionMethod))
+		allDimReducedList <- lapply(alldimReductionMethods,
+		                             cytof_dimReduction, data = exprs_data,
+		                             markers = markersUserName,
+		                             tsneSeed = tsneSeed,
+		                             perplexity = as.numeric(perplexity),
+		                             theta = as.numeric(theta),
+		                             max_iter = as.numeric(max_iter))
+		names(allDimReducedList) <- alldimReductionMethods
+				
+		## cluster results, a list
+		#- by default has flowSeed = NULL, I was using flowSeed=100 in v1.0 as that's what they used when they changed the code to make FlowSOM reproducible
+		cluster_res <- lapply(clusterMethods, cytof_cluster,
+		                          ydata = allDimReducedList[[dimReductionMethod]],
+		                          xdata = exprs_data[, markersUserName],
+		                          FlowSOM_k = as.numeric(flowsom_num),
+		                          flowSeed = flowSeed)
+	}else{
+		
+		cluster_res <- lapply(clusterMethods, cytof_cluster, 
+	                          ydata = NULL, 
+	                          xdata = exprs_data[, markersUserName],
+	                          FlowSOM_k = as.numeric(flowsom_num),
+	                          flowSeed = flowSeed)
+		
+	}
+	names(cluster_res) <- clusterMethods
+	clusterData <- cluster_res
+	
+	## save clusterData
+	if(!is.null(clusterData) && length(clusterData) > 0){
+		for(j in 1:length(clusterData)){
+			methodj <- names(clusterData)[j]
+			dataj <- clusterData[[j]]
+			if(!is.null(dataj)){
+	
+				exprs_cluster_sample <- data.frame(exprs, cluster = dataj, check.names = FALSE)
+	                   
+				## cluster median
+				cluster_median <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "median")
+				write.csv(cluster_median, paste(projectName, methodj, "cluster_median_data.csv", sep = "_"))
+	                     
+				## cluster percentage
+				if (ifMultiFCS) {
+					cluster_percentage <- cytof_clusterStat(data= exprs_cluster_sample, cluster = "cluster", statMethod = "percentage")
+					write.csv(cluster_percentage, paste(projectName, methodj, "cluster_cell_percentage.csv", sep = "_"))
+				}
+			}
+		}
+	}
+	stop_quietly()
+}
+
 
 ## dimension reduced data, a list
 #- By default has tsneSeed = 42

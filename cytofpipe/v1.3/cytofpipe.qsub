@@ -16,7 +16,7 @@
 #$ -l mem=10G
 #$ -l tmpfs=50G
 #$ -cwd
-#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v1.2/cytofpipe.jsv
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v1.3/cytofpipe.jsv
 
 set -o pipefail
 
@@ -317,8 +317,8 @@ function run_clustering {
 		
 	if [ $array == "yes" ]
 	then
-		find $PWD/$outputfiles -type f ! -name '*cluster_*.csv' -print0 | xargs -0 rm -vf
-		find $PWD/$outputfiles -type d -empty -print0 | xargs -0 rmdir -v
+		find $PWD/$outputfiles -type f ! -name '*cluster_*.csv' -print0 | xargs -0 rm -vf	#- delete everything except *cluster_*.csv files
+		find $PWD/$outputfiles -type d -empty -print0 | xargs -0 rmdir -v			#- delete any empty folders (this shouldn't happen anyway)
 	else 
 
 		for i in $PWD/$outputfiles/*Rphenograph*; do
