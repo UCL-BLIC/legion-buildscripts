@@ -1,8 +1,9 @@
 #!/bin/bash -l
 
 #$ -S /bin/bash
-#$ -l h_rt=1:0:0
-#$ -pe smp 1
+#$ -l h_rt=48:00:00
+#$ -l mem=20G
+#$ -l tmpfs=50G
 #$ -cwd
 
 
