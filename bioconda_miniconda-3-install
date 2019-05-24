@@ -1,0 +1,53 @@
+#!/usr/bin/bash -i
+
+###############################################
+# Installing miniconda and bioconda packages
+#
+# by LC, 2018 
+#
+
+
+################################################
+####               !UNTESTED!               ####
+################################################
+
+
+APPNAME=${APPNAME:-miniconda}
+VERSION=${VERSION:-3}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-REPLACE}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh}
+
+set -e
+
+export PATH=$INSTALL_PREFIX:$PATH
+
+mkdir -p $INSTALL_PREFIX
+rm -rf ${INSTALL_PREFIX}/${VERSION}
+mkdir -p ${INSTALL_PREFIX}/${VERSION}
+cd $INSTALL_PREFIX
+
+
+wget -N $SRC_ARCHIVE
+bash Miniconda3-latest-Linux-x86_64.sh
+
+
+#- deeptools
+conda install -c bioconda deeptools
+
+#- multiQC (install 1.6, 0.9 crashes on nextflow_chipseq)
+#- config conda to download 1.6, normal installation would install 0.9 as described here (https://github.com/ewels/MultiQC/issues/729)
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda install -c bioconda multiqc multiqc=1.6
+
+#- UCSC bedGraphToBigWig, bigWigToWig, wigToBigWig
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda install -c bioconda ucsc-bedgraphtobigwig
+conda install -c bioconda ucsc-bigwigtowig
+conda install -c bioconda ucsc-wigtobigwig
+

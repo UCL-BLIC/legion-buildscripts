@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+###############################################
+# Installing ngsplot
+#
+# by LC, 2018 
+#
+
+################################################
+####               !UNTESTED!               ####
+################################################
+
+
+
+APPNAME=${APPNAME:-ngsplot}
+VERSION=${VERSION:-2.61}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-REPLACE}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-REPLACE}
+
+set -e
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+mkdir -p $INSTALL_PREFIX
+cd $INSTALL_PREFIX
+
+
+#------------------------------------------------------------------------------
+#--- Download archive from 
+#---	https://drive.google.com/drive/u/0/folders/0B1PVLadG_dCKN1liNFY0MVM1Ulk
+#-------------------------------------------------------------------------------
+
+tar xvzf ngsplot-${VERSION}.tar.gz
+mv ngsplot ${VERSION}

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+###############################################
+# Installing nextflow
+#
+# by LC, 2018 
+#
+
+################################################
+####               !UNTESTED!               ####
+################################################
+
+
+APPNAME=${APPNAME:-nextflow}
+VERSION=${VERSION:-0.31.10}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-REPLACE}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-REPLACE}
+
+set -e
+
+
+mkdir -p $INSTALL_PREFIX/${VERSION}
+cd $INSTALL_PREFIX/${VERSION}
+
+wget -qO- https://get.nextflow.io | bash

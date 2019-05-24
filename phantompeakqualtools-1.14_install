@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+###############################################
+# Installing phantompeakqualtools
+#
+# by LC, 2018 
+#
+
+################################################
+####               !UNTESTED!               ####
+################################################
+
+
+APPNAME=${APPNAME:-phantompeakqualtools}
+VERSION=${VERSION:-REPLACE}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-REPLACE}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-REPLACE}
+
+set -e
+
+
+mkdir -p $INSTALL_PREFIX
+cd $INSTALL_PREFIX
+
+git clone https://github.com/kundajelab/phantompeakqualtools
