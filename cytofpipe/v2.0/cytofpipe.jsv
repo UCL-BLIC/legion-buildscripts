@@ -1,0 +1,474 @@
+#! /usr/bin/env perl
+use strict;
+use warnings;
+
+no warnings qw/uninitialized/;
+
+#- pass_through: anything unknown, ambiguous or supplied with an invalid option will not be flagged as an error. Instead the unknown
+#-	 option(s) will be passed to the catchall <> if present, otherwise through to @ARGV
+#- bundling: so that long options must always start with a double dash (otherwise f.e. '-clustering' would go through the jsv but will fail in the qsub)
+use Getopt::Long qw(GetOptionsFromArray :config pass_through no_auto_abbrev bundling);
+
+use Cwd;
+use File::Basename;
+use Env qw(SGE_ROOT);
+use lib "$SGE_ROOT/util/resources/jsv";
+use JSV qw( :DEFAULT jsv_send_env jsv_log_info );
+
+
+jsv_on_start(sub {
+    jsv_send_env();
+});
+
+
+jsv_on_verify(sub {
+	my %params = jsv_get_param_hash();
+	my $do_correct = 0;
+	my $do_wait = 0;
+
+	&parse_clustering();
+
+        jsv_reject("THIS SHOULD NEVER HAPPEN.. :?\n");
+        return;
+	
+});
+
+jsv_main();
+
+
+
+sub parse_clustering {
+
+	my %params = jsv_get_param_hash();
+
+	my @args=();
+	my $numargs=$params{CMDARGS};
+	for (my $i=0;$i<$numargs;$i++){
+		push(@args, $params{"CMDARG".$i});
+	}
+
+	my $inputdir=''; my $outputdir=''; my $markersfile='';
+	my $configfile='';
+	my $groupsfile='';
+	my $flow='0';
+	my $cytof='0';
+	my $displayall='';
+	my $all='';
+	my $downsample='';
+	my $randomtsneSeed='';
+	my $randomsampleSeed='';
+	my $randomflowSeed='';
+	my $array='';
+	GetOptionsFromArray (
+	    \@args,
+	    "i=s" => \$inputdir,
+	    "o=s"   => \$outputdir,
+	    "m=s"   => \$markersfile,
+	    "config=s"   => \$configfile,
+	    "groups=s"   => \$groupsfile,
+	    "flow"   => \$flow,
+	    "cytof"   => \$cytof,
+	    "displayAll"   => \$displayall,
+	    "all"   => \$all,
+	    "downsample=i"   => \$downsample,
+	    "randomSampleSeed"   => \$randomsampleSeed,
+	    "randomTsneSeed"   => \$randomtsneSeed,
+	    "randomFlowSeed"   => \$randomflowSeed,
+	    "array"   => \$array,
+	    "<>"   => \&print_usage_clustering_with_error,
+	) or die "\n";
+
+        if ($inputdir eq '' || $outputdir eq '' || $markersfile eq ''){
+                print_usage_clustering();
+                jsv_reject("Please check that you are providing a inputdir (-i), outputdir (-o) and markersfile (-m)\n");
+                return;
+        }
+	if (!-e "$inputdir") {
+		print_usage_clustering();
+		jsv_reject("Can't find directory with fcs files <$inputdir>\n");
+		return;
+	}else{		
+		#----------------------------------------------------------------------------------------------------------
+		#- change the paths for all the files to the absolute path, and then bind the home directory in the qsub
+		#- I need to do this otherwise a) users need to be in /scratch/scratch (it will not work from /home/regmond/scratch, 
+		#-	and b) if I binf PWD, the user cna only put parameters that hang from PWD, cannot use relative paths with ../
+		#----------------------------------------------------------------------------------------------------------
+		$inputdir=Cwd::abs_path($inputdir);
+		jsv_set_param('i', $inputdir);
+	}
+
+	if (-e "$outputdir") {
+		print_usage_clustering();
+		jsv_reject("The outputdir <$outputdir> already exists, please choose a different outputdir\n");
+		return;
+	}else{		
+		$outputdir=Cwd::abs_path($outputdir);
+		jsv_set_param('i', $outputdir);
+	}
+	if (!-e "$markersfile") {
+		print_usage_clustering();
+		jsv_reject("Can't find markers file <$markersfile>\n");
+		return;
+	}else{		
+		$markersfile=Cwd::abs_path($markersfile);
+		jsv_set_param('i', $markersfile);
+	}
+	if($flow eq '1' && $cytof eq '1') {
+		print_usage_clustering();
+		jsv_reject("These two parameters [--flow, --cytof] can not be used jointly, please choose one of them (or none for default options)\n");
+		return;
+	}
+	if($downsample ne ''){
+		if($all eq '1' && $downsample ne ''){
+			print_usage_clustering();
+        	      	jsv_reject("These two parameters [--all, --downsample NUM] can not be used jointly, please choose one of them (or none for default options)\n");
+        	      	return;
+		}
+		if(!isnum($downsample) || ($downsample < 100 || $downsample > 100000)){
+			print_usage_clustering();
+		       	jsv_reject("<$downsample> is not a valid downsample numebr. Please insert a number between 100 and 100,000\n");
+			return;
+		}	
+	}
+	if ($configfile ne ''){
+		if (!-e "$configfile") {
+			print_usage_clustering();
+			jsv_reject("Can't find config file <$configfile>\n");
+			return;
+		}else{
+			check_config_clustering($configfile);
+
+			$configfile=Cwd::abs_path($configfile);
+			jsv_set_param('i', $configfile);
+		}
+	}
+	if ($groupsfile ne ''){
+		if (!-e "$groupsfile") {
+			print_usage_clustering();
+			jsv_reject("Can't find groups file <$groupsfile>\n");
+			return;
+		}else{
+			$groupsfile=Cwd::abs_path($groupsfile);
+			jsv_set_param('i', $groupsfile);
+		}
+	}
+	
+
+#	jsv_set_param('N', "clust-${inputdir}");
+	jsv_accept('Job is accepted');
+}
+
+
+sub print_usage_clustering {
+
+	my $usage0="";
+        my $usage1="Program: Cytofpipe";
+        my $usage2 = "Version: 2.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe -i DIR -o DIR -m FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR    Input directory with the FCS files";
+        my $usage8="	      -o DIR    Output directory where results will be generated";
+        my $usage9="	      -m FILE   File with markers that will be selected for clustering";
+        my $usage10="Options: --config FILE                     Configuration file to customize the analysis";
+        my $usage11="	      --flow | --cyto           Flow cytometry data (transformation = autoLgcl) or Cytof data (transformation = cytofAsinh) [--cytof]";
+        my $usage12="	      --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="	      --displayAll                      Display all markers in output files [NULL]";
+        my $usage14="	      --randomSampleSeed                    Use a random sampling seed instead of default seed used for reproducible expression matrix merging [NULL]";
+        my $usage15="	      --randomTsneSeed                      Use a random tSNE seed instead of default seed used for reproducible tSNE results [NULL]";
+        my $usage16="	      --randomFlowSeed                      Use a random flowSOM seed instead of default seed used for reproducible flowSOM results [NULL]";
+        my $usage17="	      --groups FILE                      Get marker level plots for groups of samples [NULL]";
+        my $usage18="";
+    
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
+	jsv_log_info($usage15);jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);
+
+}
+
+sub print_usage_clustering_with_error {
+
+	my $usage0="";
+        my $usage1="Program: Cytofpipe";
+        my $usage2 = "Version: 2.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+        my $usage5="Usage:   cytofpipe -i DIR -o DIR -m FILE [options]";
+        my $usage6="";
+        my $usage7="Required: -i DIR    Input directory with the FCS files";
+        my $usage8="	      -o DIR    Output directory where results will be generated";
+        my $usage9="	      -m FILE   File with markers that will be selected for clustering";
+        my $usage10="Options: --config FILE                     Configuration file to customize the analysis";
+        my $usage11="	      --flow | --cyto           Flow cytometry data (transformation = autoLgcl) or Cytof data (transformation = cytofAsinh) [--cytof]";
+        my $usage12="	      --all | --downsample NUM  Use all events in the analysis or downsample each FCS file to the specified number of events (with no replacement for sample with events < NUM) [--downsample 10000]";
+        my $usage13="	      --displayAll                      Display all markers in output files [NULL]";
+        my $usage14="	      --randomSampleSeed                    Use a random sampling seed instead of default seed used for reproducible expression matrix merging [NULL]";
+        my $usage15="	      --randomTsneSeed                      Use a random tSNE seed instead of default seed used for reproducible tSNE results [NULL]";
+        my $usage16="	      --randomFlowSeed                      Use a random flowSOM seed instead of default seed used for reproducible flowSOM results [NULL]";
+        my $usage17="	      --groups FILE                      Get marker level plots for groups of samples [NULL]";
+        my $usage18="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);
+	jsv_log_info($usage15);jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);
+
+	jsv_reject("ERROR: Invalid or missing argument\n");
+	return;
+}
+
+sub print_usage_clustering_config {
+
+	my $usage0="";
+        my $usage1="Program: Cytofpipe";
+        my $usage2 = "Version: 2.0";
+        my $usage3 = "Contact: Lucia Conde <l.conde\@ucl.ac.uk>";
+        my $usage4="";
+	my $usage5="------------------";
+	my $usage6="CONFIG file format";
+	my $usage7="------------------";
+	my $usage8="";
+	my $usage9="\t[ cytofpipe ]  		#-- MANDATORY FIELD, IT SHOULD BE THE FIRST LINE OF THE CONFIG FILE\n";
+	my $usage10="";
+	my $usage11="\tTRANSFORM = autoLgcl, cytofAsinh, logicle, arcsinh or none  #-- MANDATORY FIELD\n";
+	my $usage12="\tMERGE = ceil, all, min, or fixed			  	#-- MANDATORY FIELD\n";
+	my $usage13="\tDOWNSAMPLE = number between 100 and 100000  		#-- MANDATORY FIELD if MERGE = fixed or ceil\n";
+	my $usage14="";
+	my $usage15="\t#- Clustering methods:";
+	my $usage16="\tPHENOGRAPH = yes|no\n";
+	my $usage17="\tCLUSTERX = yes|no\n";
+	my $usage18="\tDENSVM = yes|no\n";
+	my $usage19="\tFLOWSOM = yes|no\n";
+	my $usage20="\tFLOWSOM_K = number between 2 and 50  		#-- MANDATORY FIELD if FLOWSOM = YES:\n";
+	my $usage21="";
+	my $usage22="\t#- Additional visualization methods:";
+	my $usage23="\tTSNE = yes|no\n";
+	my $usage24="\tPCA = yes|no\n";
+	my $usage25="\tISOMAP = yes|no\n";
+	my $usage26="";
+	my $usage27="\t#- tSNE parameters:";
+	my $usage28="\tPERPLEXITY = 30\n";
+	my $usage29="\tTHETA = 0.5\n";
+	my $usage30="\tMAX_ITER = 1000\n";
+	my $usage31="";
+	my $usage32="\t#- Other:";
+	my $usage33="\tDISPLAY_ALL = yes|no\n";
+	my $usage34="\tRANDOM_SAMPLE_SEED = yes|no\n";
+	my $usage35="\tRANDOM_TSNE_SEED = yes|no\n";
+	my $usage36="\tRANDOM_FLOW_SEED = yes|no\n";
+	my $usage37="";
+
+	jsv_log_info($usage0);jsv_log_info($usage1);jsv_log_info($usage2);jsv_log_info($usage3);
+	jsv_log_info($usage4);jsv_log_info($usage5);jsv_log_info($usage6);jsv_log_info($usage7);
+	jsv_log_info($usage8);jsv_log_info($usage9);jsv_log_info($usage10);jsv_log_info($usage11);
+	jsv_log_info($usage12);jsv_log_info($usage13);jsv_log_info($usage14);jsv_log_info($usage15);
+	jsv_log_info($usage16);jsv_log_info($usage17);jsv_log_info($usage18);jsv_log_info($usage19);
+	jsv_log_info($usage20);	jsv_log_info($usage21);jsv_log_info($usage22);jsv_log_info($usage23);
+	jsv_log_info($usage24);	jsv_log_info($usage25);jsv_log_info($usage26);jsv_log_info($usage27);
+	jsv_log_info($usage28);	jsv_log_info($usage29);jsv_log_info($usage30);jsv_log_info($usage31);
+	jsv_log_info($usage32);jsv_log_info($usage33);jsv_log_info($usage34);jsv_log_info($usage35);
+	jsv_log_info($usage36);jsv_log_info($usage37);
+
+}
+
+sub isnum ($) {
+    return 0 if $_[0] eq '';
+    $_[0] ^ $_[0] ? 0 : 1
+}
+
+sub check_config_clustering {
+	my $config = shift(@_);
+
+	my $transform;my $merge;my $downsample;my $flowsom;my $flowsom_k;
+	my $perplexity; my $theta; my $max_iter;
+
+	local $/ = undef;
+	open(INF, "$config");
+	my $content = <INF>;
+	my @lines = split /\r\n|\n|\r/, $content;
+
+	my $first_line=1;
+	foreach my $line(@lines){
+		chomp $_;
+		if($first_line == 1 && $line !~ /^\s*\[\s*cytofpipe\s*\]\s*$/i){
+			print_usage_clustering_config();
+			jsv_reject("Invalid config file. Please make sure that the first line of the config file is \"[ cytofpipe ]\"");
+			return;
+		}
+		if($line=~/^TRANSFORM\s*\=\s*(.*)\s*$/){
+			$transform=$1;
+			if($transform ne "autoLgcl" && $transform ne "cytofAsinh" && $transform ne "logicle" && $transform ne "arcsinh" && $transform ne "none"){
+				print_usage_clustering_config();
+				jsv_reject("Can't recognize \"$transform\" as a valid transformation method in <$config>. Please correct the config file and choose one of the available methods (\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters");
+				return;
+			}
+		}
+		if($line=~/^MERGE\s*\=\s*(.*)\s*$/){
+			$merge=$1;
+			if($merge ne "ceil" && $merge ne "all" && $merge ne "min" && $merge ne "fixed"){
+				print_usage_clustering_config();
+				jsv_reject("Can't recognize \"$merge\" as a valid merge method in <$config>. Please correct the config file and choose one of the available methods (\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters");
+				return;
+			}
+		}
+		if($line=~/^TSNE\s*\=\s*(.*)\s*$/){
+			my $tsne=$1;
+			if($tsne !~/^yes$/i && $tsne !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$tsne\" is not a valid TSNE option in <$config>. Please correct the config file and choose if you want to include TSNE for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^PCA\s*\=\s*(.*)\s*$/){
+			my $pca=$1;
+			if($pca !~/^yes$/i && $pca !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$pca\" is not a valid PCA option in <$config>. Please correct the config file and choose if you want to include PCA for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^ISOMAP\s*\=\s*(.*)\s*$/){
+			my $isomap=$1;
+			if($isomap !~/^yes$/i && $isomap !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$isomap\" is not a valid ISOMAP option in <$config>. Please correct the config file and choose if you wnat to include ISOMAP for cluster visualization in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^PHENOGRAPH\s*\=\s*(.*)\s*$/){
+			my $phenograph=$1;
+			if($phenograph !~/^yes$/i && $phenograph !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$phenograph\" is not a valid PHENOGRAPH option in <$config>. Please correct the config file and choose if you want to include PHENOGRAPH as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^CLUSTERX\s*\=\s*(.*)\s*$/){
+			my $clusterx=$1;
+			if($clusterx !~/^yes$/i && $clusterx !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$clusterx\" is not a valid CLUSTERX option in <$config>. Please correct the config file and choose if you want to include CLUSTERX as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^DENSVM\s*\=\s*(.*)\s*$/){
+			my $densvm=$1;
+			if($densvm !~/^yes$/i && $densvm !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$densvm\" is not a valid DENSVM option in <$config>. Please correct the config file and choose if you want to include DENSVM as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^FLOWSOM\s*\=\s*(.*)\s*$/){
+			$flowsom=$1;
+			if($flowsom !~/^yes$/i && $flowsom !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$flowsom\" is not a valid FLOWSOM option in <$config>. Please correct the config file and choose if you want to include FLOWSOM as clustering method in the analysis \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^DOWNSAMPLE\s*\=\s*(.*)\s*$/){
+			$downsample=$1;
+		}
+		if($line=~/^FLOWSOM_K\s*\=\s*(.*)\s*$/){
+			$flowsom_k=$1;
+		}
+		if($line=~/^PERPLEXITY\s*\=\s*(.*)\s*$/){
+			$perplexity=$1;
+			if($perplexity !~/^\d+$/ || $perplexity < 5 || $perplexity > 50){
+				print_usage_clustering_config();
+				jsv_reject("\"$perplexity\" is not a valid PERPLEXITY option in <$config>. Please correct the config file and choose a value between 5 and 50");
+				return;
+			}
+		}
+		if($line=~/^THETA\s*\=\s*(.*)\s*$/){
+			$theta=$1;
+			if($theta !~/([0-9]*[.])?[0-9]+$/ || $theta < 0 || $theta > 1){
+				print_usage_clustering_config();
+				jsv_reject("\"$theta\" is not a valid THETA option in <$config>. Please correct the config file and choose a value between 0 and 1");
+				return;
+			}
+		}
+		if($line=~/^MAX_ITER\s*\=\s*(.*)\s*$/){
+			$max_iter=$1;
+			if($max_iter !~/^\d+$/ || $max_iter < 100 || $max_iter > 5000){
+				print_usage_clustering_config();
+				jsv_reject("\"$max_iter\" is not a valid MAX_ITER option in <$config>. Please correct the config file and choose a value between 100 and 5000");
+				return;
+			}
+		}
+		if($line=~/^DISPLAY_ALL\s*\=\s*(.*)\s*$/){
+			my $display=$1;
+			if($display !~/^yes$/i && $display !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$display\" is not a valid DISPLAY_ALL option in <$config>. Please correct the config file and choose if you want to display all the markers in the output files \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^RANDOM_SAMPLE_SEED\s*\=\s*(.*)\s*$/){
+			my $sampleSeed=$1;
+			if($sampleSeed !~/^yes$/i && $sampleSeed !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$sampleSeed\" is not a valid SAMPLE_SEED option in <$config>. Please correct the config file and choose if you want to use the default sampling seed for reproducible expression matrix merging \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^RANDOM_TSNE_SEED\s*\=\s*(.*)\s*$/){
+			my $tsneSeed=$1;
+			if($tsneSeed !~/^yes$/i && $tsneSeed !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$tsneSeed\" is not a valid TSNE_SEED option in <$config>. Please correct the config file and choose if you want to use the default tSNE seed for repreducible tSNE results \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		if($line=~/^RANDOM_FLOW_SEED\s*\=\s*(.*)\s*$/){
+			my $flowSeed=$1;
+			if($flowSeed !~/^yes$/i && $flowSeed !~/^no$/i){
+				print_usage_clustering_config();
+				jsv_reject("\"$flowSeed\" is not a valid FLOW_SEED option in <$config>. Please correct the config file and choose if you want to use the default flowSOM seed for repreducible flowSOM results \(\"YES or NO\"\)");
+				return;
+			}
+		}
+		$first_line++;
+	}
+	close(INF);
+	if(!$transform || $transform eq ''){
+		print_usage_clustering_config();
+		jsv_reject("Transformation parameter not found in <$config>. Please correct the config file and enter a valid transformation method \(\"autoLgcl\", \"cytofAsinh\", \"logicle\", \"arcsinh\", \"none\"\) or omit the config file to run with default parameters \(TRANSFORMATION = arcsinh\)");
+		return;
+	}
+	if(!$merge || $merge eq ''){
+		print_usage_clustering_config();
+		jsv_reject("Merge parameter not found in <$config>. Please correct the config file and enter a valid merge method \(\"ceil\", \"all\", \"min\", \"fixed\"\) or omit the config file to run with default parameters \(MERGE = fixed, DOWNSAMPLE = 10000\)");
+		return;
+	}
+	if($merge =~ /^fixed$/i || $merge =~ /^ceil$/i){
+		if(!$downsample || $downsample eq '' || $downsample !~/^\d+$/ || $downsample < 100 || $downsample > 100000){
+			print_usage_clustering_config();
+			if(!$downsample || $downsample eq ''){
+				jsv_reject("Downsample parameter not found in <$config>. Please correct the config file and enter a valid size between 100 and 100000");
+				return;
+			}elsif($downsample !~/^\d+$/ || $downsample < 100 || $downsample > 100000){
+				jsv_reject("Can't recognize \"$downsample\" as a valid downsample number in <$config>. Please correct the config file and choose a downsample size between 100 and 100000");
+				return;
+			}
+		}
+	}
+	if($flowsom =~ /^yes$/i){
+		if(!$flowsom_k || $flowsom_k eq '' || $flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
+			print_usage_clustering_config();
+			if(!$flowsom_k || $flowsom_k eq ''){
+				jsv_reject("FlowSOM_k parameter not found in <$config>. Please correct the config file and enter a valid cluster number between 2 and 50");
+				return;
+			}elsif($flowsom_k !~/^\d+$/ || $flowsom_k < 2 || $flowsom_k > 50){
+				jsv_reject("Can't recognize \"$flowsom_k\" as a valid number of FlowSOM clusters in <$config>. Please correct the config file and choose a cluster number between 2 and 50");
+				return;
+			}
+		}
+	}
+}
+
