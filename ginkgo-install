@@ -1,0 +1,85 @@
+#!/usr/bin/bash -i
+
+###############################################
+# Installing ginkgo
+#
+# by Javier Herrero, 2019
+#
+
+APPNAME=${APPNAME:-ginkgo}
+VERSION=${VERSION:-v052019}
+COMMIT=${COMMIT:-fbf8cab99c2375194526cfc6a9e6aa4123c23219}
+INSTALL_PREFIX=${INSTALL_PREFIX:-/shared/ucl/depts/cancer/apps/$APPNAME/}
+MD5=${MD5:-d91aa2d4a12c9f38e984567b72f3e538}
+SHA1=${SHA1:-REPLACE}
+SRC_ARCHIVE=${SRC_ARCHIVE:-https://github.com/UCL-BLIC/ginkgo/archive/${COMMIT}.zip}
+
+set -e
+
+module purge
+module load r/recommended
+module load compilers/intel/2019
+
+export PATH=$INSTALL_PREFIX/bin:$PATH
+
+
+mkdir -p $INSTALL_PREFIX
+
+rm -rf ${INSTALL_PREFIX}/${VERSION}
+
+cd ${INSTALL_PREFIX}
+
+wget -N $SRC_ARCHIVE
+
+MD5SUM=`md5sum ${COMMIT}.zip | awk '{print $1}'`
+
+if [ "$MD5SUM" != "$MD5" ]
+then
+    echo "Hash mismatch."
+    echo "Expected: $MD5"
+    echo "Got: $MD5SUM"
+    exit
+fi
+
+# Uncompress the software
+unzip -q ${COMMIT}.zip
+rm ${COMMIT}.zip
+mv ${APPNAME}-${COMMIT} ${VERSION}
+cd ${VERSION}
+make
+
+# Include the genome files
+mkdir -p ~/Scratch/${APPNAME}/genomes/hg19/original
+ln -s /scratch/scratch/${USER}/${APPNAME}/genomes/hg19/ genomes/
+cd ~/Scratch/${APPNAME}/genomes/hg19/original
+wget -N http://qb.cshl.edu/ginkgo/uploads/hg19.original.tar.gz
+tar -zxf hg19.original.tar.gz
+rm hg19.original.tar.gz
+
+# Install devtools and BiocManager (in HOME as can be used for many other projects) if required
+mkdir -p ~/R
+env R_LIBS=${HOME}/R R --vanilla <<'EOF'
+if (!("devtools" %in% rownames(installed.packages()))) {
+  install.packages("devtools", lib = "~/R", repos = "https://cran.ma.imperial.ac.uk/")
+}
+
+if (!("BiocManager" %in% rownames(installed.packages()))) {
+  install.packages("BiocManager", lib = "~/R", repos = "https://cran.ma.imperial.ac.uk/")
+}
+EOF
+
+# Add the R libraries for ginkgo
+cd ${INSTALL_PREFIX}/${VERSION}
+mkdir -p R
+
+env R_LIBS=${INSTALL_PREFIX}/${VERSION}/R:${HOME}/R R --vanilla <<'EOF'
+# amap is required by ctc and the default version is not compatible with the R version we are using here
+install.packages("https://cran.r-project.org/src/contrib/Archive/amap/amap_0.8-14.tar.gz", lib = "R")
+
+# Install ctc from bioconductor
+BiocManager::install("ctc", lib = "R")
+
+# Need to use a different version of gplots as the default one is very slow because of a bug (always calculates a HC of all rows)
+library("devtools")
+install_github("ChristophH/gplots", lib = "R")
+EOF
