@@ -1,0 +1,73 @@
+#!/usr/bin/bash -i
+
+###############################################
+# Installing bioconda packages
+#
+# by LC, 2019 
+#
+
+
+#- deeptools
+conda install -c bioconda deeptools
+
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda install -c bioconda multiqc
+
+#- UCSC bedGraphToBigWig, bigWigToWig, wigToBigWig
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+conda install -c bioconda ucsc-bedgraphtobigwig
+conda install -c bioconda ucsc-bigwigtowig
+conda install -c bioconda ucsc-wigtobigwig
+
+#- nf-core
+conda install -c bioconda nf-core
+
+#- other
+conda install -c bioconda phantompeakqualtools
+conda install -c bioconda kallisto
+conda install -c bioconda fastqc
+conda install -c bioconda trim-galore
+conda install -c bioconda rseqc
+conda install -c bioconda preseq
+conda install -c bioconda qualimap
+conda install -c bioconda subread
+conda install -c bioconda stringtie
+conda install -c bioconda bedtools
+conda install -c bioconda snpEff
+conda install -c bioconda intervene
+conda install -c bioconda salmon
+conda install -c bioconda bioconductor-dupradar
+
+
+#- issues
+#---------
+
+#- biconda also installs R, and the bioconda R gets me this error:
+#- 	/shared/ucl/depts/cancer/apps/miniconda3/lib/R/bin/exec/R: error while loading shared libraries: libiconv.so.2: cannot open shared object file: No such file or directory
+#- so I have 2 options, either I make sure that bioconda is loaded first before r/recommended, or I just use the bioconda R and fix the above issue:
+conda install -c bioconda libiconv
+
+
+
+##############################################################
+############ THE BELOW WAS DONE IN MYRIAD ####################
+#### LEAVING IT IN HERE IN CASE I FIND THE SAME ISSUES #######
+##############################################################
+
+
+#- issues
+#---------
+
+#- bedtools and other packages depend on (and therefore install) samtools, but the installed version gives me errors: 
+#-	samtools: error while loading shared libraries: libcrypto.so.1.0.0: cannot open shared object file: No such file or directory
+#- fix by downgrading openssl from 1.1 to 1.0 (https://github.com/bioconda/bioconda-recipes/issues/12100)
+conda install -c bioconda openssl=1.0
+
+
+#- biconda also installs perl, so if at some point I load bioconda and it changes to bioconda perl, i need a few modules that were not installed by default
+conda install -c bioconda perl-dbi openssl=1.0
+conda install -c bioconda perl-try-tiny openssl=1.0
