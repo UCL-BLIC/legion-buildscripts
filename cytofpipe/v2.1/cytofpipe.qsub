@@ -13,6 +13,6 @@
 
 set -o pipefail
 
-singularity exec -B /lustre/scratch/scratch/${USER} ${CYTOFPIPE_HOME}/container/cytofpipe.img cytofpipe.pl $*
+singularity exec -B /lustre/scratch/scratch/${USER} ${CYTOFPIPE_HOME}/container/cytofpipe_v2_1.img cytofpipe.pl $*
 
 
