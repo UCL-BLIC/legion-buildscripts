@@ -1,0 +1,18 @@
+#!/bin/bash -l
+
+# =========================================================================================
+#  NAME: cytofpipe v2.1
+# =========================================================================================
+
+#$ -S /bin/bash
+#$ -l h_rt=12:00:00
+#$ -l mem=10G
+#$ -l tmpfs=10G
+#$ -cwd
+#$ -jsv /shared/ucl/depts/cancer/apps/cytofpipe/v2.1/cytofpipe.jsv 
+
+set -o pipefail
+
+singularity exec -B /lustre/scratch/scratch/${USER} ${CYTOFPIPE_HOME}/container/cytofpipe.img cytofpipe.pl $*
+
+
