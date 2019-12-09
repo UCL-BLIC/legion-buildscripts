@@ -41,6 +41,13 @@ conda install -c bioconda snpEff
 conda install -c bioconda intervene
 conda install -c bioconda salmon
 conda install -c bioconda bioconductor-dupradar
+conda install -c bioconda umi_tools
+
+conda install -c bioconda perl-http-cookies
+conda install -c bioconda perl-www-mechanize
+conda install -c bioconda perl-lwp-protocol-https
+conda install -c bioconda perl-dbi
+conda install -c bioconda perl-dbd-mysql
 
 
 #- issues
@@ -71,3 +78,4 @@ conda install -c bioconda openssl=1.0
 #- biconda also installs perl, so if at some point I load bioconda and it changes to bioconda perl, i need a few modules that were not installed by default
 conda install -c bioconda perl-dbi openssl=1.0
 conda install -c bioconda perl-try-tiny openssl=1.0
+
