@@ -42,6 +42,8 @@ conda install -c bioconda intervene
 conda install -c bioconda salmon
 conda install -c bioconda bioconductor-dupradar
 conda install -c bioconda umi_tools
+conda install -c bioconda cnvkit
+conda install -c bioconda control-freec
 
 conda install -c bioconda perl-http-cookies
 conda install -c bioconda perl-www-mechanize
